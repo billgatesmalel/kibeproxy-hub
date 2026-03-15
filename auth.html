@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KibeProxy Hub | Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0a; --surface: #111111; --border: #1e1e1e;
+      --border-light: #2a2a2a; --text-primary: #f0f0f0;
+      --text-secondary: #888; --text-muted: #555;
+      --green: #22c55e; --green-dim: #166534;
+      --green-glow: rgba(34,197,94,0.15); --red: #ef4444;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    /* BG GRID */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* CARD */
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    /* LOGO */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .logo-icon::before {
+      content: '';
+      position: absolute; inset: 5px;
+      border: 1px solid var(--green);
+      border-radius: 50%; opacity: 0.5;
+    }
+    .logo-icon svg { width: 14px; height: 14px; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; }
+
+    /* TABS */
+    .auth-tabs {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 2rem;
+    }
+    .auth-tab {
+      flex: 1; padding: 9px; border: none;
+      background: transparent; border-radius: 7px;
+      color: var(--text-muted); font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .auth-tab.active { background: var(--border-light); color: var(--text-primary); }
+
+    /* FORM */
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label {
+      display: block; font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: 9px; padding: 11px 14px;
+      color: var(--text-primary); font-family: 'DM Mono', monospace;
+      font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--green); }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    /* SUBMIT */
+    .submit-btn {
+      width: 100%; background: var(--green); color: #000;
+      border: none; border-radius: 9px; padding: 12px;
+      font-family: 'Syne', sans-serif; font-size: 0.9rem;
+      font-weight: 700; cursor: pointer; margin-top: 0.5rem;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .submit-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* DIVIDER */
+    .divider {
+      display: flex; align-items: center; gap: 1rem;
+      margin: 1.5rem 0; color: var(--text-muted); font-size: 0.75rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ERROR / SUCCESS */
+    .alert {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.82rem; margin-bottom: 1rem;
+      display: none; align-items: center; gap: 8px;
+    }
+    .alert.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; display: flex; }
+    .alert.success { background: var(--green-glow); border: 1px solid var(--green-dim); color: var(--green); display: flex; }
+
+    /* FOOTER NOTE */
+    .auth-footer {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+
+    /* SPINNER */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+
+    <!-- LOGO -->
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </div>
+      <span class="logo-text">KibeProxy Hub</span>
+    </div>
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuth('signup')">Sign Up</button>
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert" id="alert"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="login-password" type="password" placeholder="••••••••" />
+      </div>
+      <button class="submit-btn" id="login-btn" onclick="handleLogin()">
+        Login to Dashboard
+      </button>
+      <div class="auth-footer">
+        Don't have an account?
+        <span style="color:var(--green);cursor:pointer;" onclick="switchAuth('signup')">Sign up free</span>
+      </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="form-signup" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="signup-name" type="text" placeholder="Ian Kibet" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="signup-email" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="signup-password" type="password" placeholder="Min. 6 characters" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" id="signup-confirm" type="password" placeholder="Repeat password" />
+      </div>
+      <button class="submit-btn" id="signup-btn" onclick="handleSignup()">
+        Create Account
+      </button>
+      <div class="auth-footer">
+        Already have an account?
+        <span style="color:var(--green);cursor:pointer;" onclick="switchAuth('login')">Login</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createClient } = supabase;
+    const db = createClient(
+      'https://dyhzdtvnirqwhsfmrvjo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5aHpkdHZuaXJxd2hzZm1ydmpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDYyMzEsImV4cCI6MjA4OTE4MjIzMX0.eJJ1Bau5V6qJoLt0qtEJXvZPnKGWG6hj6QLF2S2bpGE'
+    );
+
+    // If already logged in, go to dashboard
+    db.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.href = 'index.html';
+    });
+
+    function switchAuth(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+      hideAlert();
+    }
+
+    function showAlert(msg, type = 'error') {
+      const el = document.getElementById('alert');
+      el.className = `alert ${type}`;
+      el.innerHTML = `<span>${type === 'error' ? '✕' : '✓'}</span> ${msg}`;
+    }
+
+    function hideAlert() {
+      document.getElementById('alert').className = 'alert';
+    }
+
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Please wait...';
+      } else {
+        btn.disabled = false;
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) { showAlert('Please fill in all fields'); return; }
+
+      setLoading('login-btn', true);
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      setLoading('login-btn', false);
+
+      if (error) {
+        showAlert(error.message);
+        document.getElementById('login-btn').innerHTML = 'Login to Dashboard';
+      } else {
+        showAlert('Login successful! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'index.html', 1000);
+      }
+    }
+
+    async function handleSignup() {
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+
+      if (!name || !email || !password) { showAlert('Please fill in all fields'); return; }
+      if (password.length < 6) { showAlert('Password must be at least 6 characters'); return; }
+      if (password !== confirm) { showAlert('Passwords do not match'); return; }
+
+      setLoading('signup-btn', true);
+      const { error } = await db.auth.signUp({
+        email, password,
+        options: { data: { full_name: name } }
+      });
+      setLoading('signup-btn', false);
+
+      if (error) {
+        showAlert(error.message);
+        document.getElementById('signup-btn').innerHTML = 'Create Account';
+      } else {
+        showAlert('Account created! Check your email to confirm, then login.', 'success');
+        document.getElementById('signup-btn').innerHTML = 'Create Account';
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const loginVisible = document.getElementById('form-login').style.display !== 'none';
+        if (loginVisible) handleLogin();
+        else handleSignup();
+      }
+    });
+  </script>
+</body>
+</html>
