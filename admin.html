@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KibeProxy Hub | Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1e1e1e;
+      --border-light: #2a2a2a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #888;
+      --text-muted: #555;
+      --green: #22c55e;
+      --green-dim: #166534;
+      --green-glow: rgba(34,197,94,0.15);
+      --red: #ef4444;
+      --red-glow: rgba(239,68,68,0.1);
+      --yellow: #eab308;
+      --yellow-glow: rgba(234,179,8,0.1);
+      --blue: #3b82f6;
+      --blue-glow: rgba(59,130,246,0.1);
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 64px;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 32px; height: 32px; border: 1.5px solid var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+    .logo-icon::before { content: ''; position: absolute; inset: 4px; border: 1px solid var(--green); border-radius: 50%; opacity: 0.5; }
+    .logo-icon svg { width: 14px; height: 14px; }
+    .logo-text { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+
+    .admin-badge {
+      background: var(--yellow-glow);
+      border: 1px solid rgba(234,179,8,0.35);
+      color: var(--yellow);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--text-primary); border-color: var(--text-muted); }
+
+    .user-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 6px 14px;
+      color: var(--text-primary);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .user-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sidebar-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0 0.75rem;
+      margin: 1rem 0 0.4rem;
+    }
+
+    .sidebar-label:first-child { margin-top: 0; }
+
+    .sidebar-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .sidebar-btn:hover { background: var(--border); color: var(--text-primary); }
+    .sidebar-btn.active { background: var(--green-glow); color: var(--green); border: 1px solid var(--green-dim); }
+
+    /* ── MAIN ── */
+    .main { padding: 2.5rem; }
+
+    /* ── STATS GRID ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-icon.blue   { background: var(--blue-glow);   color: var(--blue); }
+    .stat-icon.green  { background: var(--green-glow);  color: var(--green); }
+    .stat-icon.red    { background: var(--red-glow);    color: var(--red); }
+    .stat-icon.yellow { background: var(--yellow-glow); color: var(--yellow); }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 500;
+    }
+
+    /* ── SECTION CARD ── */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .section-title { font-size: 0.95rem; font-weight: 700; }
+    .section-sub   { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── TABLE ── */
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table th {
+      padding: 11px 18px;
+      text-align: left;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .data-table td {
+      padding: 13px 18px;
+      font-size: 0.83rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .badge.active  { background: var(--green-glow); color: var(--green); border: 1px solid var(--green-dim); }
+    .badge.expired { background: var(--red-glow);   color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
+    .badge.blue    { background: var(--blue-glow);  color: var(--blue);  border: 1px solid rgba(59,130,246,0.3); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-green   { background: var(--green); color: #000; }
+    .btn-green:hover { opacity: 0.85; }
+    .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary); }
+    .btn-outline:hover { border-color: var(--text-muted); color: var(--text-primary); }
+    .btn-red     { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+    .btn-red:hover { background: var(--red-glow); }
+    .btn-sm      { padding: 5px 11px; font-size: 0.75rem; }
+
+    /* ── EXPAND ROW ── */
+    .expand-row { background: #0d0d0d; }
+    .expand-row td { padding: 0 !important; border-bottom: 1px solid var(--border) !important; }
+    .expand-inner { padding: 1rem 1.5rem; }
+
+    .expand-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .expand-tab {
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-light);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Syne', sans-serif;
+      transition: all 0.2s;
+    }
+    .expand-tab.active { background: var(--border-light); color: var(--text-primary); }
+
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .mini-table th { padding: 7px 12px; text-align: left; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); font-weight: 500; }
+    .mini-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+    .mini-table tr:last-child td { border-bottom: none; }
+
+    /* ── SEARCH ── */
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 7px 12px;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      width: 180px;
+    }
+
+    .search-box input::placeholder { color: var(--text-muted); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #161616;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .modal-sub   { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus { border-color: var(--green); }
+
+    .form-select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      background: var(--green);
+      color: #000;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1a1a1a;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      z-index: 300;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show    { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green-dim); }
+    .toast.error   { border-color: rgba(239,68,68,0.4); }
+
+    /* ── LOADING ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-light);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* ── EMPTY ── */
+    .empty-cell {
+      text-align: center;
+      padding: 2.5rem !important;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* ── ACCESS DENIED ── */
+    #access-denied {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #access-denied.show { display: flex; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── ACCESS DENIED ── -->
+<div id="access-denied">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+  </svg>
+  <h2 style="font-size:1.5rem;font-weight:800;">Access Denied</h2>
+  <p style="color:var(--text-muted);max-width:320px;">You don't have permission to view this page. Admin access only.</p>
+  <a href="index.html" style="color:var(--green);text-decoration:none;font-weight:600;">← Back to Dashboard</a>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app" style="display:none;">
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-left">
+      <a class="nav-logo" href="index.html">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </div>
+        <span class="logo-text">KibeProxy Hub</span>
+      </a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <div class="nav-right">
+      <a href="index.html" class="nav-link">← Dashboard</a>
+      <button class="user-btn" onclick="handleLogout()" title="Logout">
+        <div class="user-avatar" id="admin-initials">AD</div>
+        <span id="admin-name">Admin</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- LAYOUT -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-label">Overview</div>
+      <button class="sidebar-btn active" onclick="showSection('users', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        All Users
+      </button>
+      <button class="sidebar-btn" onclick="showSection('proxies', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        All Proxies
+      </button>
+      <button class="sidebar-btn" onclick="showSection('emails', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        All Emails
+      </button>
+
+      <div class="sidebar-label">Actions</div>
+      <button class="sidebar-btn" onclick="openModal('proxy')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Proxy to User
+      </button>
+      <button class="sidebar-btn" onclick="openModal('email')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Email to User
+      </button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="s-users">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="stat-label">Active Proxies</div>
+          <div class="stat-value" id="s-active">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+          </div>
+          <div class="stat-label">Expired Proxies</div>
+          <div class="stat-value" id="s-expired">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div class="stat-label">Total Emails</div>
+          <div class="stat-value" id="s-emails">—</div>
+        </div>
+      </div>
+
+      <!-- USERS SECTION -->
+      <div id="section-users">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">All Users</div>
+              <div class="section-sub">Click a row to expand proxies and emails</div>
+            </div>
+            <div class="search-box">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="user-search" placeholder="Search by user ID..." oninput="filterUsers()" />
+            </div>
+          </div>
+          <div id="users-wrap">
+            <div class="loading"><div class="spinner"></div> Loading users...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROXIES SECTION -->
+      <div id="section-proxies" style="display:none;">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">All Proxies</div>
+              <div class="section-sub">Every proxy across all users</div>
+            </div>
+            <button class="btn btn-green btn-sm" onclick="openModal('proxy')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Proxy
+            </button>
+          </div>
+          <div id="proxies-wrap">
+            <div class="loading"><div class="spinner"></div> Loading proxies...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAILS SECTION -->
+      <div id="section-emails" style="display:none;">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">All Emails</div>
+              <div class="section-sub">Every email across all users</div>
+            </div>
+            <button class="btn btn-green btn-sm" onclick="openModal('email')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Email
+            </button>
+          </div>
+          <div id="emails-wrap">
+            <div class="loading"><div class="spinner"></div> Loading emails...</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- ── ADD PROXY MODAL ── -->
+<div class="modal-overlay" id="modal-proxy">
+  <div class="modal">
+    <div class="modal-title">Add Proxy to User</div>
+    <div class="modal-sub">Assign a proxy to a specific user account</div>
+    <div class="form-group">
+      <label class="form-label">Select User</label>
+      <select class="form-select" id="ap-user"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Host / IP</label>
+        <input class="form-input" id="ap-host" placeholder="192.168.1.1" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Port</label>
+        <input class="form-input" id="ap-port" type="number" placeholder="8080" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="ap-username" placeholder="proxyuser" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="ap-password" type="password" placeholder="••••••••" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="ap-status">
+          <option value="active">Active</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Expires At</label>
+        <input class="form-input" id="ap-expires" type="datetime-local" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('proxy')">Cancel</button>
+      <button class="btn-submit" onclick="adminAddProxy()">Add Proxy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD EMAIL MODAL ── -->
+<div class="modal-overlay" id="modal-email">
+  <div class="modal">
+    <div class="modal-title">Add Email to User</div>
+    <div class="modal-sub">Assign an email to a specific user account</div>
+    <div class="form-group">
+      <label class="form-label">Select User</label>
+      <select class="form-select" id="ae-user"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" id="ae-email" type="email" placeholder="user@example.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="ae-password" type="password" placeholder="••••••••" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('email')">Cancel</button>
+      <button class="btn-submit" onclick="adminAddEmail()">Add Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── CONFIG ─────────────────────────────────────────────────────
+  const ADMIN_EMAIL = 'kibetian2005@gmail.com';
+
+  // ── SUPABASE ───────────────────────────────────────────────────
+  const { createClient } = supabase;
+  const db = createClient(
+    'https://dyhzdtvnirqwhsfmrvjo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5aHpkdHZuaXJxd2hzZm1ydmpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDYyMzEsImV4cCI6MjA4OTE4MjIzMX0.eJJ1Bau5V6qJoLt0qtEJXvZPnKGWG6hj6QLF2S2bpGE'
+  );
+
+  let allUsers   = [];
+  let allProxies = [];
+  let allEmails  = [];
+
+  // ── AUTH + ADMIN GUARD ─────────────────────────────────────────
+  async function initAdmin() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
+
+    if (session.user.email !== ADMIN_EMAIL) {
+      document.getElementById('access-denied').classList.add('show');
+      return;
+    }
+
+    const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    document.getElementById('admin-name').textContent     = name;
+    document.getElementById('admin-initials').textContent = initials;
+    document.getElementById('app').style.display = 'block';
+
+    loadAll();
+  }
+
+  async function handleLogout() {
+    await db.auth.signOut();
+    window.location.href = 'auth.html';
+  }
+
+  // ── LOAD ALL DATA ──────────────────────────────────────────────
+  async function loadAll() {
+    const [{ data: proxies }, { data: emails }] = await Promise.all([
+      db.from('proxies').select('*').order('created_at', { ascending: false }),
+      db.from('emails').select('*').order('created_at', { ascending: false })
+    ]);
+
+    allProxies = proxies || [];
+    allEmails  = emails  || [];
+
+    // Build user map from proxies + emails
+    const userMap = {};
+    allProxies.forEach(p => {
+      if (!p.user_id) return;
+      if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, proxies: [], emails: [] };
+      userMap[p.user_id].proxies.push(p);
+    });
+    allEmails.forEach(e => {
+      if (!e.user_id) return;
+      if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, proxies: [], emails: [] };
+      userMap[e.user_id].emails.push(e);
+    });
+
+    allUsers = Object.values(userMap);
+
+    // Update stats
+    document.getElementById('s-users').textContent   = allUsers.length;
+    document.getElementById('s-active').textContent  = allProxies.filter(p => p.status === 'active').length;
+    document.getElementById('s-expired').textContent = allProxies.filter(p => p.status === 'expired').length;
+    document.getElementById('s-emails').textContent  = allEmails.length;
+
+    renderUsers(allUsers);
+    renderProxies(allProxies);
+    renderEmails(allEmails);
+    populateDropdowns();
+  }
+
+  // ── RENDER USERS ───────────────────────────────────────────────
+  function renderUsers(users) {
+    const wrap = document.getElementById('users-wrap');
+    if (!users.length) {
+      wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="5">No users found. Users appear once they have proxies or emails assigned.</td></tr></tbody></table>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Proxies</th>
+            <th>Emails</th>
+            <th>Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${users.map(u => `
+            <tr style="cursor:pointer;" onclick="toggleExpand('${u.id}')">
+              <td class="mono">
+                ${u.id.slice(0, 8)}…
+                <span style="color:var(--text-muted);font-size:0.72rem;margin-left:4px;">${u.id.slice(-4)}</span>
+              </td>
+              <td><span class="mono">${u.proxies.length}</span></td>
+              <td><span class="mono">${u.emails.length}</span></td>
+              <td>
+                <span class="badge active">${u.proxies.filter(p => p.status === 'active').length} active</span>
+              </td>
+              <td onclick="event.stopPropagation()">
+                <button class="btn btn-outline btn-sm" onclick="openForUser('proxy','${u.id}')">+ Proxy</button>
+                <button class="btn btn-outline btn-sm" style="margin-left:6px;" onclick="openForUser('email','${u.id}')">+ Email</button>
+              </td>
+            </tr>
+            <tr id="expand-${u.id}" style="display:none;" class="expand-row">
+              <td colspan="5">
+                <div class="expand-inner">
+                  <div class="expand-tabs">
+                    <button class="expand-tab active" onclick="switchExpandTab('${u.id}','proxies',this)">
+                      Proxies (${u.proxies.length})
+                    </button>
+                    <button class="expand-tab" onclick="switchExpandTab('${u.id}','emails',this)">
+                      Emails (${u.emails.length})
+                    </button>
+                  </div>
+                  <div id="exp-p-${u.id}">
+                    ${u.proxies.length === 0
+                      ? '<p style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem 0;">No proxies assigned yet.</p>'
+                      : `<table class="mini-table">
+                          <thead><tr><th>Host</th><th>Port</th><th>Username</th><th>Status</th><th>Expires</th><th></th></tr></thead>
+                          <tbody>
+                            ${u.proxies.map(p => `
+                              <tr>
+                                <td>${p.host || '—'}</td>
+                                <td>${p.port || '—'}</td>
+                                <td>${p.username || '—'}</td>
+                                <td><span class="badge ${p.status}">${p.status}</span></td>
+                                <td>${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}</td>
+                                <td><button class="btn btn-red btn-sm" onclick="deleteProxy('${p.id}')">Delete</button></td>
+                              </tr>`).join('')}
+                          </tbody>
+                        </table>`}
+                  </div>
+                  <div id="exp-e-${u.id}" style="display:none;">
+                    ${u.emails.length === 0
+                      ? '<p style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem 0;">No emails assigned yet.</p>'
+                      : `<table class="mini-table">
+                          <thead><tr><th>Email</th><th>Added</th><th></th></tr></thead>
+                          <tbody>
+                            ${u.emails.map(e => `
+                              <tr>
+                                <td>${e.email}</td>
+                                <td>${new Date(e.created_at).toLocaleDateString()}</td>
+                                <td><button class="btn btn-red btn-sm" onclick="deleteEmail('${e.id}')">Delete</button></td>
+                              </tr>`).join('')}
+                          </tbody>
+                        </table>`}
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // ── RENDER PROXIES ─────────────────────────────────────────────
+  function renderProxies(proxies) {
+    const wrap = document.getElementById('proxies-wrap');
+    if (!proxies.length) {
+      wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="6">No proxies found.</td></tr></tbody></table>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr><th>Host</th><th>Port</th><th>Username</th><th>Status</th><th>Expires</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          ${proxies.map(p => `
+            <tr>
+              <td class="mono">${p.host || '—'}</td>
+              <td class="mono">${p.port || '—'}</td>
+              <td class="mono">${p.username || '—'}</td>
+              <td><span class="badge ${p.status}">${p.status}</span></td>
+              <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">
+                ${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}
+              </td>
+              <td><button class="btn btn-red btn-sm" onclick="deleteProxy('${p.id}')">Delete</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // ── RENDER EMAILS ──────────────────────────────────────────────
+  function renderEmails(emails) {
+    const wrap = document.getElementById('emails-wrap');
+    if (!emails.length) {
+      wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="3">No emails found.</td></tr></tbody></table>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr><th>Email</th><th>Added</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          ${emails.map(e => `
+            <tr>
+              <td class="mono">${e.email}</td>
+              <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">
+                ${new Date(e.created_at).toLocaleDateString()}
+              </td>
+              <td><button class="btn btn-red btn-sm" onclick="deleteEmail('${e.id}')">Delete</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // ── POPULATE DROPDOWNS ─────────────────────────────────────────
+  function populateDropdowns() {
+    const opts = allUsers.length
+      ? allUsers.map(u => `<option value="${u.id}">${u.id.slice(0,8)}… (${u.proxies.length}p / ${u.emails.length}e)</option>`).join('')
+      : '<option value="">No users yet</option>';
+    document.getElementById('ap-user').innerHTML = opts;
+    document.getElementById('ae-user').innerHTML = opts;
+  }
+
+  // ── SECTION SWITCH ─────────────────────────────────────────────
+  function showSection(name, btn) {
+    ['users','proxies','emails'].forEach(s => {
+      document.getElementById(`section-${s}`).style.display = s === name ? 'block' : 'none';
+    });
+    document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  // ── EXPAND ROW ─────────────────────────────────────────────────
+  function toggleExpand(userId) {
+    const row = document.getElementById(`expand-${userId}`);
+    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+  }
+
+  function switchExpandTab(userId, tab, btn) {
+    document.querySelectorAll(`#expand-${userId} .expand-tab`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`exp-p-${userId}`).style.display = tab === 'proxies' ? 'block' : 'none';
+    document.getElementById(`exp-e-${userId}`).style.display = tab === 'emails'  ? 'block' : 'none';
+  }
+
+  // ── SEARCH ────────────────────────────────────────────────────
+  function filterUsers() {
+    const q = document.getElementById('user-search').value.toLowerCase();
+    renderUsers(allUsers.filter(u => u.id.toLowerCase().includes(q)));
+  }
+
+  // ── MODAL ─────────────────────────────────────────────────────
+  function openModal(type) {
+    document.getElementById(`modal-${type}`).classList.add('open');
+  }
+
+  function closeModal(type) {
+    document.getElementById(`modal-${type}`).classList.remove('open');
+  }
+
+  function openForUser(type, userId) {
+    openModal(type);
+    document.getElementById(type === 'proxy' ? 'ap-user' : 'ae-user').value = userId;
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+  });
+
+  // ── TOAST ─────────────────────────────────────────────────────
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.className = `toast ${type} show`;
+    t.innerHTML = `<span style="color:${type === 'success' ? '#22c55e' : '#ef4444'}">${type === 'success' ? '✓' : '✕'}</span> ${msg}`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── ADD PROXY ─────────────────────────────────────────────────
+  async function adminAddProxy() {
+    const user_id    = document.getElementById('ap-user').value;
+    const host       = document.getElementById('ap-host').value.trim();
+    const port       = parseInt(document.getElementById('ap-port').value);
+    const username   = document.getElementById('ap-username').value.trim();
+    const password   = document.getElementById('ap-password').value;
+    const status     = document.getElementById('ap-status').value;
+    const expires_at = document.getElementById('ap-expires').value || null;
+
+    if (!host || !port) { showToast('Host and Port are required', 'error'); return; }
+
+    const { error } = await db.from('proxies').insert([{ user_id, host, port, username, password, status, expires_at }]);
+    if (error) { showToast('Failed: ' + error.message, 'error'); return; }
+
+    closeModal('proxy');
+    showToast('Proxy added successfully!');
+    ['ap-host','ap-port','ap-username','ap-password','ap-expires'].forEach(id => document.getElementById(id).value = '');
+    await loadAll();
+  }
+
+  // ── ADD EMAIL ─────────────────────────────────────────────────
+  async function adminAddEmail() {
+    const user_id  = document.getElementById('ae-user').value;
+    const email    = document.getElementById('ae-email').value.trim();
+    const password = document.getElementById('ae-password').value;
+
+    if (!email) { showToast('Email is required', 'error'); return; }
+
+    const { error } = await db.from('emails').insert([{ user_id, email, password }]);
+    if (error) { showToast('Failed: ' + error.message, 'error'); return; }
+
+    closeModal('email');
+    showToast('Email added successfully!');
+    document.getElementById('ae-email').value    = '';
+    document.getElementById('ae-password').value = '';
+    await loadAll();
+  }
+
+  // ── DELETE PROXY ──────────────────────────────────────────────
+  async function deleteProxy(id) {
+    if (!confirm('Delete this proxy?')) return;
+    const { error } = await db.from('proxies').delete().eq('id', id);
+    if (error) { showToast('Delete failed', 'error'); return; }
+    showToast('Proxy deleted');
+    await loadAll();
+  }
+
+  // ── DELETE EMAIL ──────────────────────────────────────────────
+  async function deleteEmail(id) {
+    if (!confirm('Delete this email?')) return;
+    const { error } = await db.from('emails').delete().eq('id', id);
+    if (error) { showToast('Delete failed', 'error'); return; }
+    showToast('Email deleted');
+    await loadAll();
+  }
+
+  // ── START ─────────────────────────────────────────────────────
+  initAdmin();
+</script>
+</body>
+</html>
