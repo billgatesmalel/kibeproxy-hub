@@ -431,6 +431,143 @@
       .countries-grid { grid-template-columns: repeat(3,1fr); }
     }
   </style>
+
+<style>
+/* ── FOOTER ── */
+footer {
+  background: #080808;
+  border-top: 1px solid #1e1e1e;
+  margin-top: 4rem;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2.5rem 1.5rem;
+}
+
+/* TOP */
+.footer-top {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.75rem;
+}
+
+.footer-logo .logo-icon {
+  width: 30px; height: 30px;
+  border: 1.5px solid #22c55e;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+
+.footer-logo .logo-icon svg { width: 13px; height: 13px; }
+
+.footer-logo-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f0f0f0;
+}
+
+.footer-tagline {
+  font-size: 0.82rem;
+  color: #555;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.footer-col { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.footer-col-title {
+  font-size: 0.72rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.footer-col a,
+.footer-col span {
+  font-size: 0.82rem;
+  color: #555;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-col a:hover { color: #22c55e; }
+
+/* DIVIDER */
+.footer-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2a2a2a 20%, #2a2a2a 80%, transparent);
+  margin-bottom: 1.5rem;
+}
+
+/* BOTTOM */
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-copy {
+  font-size: 0.78rem;
+  color: #444;
+  font-family: "DM Mono", monospace;
+}
+
+.footer-dev {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.05));
+  border: 1px solid rgba(34,197,94,0.25);
+  color: #22c55e;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  font-family: "Syne", sans-serif;
+  transition: all 0.2s;
+  animation: pulse-green 2.5s ease-in-out infinite;
+}
+
+.footer-dev:hover {
+  background: rgba(34,197,94,0.2);
+  border-color: #22c55e;
+  transform: translateY(-1px);
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.15); }
+  50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+}
+
+@media (max-width: 700px) {
+  .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+  .footer-links { grid-template-columns: repeat(2,1fr); }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .footer-inner { padding: 2rem 1.2rem 1.5rem; }
+}
+</style>
 </head>
 <body>
 
@@ -784,13 +921,13 @@ console.<span class="fn">log</span>(res.data); <span class="cm">// Shows your pr
             <div class="code-body"><span class="kw">import</span> smtplib
 <span class="kw">from</span> email.mime.text <span class="kw">import</span> MIMEText
 
-email    = <span class="str">"your@email.com"</span>
+email    = <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95ecfae0e7d5f0f8f4fcf9bbf6faf8">[email&#160;protected]</a>"</span>
 password = <span class="str">"yourpassword"</span>
 
 msg = <span class="fn">MIMEText</span>(<span class="str">"Hello from KibeProxy Hub!"</span>)
 msg[<span class="str">'Subject'</span>] = <span class="str">"Test Email"</span>
 msg[<span class="str">'From'</span>]    = email
-msg[<span class="str">'To'</span>]      = <span class="str">"recipient@email.com"</span>
+msg[<span class="str">'To'</span>]      = <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cdbfa8aea4bda4a8a3b98da8a0aca4a1e3aea2a0">[email&#160;protected]</a>"</span>
 
 <span class="kw">with</span> smtplib.<span class="fn">SMTP</span>(<span class="str">"smtp.gmail.com"</span>, <span class="num">587</span>) <span class="kw">as</span> s:
     s.<span class="fn">starttls</span>()
@@ -815,12 +952,12 @@ msg[<span class="str">'To'</span>]      = <span class="str">"recipient@email.com
 <span class="kw">const</span> transporter = nodemailer.<span class="fn">createTransport</span>({
   host: <span class="str">'smtp.gmail.com'</span>,
   port: <span class="num">587</span>,
-  auth: { user: <span class="str">'your@email.com'</span>, pass: <span class="str">'yourpassword'</span> }
+  auth: { user: <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="91e8fee4e3d1f4fcf0f8fdbff2fefc">[email&#160;protected]</a>'</span>, pass: <span class="str">'yourpassword'</span> }
 });
 
 <span class="kw">await</span> transporter.<span class="fn">sendMail</span>({
-  from:    <span class="str">'your@email.com'</span>,
-  to:      <span class="str">'recipient@email.com'</span>,
+  from:    <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dba2b4aea99bbeb6bab2b7f5b8b4b6">[email&#160;protected]</a>'</span>,
+  to:      <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="255740464c554c404b51654048444c490b464a48">[email&#160;protected]</a>'</span>,
   subject: <span class="str">'Hello from KibeProxy Hub!'</span>,
   text:    <span class="str">'Your email is working perfectly.'</span>
 });
@@ -955,34 +1092,10 @@ console.<span class="fn">log</span>(<span class="str">'✓ Email sent!'</span>);
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   function toggleFaq(el) { el.classList.toggle('open'); }
 
   function toggleSupport(e) {
     e.preventDefault();
     const menu = document.getElementById('support-menu');
-    if (menu) menu.classList.toggle('open');
-  }
-
-  document.addEventListener('click', e => {
-    const menu = document.getElementById('support-menu');
-    if (menu && !e.target.closest('.support-dropdown')) menu.classList.remove('open');
-  });
-
-  // Highlight active nav link on scroll
-  const sections = document.querySelectorAll('.doc-sec');
-  const navLinks  = document.querySelectorAll('.docs-nav-link');
-
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 120) current = s.id;
-    });
-    navLinks.forEach(l => {
-      l.classList.toggle('active', l.getAttribute('href') === '#' + current);
-    });
-  });
-</script>
-
-</body>
-</html>
+    if (menu) menu.c
