@@ -233,7 +233,6 @@ async function addProxyListing() {
 
   if (error) { showToast('Failed: ' + error.message, 'error'); return; }
 
-  closeModal('proxy-listing');
   showToast('Proxy listing added! Users can now buy it.');
   ['pl-country','pl-flag','pl-host','pl-port','pl-username','pl-password'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pl-price').value = '100';
@@ -254,7 +253,6 @@ async function addEmailListing() {
 
   if (error) { showToast('Failed: ' + error.message, 'error'); return; }
 
-  closeModal('email-listing');
   showToast('Email listing added! Users can now buy it.');
   document.getElementById('el-email').value    = '';
   document.getElementById('el-password').value = '';

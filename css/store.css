@@ -38,6 +38,14 @@ main { max-width: 1200px; margin: 0 auto; padding: 3rem 2.5rem; }
 .spec-val   { font-family: 'DM Mono', monospace; color: var(--text-secondary); font-size: 0.78rem; }
 .spec-val.green { color: var(--green); font-weight: 600; }
 
+/* ── LOCKED / HIDDEN ── */
+.locked {
+  color: var(--text-muted) !important;
+  font-style: italic;
+  font-size: 0.75rem !important;
+  letter-spacing: 0;
+}
+
 /* ── DURATION ── */
 .duration-section { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); }
 
