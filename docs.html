@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KibeProxy Hub | Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/docs.css" />
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    </div>
+    <span class="logo-text">KibeProxy Hub</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="store.html">Buy Proxies</a></li>
+    <li><a href="store.html">Buy Emails</a></li>
+    <li class="support-dropdown">
+      <a href="#" onclick="toggleSupport(event)">Support ▾</a>
+      <div class="support-menu" id="support-menu">
+        <a href="https://wa.me/254724031319" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        <a href="https://t.me/kibeproxy" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram
+        </a>
+      </div>
+    </li>
+    <li><a href="docs.html" style="color:var(--green);">Docs</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <div class="balance-pill">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      KES 0
+    </div>
+    <a href="index.html" style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);text-decoration:none;">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- HEADER -->
+  <div class="docs-header">
+    <h1 class="docs-title">Documentation</h1>
+    <p class="docs-subtitle">Everything you need to know about using KibeProxy Hub</p>
+  </div>
+
+  <!-- QUICK LINKS -->
+  <div class="quick-links">
+    <a href="#getting-started" class="quick-card">
+      <div class="quick-icon yellow">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><bolt/><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        ⚡
+      </div>
+      <div class="quick-info">
+        <div class="quick-title">Getting Started</div>
+        <div class="quick-sub">Learn the basics of using KibeProxy Hub</div>
+      </div>
+      <span class="quick-btn">Read Guide ↗</span>
+    </a>
+
+    <a href="#smtp-guide" class="quick-card">
+      <div class="quick-icon purple">🛡️</div>
+      <div class="quick-info">
+        <div class="quick-title">SMTP Setup Guide</div>
+        <div class="quick-sub">Configure email sending with SMTP</div>
+      </div>
+      <span class="quick-btn">Read Guide ↗</span>
+    </a>
+
+    <a href="#faq" class="quick-card">
+      <div class="quick-icon blue">❓</div>
+      <div class="quick-info">
+        <div class="quick-title">FAQ</div>
+        <div class="quick-sub">Frequently asked questions and answers</div>
+      </div>
+      <span class="quick-btn">Read Guide ↗</span>
+    </a>
+  </div>
+
+  <!-- GETTING STARTED -->
+  <div class="doc-section" id="getting-started">
+    <div class="section-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Getting Started with KibeProxy Hub
+    </div>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Create an Account</div>
+          <p class="step-desc">Visit <a href="auth.html" class="doc-link">KibeProxy Hub</a> and click <strong>Sign Up</strong>. Enter your full name, email address and a password (minimum 6 characters). Click <strong>Create Account</strong> to register.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Browse the Store</div>
+          <p class="step-desc">After logging in, click <strong>Buy Proxies</strong> or <strong>Buy Emails</strong> in the navbar to visit the store. Browse available proxies from Philippines, India, Australia, Canada and USA.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Purchase a Proxy</div>
+          <p class="step-desc">Select your desired country, choose a duration (1, 7, 14 or 30 days) at <strong>KES 100/day</strong>. Click <strong>Buy Proxy</strong>, review the order summary, then click <strong>Confirm & Buy</strong>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Purchase an Email</div>
+          <p class="step-desc">Switch to the <strong>Emails</strong> tab in the store. Each email account costs <strong>KES 25</strong> (one-time). Click <strong>Buy Email</strong> and confirm your order.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Access Your Purchases</div>
+          <p class="step-desc">Go to your <a href="index.html" class="doc-link">Dashboard</a>. All purchased proxies and emails appear here. Click <strong>Show</strong> next to any password to reveal it. Proxy credentials include host, port, username and password.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY FEATURES -->
+  <div class="doc-section">
+    <div class="section-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Key Features
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-title">🌍 Affordable Proxies</div>
+        <p class="feature-desc">Daily proxy access from Philippines, India, Australia, Canada and USA at KES 100/day.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">✉️ Email Services</div>
+        <p class="feature-desc">Purchase quality email accounts for business and personal use at KES 25 each.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">💳 Easy Payments</div>
+        <p class="feature-desc">Contact support via WhatsApp or Telegram to complete payment before confirming orders.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">📞 24/7 Support</div>
+        <p class="feature-desc">Get help from our support team via WhatsApp (+254724031319) or Telegram (@kibeproxy).</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">📊 Dashboard</div>
+        <p class="feature-desc">Manage all your proxies and emails from one clean dashboard. View credentials securely.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">🔒 Secure Credentials</div>
+        <p class="feature-desc">All passwords are hidden by default. Reveal them only when needed with the Show button.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMTP GUIDE -->
+  <div class="doc-section" id="smtp-guide">
+    <div class="section-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      SMTP Setup Guide
+    </div>
+
+    <p class="doc-text">After purchasing an email account from KibeProxy Hub, you can use it to send emails via SMTP. Here's how to configure it:</p>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Get Your Email Credentials</div>
+          <p class="step-desc">Go to your <a href="index.html" class="doc-link">Dashboard</a> → click the <strong>Emails</strong> tab → click <strong>Show</strong> to reveal your email and password.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Configure SMTP Settings</div>
+          <p class="step-desc">Use these settings in your email client or app:</p>
+          <div class="code-block">
+            <div class="code-row"><span class="code-key">SMTP Host</span><span class="code-val">smtp.gmail.com</span></div>
+            <div class="code-row"><span class="code-key">SMTP Port</span><span class="code-val">587 (TLS) or 465 (SSL)</span></div>
+            <div class="code-row"><span class="code-key">Username</span><span class="code-val">your purchased email</span></div>
+            <div class="code-row"><span class="code-key">Password</span><span class="code-val">your email password</span></div>
+            <div class="code-row"><span class="code-key">Encryption</span><span class="code-val">TLS / STARTTLS</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Using with Python</div>
+          <p class="step-desc">Example code to send an email using Python:</p>
+          <div class="code-block code-dark">
+            <pre>import smtplib
+from email.mime.text import MIMEText
+
+smtp_host = "smtp.gmail.com"
+smtp_port = 587
+email     = "your@email.com"
+password  = "yourpassword"
+
+msg = MIMEText("Hello from KibeProxy!")
+msg['Subject'] = "Test Email"
+msg['From']    = email
+msg['To']      = "recipient@email.com"
+
+with smtplib.SMTP(smtp_host, smtp_port) as s:
+    s.starttls()
+    s.login(email, password)
+    s.send_message(msg)
+    print("Email sent!")</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Using with Node.js (Nodemailer)</div>
+          <div class="code-block code-dark">
+            <pre>const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  auth: {
+    user: 'your@email.com',
+    pass: 'yourpassword'
+  }
+});
+
+await transporter.sendMail({
+  from: 'your@email.com',
+  to:   'recipient@email.com',
+  subject: 'Test Email',
+  text: 'Hello from KibeProxy Hub!'
+});</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROXY SETUP -->
+  <div class="doc-section">
+    <div class="section-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      How to Use Your Proxy
+    </div>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Get Your Proxy Credentials</div>
+          <p class="step-desc">Go to Dashboard → <strong>Active</strong> tab → copy Host, Port, Username and Password (click Show).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Using with Python (Requests)</div>
+          <div class="code-block code-dark">
+            <pre>import requests
+
+proxy = {
+  'http':  'http://username:password@host:port',
+  'https': 'http://username:password@host:port'
+}
+
+response = requests.get('https://httpbin.org/ip', proxies=proxy)
+print(response.json())</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Using in a Browser</div>
+          <p class="step-desc">Go to browser <strong>Settings → Network → Proxy</strong> and enter:</p>
+          <div class="code-block">
+            <div class="code-row"><span class="code-key">HTTP Proxy</span><span class="code-val">host:port</span></div>
+            <div class="code-row"><span class="code-key">Username</span><span class="code-val">your proxy username</span></div>
+            <div class="code-row"><span class="code-key">Password</span><span class="code-val">your proxy password</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="doc-section" id="faq">
+    <div class="section-label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Frequently Asked Questions
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How long does my proxy stay active? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Your proxy stays active for the duration you selected at purchase — 1, 7, 14 or 30 days. The expiry date is shown in your dashboard.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How do I pay? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Contact support via WhatsApp (+254724031319) or Telegram (@kibeproxy) to complete payment before confirming your order. We accept M-Pesa and other payment methods.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What countries are available? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">We currently offer proxies from: 🇵🇭 Philippines, 🇮🇳 India, 🇦🇺 Australia, 🇨🇦 Canada and 🇺🇸 USA. More countries coming soon!</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Can I buy multiple proxies? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Yes! You can buy as many proxies as you need from different countries. Each purchase adds a new proxy to your dashboard.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What protocols do proxies support? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">All our proxies support both HTTP and SOCKS5 protocols, making them compatible with most tools, browsers and programming languages.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What is an email account used for? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Email accounts can be used for sending emails via SMTP, creating accounts on platforms, or general email use. Each account comes with full login credentials.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How do I get support? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Contact us via WhatsApp at +254724031319, Telegram @kibeproxy, or join our WhatsApp group for community support.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEED HELP -->
+  <div class="help-banner">
+    <div>
+      <div class="help-title">Need Help?</div>
+      <div class="help-sub">Can't find what you're looking for? Our support team is ready to help.</div>
+    </div>
+    <div class="help-btns">
+      <a href="https://wa.me/254724031319" target="_blank" class="help-btn whatsapp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Support
+      </a>
+      <a href="https://t.me/kibeproxy" target="_blank" class="help-btn telegram">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Telegram Support
+      </a>
+      <a href="https://chat.whatsapp.com/LyamprdeHHTAypgwwDUZuI?mode=gi_t" target="_blank" class="help-btn group">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Join WhatsApp Group
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+
+  function toggleSupport(e) {
+    e.preventDefault();
+    const menu = document.getElementById('support-menu');
+    if (menu) menu.classList.toggle('open');
+  }
+
+  document.addEventListener('click', e => {
+    const menu = document.getElementById('support-menu');
+    if (menu && !e.target.closest('.support-dropdown')) {
+      menu.classList.remove('open');
+    }
+  });
+</script>
+
+</body>
+</html>
