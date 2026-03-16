@@ -3,20 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KibeProxy Hub | Buy Proxies</title>
+  <title>KibeProxy Hub | Store</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/store.css" />
 </head>
 <body>
 
-<!-- ── NAVBAR ── -->
 <nav>
   <a class="nav-logo" href="index.html">
     <div class="logo-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
+        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
       </svg>
     </div>
@@ -24,8 +22,7 @@
   </a>
 
   <ul class="nav-links">
-    <li><a href="store.html" style="color:var(--green);">Buy Proxies</a></li>
-    <li><a href="#">Buy Emails</a></li>
+    <li><a href="store.html" style="color:var(--green);">Store</a></li>
     <li class="support-dropdown">
       <a href="#" onclick="toggleSupport(event)">Support ▾</a>
       <div class="support-menu" id="support-menu">
@@ -44,9 +41,7 @@
 
   <div class="nav-right">
     <div class="balance-pill">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-      </svg>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       KES 0
     </div>
     <a href="admin.html" class="admin-badge" id="admin-link" style="display:none;">ADMIN</a>
@@ -63,136 +58,77 @@
   </div>
 </nav>
 
-<!-- ── MAIN ── -->
 <main>
-
-  <!-- PAGE HEADER -->
   <div class="page-header">
-    <h1 class="page-title">Buy Proxies</h1>
-    <p class="page-subtitle">Premium residential & datacenter proxies from 5 countries</p>
-    <div class="price-banner">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-      </svg>
-      KES 100 / day — All Countries
-    </div>
+    <h1 class="page-title">Store</h1>
+    <p class="page-subtitle">Buy proxies (KES 100/day) and emails (KES 25 each)</p>
   </div>
 
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterCountry('all')">
-      🌍 All Countries
+  <div class="store-tabs">
+    <button class="store-tab active" onclick="switchStoreTab('proxies', this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Proxies
     </button>
-    <button class="filter-btn" onclick="filterCountry('philippines')">
-      🇵🇭 Philippines
-    </button>
-    <button class="filter-btn" onclick="filterCountry('india')">
-      🇮🇳 India
-    </button>
-    <button class="filter-btn" onclick="filterCountry('australia')">
-      🇦🇺 Australia
-    </button>
-    <button class="filter-btn" onclick="filterCountry('canada')">
-      🇨🇦 Canada
-    </button>
-    <button class="filter-btn" onclick="filterCountry('usa')">
-      🇺🇸 USA
+    <button class="store-tab" onclick="switchStoreTab('emails', this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Emails
     </button>
   </div>
 
-  <!-- COUNTRY GRID -->
-  <div class="country-grid" id="country-grid">
-    <!-- Rendered by JS -->
+  <div class="store-grid" id="store-grid">
+    <div class="store-empty"><div class="spinner" style="margin:0 auto 1rem;"></div> Loading...</div>
   </div>
-
 </main>
 
-<!-- ── ORDER MODAL ── -->
+<!-- ORDER MODAL -->
 <div class="modal-overlay" id="modal-order">
   <div class="modal">
-
-    <!-- ORDER VIEW -->
     <div id="order-view">
       <div class="modal-title" style="display:flex;align-items:center;gap:10px;">
-        <span id="order-flag">🌍</span>
-        <span>Order Summary</span>
+        <span id="o-icon">🌍</span>
+        <span id="o-title">Order Summary</span>
       </div>
-
       <div class="order-summary">
-        <div class="order-row">
-          <span class="label">Country</span>
-          <span class="value" id="order-country">—</span>
-        </div>
-        <div class="order-row">
-          <span class="label">Duration</span>
-          <span class="value" id="order-days">—</span>
-        </div>
-        <div class="order-row">
-          <span class="label">Price</span>
-          <span class="value" id="order-price">—</span>
-        </div>
-        <div class="order-row">
-          <span class="label">Expires On</span>
-          <span class="value" id="order-expires">—</span>
-        </div>
-        <div class="order-row">
-          <span class="label">Total</span>
-          <span class="value total" id="order-total">—</span>
-        </div>
+        <div class="order-row"><span class="lbl">Item</span><span class="val" id="o-host">—</span></div>
+        <div class="order-row"><span class="lbl">Duration</span><span class="val" id="o-dur">—</span></div>
+        <div class="order-row"><span class="lbl">Price</span><span class="val" id="o-price">—</span></div>
+        <div class="order-row"><span class="lbl">Expires</span><span class="val" id="o-expires">—</span></div>
+        <div class="order-row"><span class="lbl">Total</span><span class="val total" id="o-total">—</span></div>
       </div>
-
       <div class="payment-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        This is a demo store. Clicking "Confirm" will create a proxy entry in your dashboard immediately.
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Contact support on WhatsApp or Telegram to complete payment before confirming.
       </div>
-
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('order')">Cancel</button>
-        <button class="btn-submit" id="confirm-btn" onclick="confirmOrder()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-          </svg>
-          Confirm & Buy
-        </button>
+        <button class="btn-submit" id="confirm-btn" onclick="confirmOrder()">✓ Confirm & Buy</button>
       </div>
     </div>
 
-    <!-- SUCCESS VIEW -->
     <div id="success-view" style="display:none;">
       <div class="success-state">
         <div class="success-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:0.5rem;">Order Confirmed!</h3>
         <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.25rem;">
-          Your <strong id="success-country" style="color:var(--text-primary)"></strong> proxy is ready.
+          Your <strong id="success-item" style="color:var(--text-primary)"></strong> is now in your dashboard.
         </p>
         <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">
-          Active for <strong id="success-days" style="color:var(--green)"></strong>
+          Duration: <strong id="success-dur" style="color:var(--green)"></strong>
         </p>
         <button class="btn-submit" style="width:100%;justify-content:center;display:flex;" onclick="goToDashboard()">
           Go to Dashboard →
         </button>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
-<!-- ── SCRIPTS ── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/store.js"></script>
-
 </body>
 </html>
