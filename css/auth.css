@@ -1,0 +1,104 @@
+/* ── AUTH PAGE STYLES ────────────────────────────────────────── */
+
+html, body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ── AUTH CARD ── */
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 20px; padding: 2.5rem;
+  width: 100%; max-width: 420px;
+  position: relative;
+  animation: fadeUp 0.4s ease both;
+}
+
+/* ── LOGO ── */
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.logo .logo-icon { width: 36px; height: 36px; }
+.logo .logo-icon::before { inset: 5px; }
+.logo-text-auth { font-size: 1.1rem; font-weight: 800; }
+
+/* ── TABS ── */
+.auth-tabs {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 4px;
+  margin-bottom: 2rem;
+}
+
+.auth-tab {
+  flex: 1; padding: 9px;
+  border: none; background: transparent;
+  border-radius: 7px;
+  color: var(--text-muted);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.auth-tab.active { background: var(--border-light); color: var(--text-primary); }
+
+/* ── ALERT ── */
+.alert {
+  padding: 10px 14px; border-radius: 8px;
+  font-size: 0.82rem; margin-bottom: 1rem;
+  display: none; align-items: center; gap: 8px;
+}
+
+.alert.error   { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; display: flex; }
+.alert.success { background: var(--green-glow); border: 1px solid var(--green-dim); color: var(--green); display: flex; }
+
+/* ── SUBMIT BUTTON ── */
+.submit-btn {
+  width: 100%; background: var(--green); color: #000;
+  border: none; border-radius: 9px; padding: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; margin-top: 0.5rem;
+  transition: opacity 0.2s, transform 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+.submit-btn:hover   { opacity: 0.88; transform: translateY(-1px); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── FOOTER NOTE ── */
+.auth-footer {
+  text-align: center; margin-top: 1.5rem;
+  font-size: 0.8rem; color: var(--text-muted);
+}
+
+.auth-footer span {
+  color: var(--green); cursor: pointer;
+}
+
+/* ── SPINNER (auth specific) ── */
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
