@@ -35,3 +35,18 @@ async function handleLogout() {
   await db.auth.signOut();
   window.location.href = 'auth.html';
 }
+
+// ── SUPPORT DROPDOWN ──────────────────────────────────────────
+function toggleSupport(e) {
+  e.preventDefault();
+  const menu = document.getElementById('support-menu');
+  menu.classList.toggle('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+  const menu = document.getElementById('support-menu');
+  if (menu && !e.target.closest('.support-dropdown')) {
+    menu.classList.remove('open');
+  }
+});
