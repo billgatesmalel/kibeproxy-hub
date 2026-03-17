@@ -124,6 +124,7 @@ footer {
 
     <!-- LOGIN FORM -->
     <div id="form-login">
+      <form id="login-form" autocomplete="on" onsubmit="event.preventDefault(); handleLogin();" style="display:contents;">
       <div class="form-group">
         <label class="form-label">Email Address</label>
         <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
@@ -143,7 +144,7 @@ footer {
           </button>
         </div>
       </div>
-      <button class="submit-btn" id="login-btn" onclick="handleLogin()">
+      <button class="submit-btn" id="login-btn" type="submit">
         Login to Dashboard
       </button>
       <div class="auth-footer">
@@ -154,6 +155,7 @@ footer {
 
     <!-- SIGNUP FORM -->
     <div id="form-signup" style="display:none;">
+      <form id="signup-form" autocomplete="on" onsubmit="event.preventDefault(); handleSignup();" style="display:contents;">
       <div class="form-group">
         <label class="form-label">Full Name</label>
         <input class="form-input" id="signup-name" type="text" placeholder="Ian Kibet" />
@@ -192,7 +194,7 @@ footer {
           </button>
         </div>
       </div>
-      <button class="submit-btn" id="signup-btn" onclick="handleSignup()">
+      <button class="submit-btn" id="signup-btn" type="submit">
         Create Account
       </button>
       <div class="auth-footer">

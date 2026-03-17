@@ -83,11 +83,8 @@ async function handleLogin() {
     }
     showAlert('Login successful! Redirecting...', 'success');
 
-    // Trigger browser "Save password to Google" prompt
-    // by submitting a real form with the credentials
-    const email    = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    triggerSavePasswordPrompt(email, password, 'index.html');
+    // Redirect — browser sees filled autocomplete fields and prompts to save
+    setTimeout(() => window.location.href = 'index.html', 800);
   }
 }
 
@@ -114,54 +111,18 @@ async function handleSignup() {
   } else {
     showAlert('Account created! You can now login.', 'success');
 
-    // Trigger browser "Save password to Google" prompt
-    const sEmail = document.getElementById('signup-email').value.trim();
-    const sPass  = document.getElementById('signup-password').value;
-    setTimeout(() => triggerSavePasswordPrompt(sEmail, sPass, null), 800);
+    // Browser will offer to save password automatically due to autocomplete attributes
   }
 }
 
 // ── TRIGGER BROWSER SAVE PASSWORD PROMPT ────────────────────
-// Submitting a hidden native form causes Chrome/browsers to show
-// "Save password?" or "Save to Google?" natively
+// Uses autocomplete attributes — browser detects login and shows
+// "Save password to Google?" automatically after redirect
 function triggerSavePasswordPrompt(email, password, redirectTo) {
-  // Create a hidden native form
-  const form = document.createElement('form');
-  form.method  = 'post';
-  form.action  = redirectTo || '#';
-  form.style.display = 'none';
-
-  // Username/email field
-  const userField = document.createElement('input');
-  userField.type         = 'text';
-  userField.name         = 'username';
-  userField.autocomplete = 'username';
-  userField.value        = email;
-  form.appendChild(userField);
-
-  // Password field
-  const passField = document.createElement('input');
-  passField.type         = 'password';
-  passField.name         = 'password';
-  passField.autocomplete = 'current-password';
-  passField.value        = password;
-  form.appendChild(passField);
-
-  // Submit button
-  const submit = document.createElement('input');
-  submit.type = 'submit';
-  form.appendChild(submit);
-
-  document.body.appendChild(form);
-
-  // Submitting triggers the browser's native save-password dialog
+  // Just redirect — the browser sees the autocomplete="current-password"
+  // fields that were filled and shows the save prompt on the next page
   if (redirectTo) {
-    form.submit(); // navigates + shows save prompt
-  } else {
-    // For signup: just show prompt without navigating
-    form.addEventListener('submit', e => e.preventDefault());
-    submit.click();
-    setTimeout(() => form.remove(), 2000);
+    window.location.href = redirectTo;
   }
 }
 
