@@ -11,18 +11,28 @@ const ADMIN_EMAIL = 'kibetian2005@gmail.com';
 // ── TOAST ─────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.className = `toast ${type} show`;
   t.innerHTML = `<span style="color:${type === 'success' ? '#22c55e' : '#ef4444'}">${type === 'success' ? '✓' : '✕'}</span> ${msg}`;
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ── MODAL ─────────────────────────────────────────────────────
-function openModal(type)  { document.getElementById(`modal-${type}`).classList.add('open'); }
-function closeModal(type) { document.getElementById(`modal-${type}`).classList.remove('open'); }
+function openModal(type) {
+  const el = document.getElementById('modal-' + type);
+  if (el) el.classList.add('open');
+}
+
+function closeModal(type) {
+  const el = document.getElementById('modal-' + type);
+  if (el) el.classList.remove('open');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal-overlay').forEach(el => {
-    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    el.addEventListener('click', e => {
+      if (e.target === el) el.classList.remove('open');
+    });
   });
 });
 

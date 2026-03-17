@@ -128,9 +128,11 @@
   }
 
   // ── 1. DEVTOOLS DETECTION ────────────────────────────────────
+  const IS_PROD = !window.location.host.includes('localhost') && !window.location.host.includes('127.0.0.1');
   let devToolsOpen = false;
 
   function checkDevTools() {
+    if (!IS_PROD) return; // Only block devtools in production
     const threshold = 160;
     const widthDiff  = window.outerWidth  - window.innerWidth  > threshold;
     const heightDiff = window.outerHeight - window.innerHeight > threshold;
@@ -157,12 +159,14 @@
 
   // ── 2. RIGHT-CLICK DISABLE ───────────────────────────────────
   document.addEventListener('contextmenu', e => {
+    if (!IS_PROD) return; // Allow right-click on localhost
     e.preventDefault();
     return false;
   });
 
   // ── 3. KEYBOARD SHORTCUT BLOCKING ───────────────────────────
   document.addEventListener('keydown', e => {
+    if (!IS_PROD) return; // Allow devtools shortcuts on localhost
     // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
     if (
       e.key === 'F12' ||
