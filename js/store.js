@@ -1,5 +1,6 @@
 // ── STORE LOGIC ───────────────────────────────────────────────
-let currentUserId = null;
+let currentUserId    = null;
+let currentUserEmail = null;
 let proxyListings = [];
 let emailListings = [];
 let activeTab     = 'proxies';
@@ -22,7 +23,8 @@ async function initStore() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
 
-  currentUserId = session.user.id;
+  currentUserId    = session.user.id;
+  currentUserEmail = session.user.email;
   const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -433,8 +435,12 @@ async function showMpesaSuccess(mpesaCode, amount) {
   document.getElementById('mpesa-success-view').style.display = 'block';
   document.getElementById('mpesa-receipt').textContent = mpesaCode || 'N/A';
 
-  // Now complete the order
-  await completePaidOrder();
+  // Get the phone used for payment
+  const phone = document.getElementById('mpesa-phone').value.trim();
+  const formattedPhone = phone.startsWith('0') ? '254' + phone.slice(1) : '254' + phone;
+
+  // Complete order with tracking details
+  await completePaidOrder(mpesaCode, formattedPhone);
 }
 
 function resetMpesaForm() {
@@ -459,26 +465,38 @@ function hideMpesaError() {
 // Store pending order data
 let pendingOrderData = null;
 
-async function completePaidOrder() {
+async function completePaidOrder(mpesaCode, mpesaPhone) {
   if (!pendingOrderData) return;
 
   const { type, id, days, expires } = pendingOrderData;
+  const now = new Date().toISOString();
 
   if (type === 'proxy') {
     const listing = proxyListings.find(p => p.id === id);
     await db.from('proxies').insert([{
-      user_id: currentUserId,
-      host: listing.host, port: listing.port,
-      username: listing.username || '',
-      password: listing.password || '',
-      status: 'active', expires_at: expires,
+      user_id:      currentUserId,
+      host:         listing.host,
+      port:         listing.port,
+      username:     listing.username || '',
+      password:     listing.password || '',
+      status:       'active',
+      expires_at:   expires,
+      buyer_email:  currentUserEmail,
+      mpesa_phone:  mpesaPhone  || '',
+      mpesa_code:   mpesaCode   || '',
+      purchased_at: now,
     }]);
     await db.from('proxy_listings').update({ available: false }).eq('id', id);
   } else {
     const listing = emailListings.find(e => e.id === id);
     await db.from('emails').insert([{
-      user_id: currentUserId,
-      email: listing.email, password: listing.password || '',
+      user_id:      currentUserId,
+      email:        listing.email,
+      password:     listing.password || '',
+      buyer_email:  currentUserEmail,
+      mpesa_phone:  mpesaPhone  || '',
+      mpesa_code:   mpesaCode   || '',
+      purchased_at: now,
     }]);
     await db.from('email_listings').update({ available: false }).eq('id', id);
   }
