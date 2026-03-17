@@ -126,11 +126,22 @@ footer {
     <div id="form-login">
       <div class="form-group">
         <label class="form-label">Email Address</label>
-        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" />
+        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input class="form-input" id="login-password" type="password" placeholder="••••••••" />
+        <div style="position:relative;">
+          <input class="form-input" id="login-password" type="password" placeholder="••••••••"
+            autocomplete="current-password"
+            style="padding-right:48px;" />
+          <button type="button" onclick="togglePasswordVisibility('login-password','eye-login')"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;display:flex;align-items:center;">
+            <svg id="eye-login" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <button class="submit-btn" id="login-btn" onclick="handleLogin()">
         Login to Dashboard
@@ -153,11 +164,33 @@ footer {
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input class="form-input" id="signup-password" type="password" placeholder="Min. 6 characters" />
+        <div style="position:relative;">
+          <input class="form-input" id="signup-password" type="password" placeholder="Min. 6 characters"
+            autocomplete="new-password"
+            style="padding-right:48px;" />
+          <button type="button" onclick="togglePasswordVisibility('signup-password','eye-signup')"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;display:flex;align-items:center;">
+            <svg id="eye-signup" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Confirm Password</label>
-        <input class="form-input" id="signup-confirm" type="password" placeholder="Repeat password" />
+        <div style="position:relative;">
+          <input class="form-input" id="signup-confirm" type="password" placeholder="Repeat password"
+            autocomplete="new-password"
+            style="padding-right:48px;" />
+          <button type="button" onclick="togglePasswordVisibility('signup-confirm','eye-confirm')"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;display:flex;align-items:center;">
+            <svg id="eye-confirm" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <button class="submit-btn" id="signup-btn" onclick="handleSignup()">
         Create Account

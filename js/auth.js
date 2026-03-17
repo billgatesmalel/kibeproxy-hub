@@ -1,5 +1,24 @@
 // ── AUTH PAGE LOGIC ───────────────────────────────────────────
 
+// ── SHOW / HIDE PASSWORD ──────────────────────────────────────
+function togglePasswordVisibility(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (!input || !icon) return;
+
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+
+  // Swap eye icon
+  icon.innerHTML = isHidden
+    ? // eye-off (password visible)
+      `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+       <line x1="1" y1="1" x2="23" y2="23"/>`
+    : // eye (password hidden)
+      `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+       <circle cx="12" cy="12" r="3"/>`;
+}
+
 // Redirect to dashboard if already logged in
 db.auth.getSession().then(({ data }) => {
   if (data.session) window.location.href = 'index.html';
@@ -63,7 +82,12 @@ async function handleLogin() {
       }
     }
     showAlert('Login successful! Redirecting...', 'success');
-    setTimeout(() => window.location.href = 'index.html', 1000);
+
+    // Trigger browser "Save password to Google" prompt
+    // by submitting a real form with the credentials
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    triggerSavePasswordPrompt(email, password, 'index.html');
   }
 }
 
@@ -89,6 +113,55 @@ async function handleSignup() {
     showAlert(error.message);
   } else {
     showAlert('Account created! You can now login.', 'success');
+
+    // Trigger browser "Save password to Google" prompt
+    const sEmail = document.getElementById('signup-email').value.trim();
+    const sPass  = document.getElementById('signup-password').value;
+    setTimeout(() => triggerSavePasswordPrompt(sEmail, sPass, null), 800);
+  }
+}
+
+// ── TRIGGER BROWSER SAVE PASSWORD PROMPT ────────────────────
+// Submitting a hidden native form causes Chrome/browsers to show
+// "Save password?" or "Save to Google?" natively
+function triggerSavePasswordPrompt(email, password, redirectTo) {
+  // Create a hidden native form
+  const form = document.createElement('form');
+  form.method  = 'post';
+  form.action  = redirectTo || '#';
+  form.style.display = 'none';
+
+  // Username/email field
+  const userField = document.createElement('input');
+  userField.type         = 'text';
+  userField.name         = 'username';
+  userField.autocomplete = 'username';
+  userField.value        = email;
+  form.appendChild(userField);
+
+  // Password field
+  const passField = document.createElement('input');
+  passField.type         = 'password';
+  passField.name         = 'password';
+  passField.autocomplete = 'current-password';
+  passField.value        = password;
+  form.appendChild(passField);
+
+  // Submit button
+  const submit = document.createElement('input');
+  submit.type = 'submit';
+  form.appendChild(submit);
+
+  document.body.appendChild(form);
+
+  // Submitting triggers the browser's native save-password dialog
+  if (redirectTo) {
+    form.submit(); // navigates + shows save prompt
+  } else {
+    // For signup: just show prompt without navigating
+    form.addEventListener('submit', e => e.preventDefault());
+    submit.click();
+    setTimeout(() => form.remove(), 2000);
   }
 }
 
