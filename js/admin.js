@@ -39,13 +39,19 @@ async function loadAll() {
     { data: proxies },
     { data: emails },
     { data: pListings },
-    { data: eListings }
+    { data: eListings },
+    { data: bans }
   ] = await Promise.all([
     db.from('proxies').select('*').order('purchased_at', { ascending: false }),
     db.from('emails').select('*').order('purchased_at', { ascending: false }),
     db.from('proxy_listings').select('*').order('created_at', { ascending: false }),
     db.from('email_listings').select('*').order('created_at', { ascending: false }),
+    db.from('user_bans').select('*'),
   ]);
+
+  // Build bans map
+  window.bannedUsers = {};
+  (bans || []).forEach(b => { if (b.banned) window.bannedUsers[b.user_id] = true; });
 
   allProxies    = proxies    || [];
   allEmails     = emails     || [];
@@ -93,11 +99,19 @@ function renderUsers(users) {
       </thead>
       <tbody>
         ${users.map(u => `
-          <tr style="cursor:pointer;" onclick="toggleExpand('${u.id}')">
-            <td class="mono">${u.id.slice(0,8)}…<span style="color:var(--text-muted);font-size:0.72rem;margin-left:4px;">${u.id.slice(-4)}</span></td>
-            <td class="mono">${u.proxies.length}</td>
-            <td class="mono">${u.emails.length}</td>
-            <td><span class="badge active">${u.proxies.filter(p=>p.status==='active').length} active</span></td>
+          <tr style="cursor:pointer;">
+            <td class="mono" onclick="toggleExpand('${u.id}')">${u.id.slice(0,8)}…<span style="color:var(--text-muted);font-size:0.72rem;margin-left:4px;">${u.id.slice(-4)}</span></td>
+            <td class="mono" onclick="toggleExpand('${u.id}')">${u.proxies.length}</td>
+            <td class="mono" onclick="toggleExpand('${u.id}')">${u.emails.length}</td>
+            <td onclick="toggleExpand('${u.id}')">
+              <span class="badge active">${u.proxies.filter(p=>p.status==='active').length} active</span>
+              ${window.bannedUsers && window.bannedUsers[u.id] ? '<span class="badge expired" style="margin-left:6px;">🚫 Banned</span>' : ''}
+            </td>
+            <td>
+              ${window.bannedUsers && window.bannedUsers[u.id]
+                ? `<button class="btn btn-green btn-sm" onclick="banUser('${u.id}', false)">✓ Unban</button>`
+                : `<button class="btn btn-red btn-sm" onclick="banUser('${u.id}', true)">🚫 Ban</button>`}
+            </td>
           </tr>
           <tr id="expand-${u.id}" style="display:none;" class="expand-row">
             <td colspan="4">
@@ -374,6 +388,21 @@ async function deleteUserEmail(id) {
   if (!confirm('Remove this email from user?')) return;
   await db.from('emails').delete().eq('id', id);
   showToast('Email removed');
+  await loadAll();
+}
+
+// ── BAN / UNBAN USER ─────────────────────────────────────────
+async function banUser(userId, ban) {
+  const action = ban ? 'ban' : 'unban';
+  if (!confirm('Are you sure you want to ' + action + ' this user?')) return;
+
+  const { error } = await db
+    .from('user_bans')
+    .upsert([{ user_id: userId, banned: ban, updated_at: new Date().toISOString() }],
+            { onConflict: 'user_id' });
+
+  if (error) { showToast('Failed: ' + error.message, 'error'); return; }
+  showToast('User ' + action + 'ned successfully.');
   await loadAll();
 }
 

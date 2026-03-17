@@ -48,6 +48,20 @@ async function handleLogin() {
   if (error) {
     showAlert(error.message);
   } else {
+    // Check if user is banned
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      const { data: ban } = await db.from('user_bans')
+        .select('banned')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (ban && ban.banned) {
+        await db.auth.signOut();
+        showAlert('🚫 Your account has been suspended. Contact support on WhatsApp: +254724031319');
+        return;
+      }
+    }
     showAlert('Login successful! Redirecting...', 'success');
     setTimeout(() => window.location.href = 'index.html', 1000);
   }
