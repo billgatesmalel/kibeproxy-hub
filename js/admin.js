@@ -1,9 +1,9 @@
 // ── ADMIN LOGIC ───────────────────────────────────────────────
-let allUsers         = [];
-let allProxies       = [];
-let allEmails        = [];
-let proxyListings    = [];
-let emailListings    = [];
+let allUsers      = [];
+let allProxies    = [];
+let allEmails     = [];
+let proxyListings = [];
+let emailListings = [];
 
 // ── AUTH + ADMIN GUARD ────────────────────────────────────────
 async function initAdmin() {
@@ -24,6 +24,18 @@ async function initAdmin() {
   loadAll();
 }
 
+// ── PAYMENT STATUS BADGE ──────────────────────────────────────
+function payBadge(status) {
+  if (!status || status === 'success') {
+    return '<span class="badge active">✓ Paid</span>';
+  } else if (status === 'pending') {
+    return '<span class="badge" style="background:rgba(234,179,8,0.1);color:#eab308;border:1px solid rgba(234,179,8,0.3);">⏳ Pending</span>';
+  } else if (status === 'failed') {
+    return '<span class="badge expired">✕ Failed</span>';
+  }
+  return '<span class="badge active">✓ Paid</span>';
+}
+
 // ── LOAD ALL ──────────────────────────────────────────────────
 async function loadAll() {
   const [
@@ -32,8 +44,8 @@ async function loadAll() {
     { data: pListings },
     { data: eListings }
   ] = await Promise.all([
-    db.from('proxies').select('*').order('created_at', { ascending: false }),
-    db.from('emails').select('*').order('created_at', { ascending: false }),
+    db.from('proxies').select('*').order('purchased_at', { ascending: false }),
+    db.from('emails').select('*').order('purchased_at', { ascending: false }),
     db.from('proxy_listings').select('*').order('created_at', { ascending: false }),
     db.from('email_listings').select('*').order('created_at', { ascending: false }),
   ]);
@@ -58,15 +70,15 @@ async function loadAll() {
   allUsers = Object.values(userMap);
 
   // Stats
-  document.getElementById('s-users').textContent    = allUsers.length;
-  document.getElementById('s-proxies').textContent  = proxyListings.filter(p => p.available).length;
-  document.getElementById('s-emails').textContent   = emailListings.filter(e => e.available).length;
-  document.getElementById('s-sold').textContent     = allProxies.length + allEmails.length;
+  document.getElementById('s-users').textContent   = allUsers.length;
+  document.getElementById('s-proxies').textContent = proxyListings.filter(p => p.available).length;
+  document.getElementById('s-emails').textContent  = emailListings.filter(e => e.available).length;
+  document.getElementById('s-sold').textContent    = allProxies.length + allEmails.length;
 
   renderUsers(allUsers);
+  renderPurchases(allProxies, allEmails);
   renderProxyListings(proxyListings);
   renderEmailListings(emailListings);
-  renderPurchases(allProxies, allEmails);
   populateDropdowns();
 }
 
@@ -79,7 +91,9 @@ function renderUsers(users) {
   }
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>User ID</th><th>Proxies Owned</th><th>Emails Owned</th><th>Details</th></tr></thead>
+      <thead>
+        <tr><th>User ID</th><th>Proxies</th><th>Emails</th><th>Details</th></tr>
+      </thead>
       <tbody>
         ${users.map(u => `
           <tr style="cursor:pointer;" onclick="toggleExpand('${u.id}')">
@@ -95,61 +109,67 @@ function renderUsers(users) {
                   <button class="expand-tab active" onclick="switchExpandTab('${u.id}','proxies',this)">Proxies (${u.proxies.length})</button>
                   <button class="expand-tab" onclick="switchExpandTab('${u.id}','emails',this)">Emails (${u.emails.length})</button>
                 </div>
+
                 <div id="exp-p-${u.id}">
-                  ${u.proxies.length === 0 ? '<p style="color:var(--text-muted);font-size:0.82rem;">No proxies purchased.</p>' : `
-                  <table class="mini-table">
-                    <thead>
-                      <tr>
-                        <th>Buyer Email</th>
-                        <th>M-Pesa Phone</th>
-                        <th>M-Pesa Code</th>
-                        <th>Purchased At</th>
-                        <th>Country</th>
-                        <th>Status</th>
-                        <th>Expires</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${u.proxies.map(p => `
-                        <tr>
-                          <td style="color:var(--green)">${p.buyer_email || '—'}</td>
-                          <td>${p.mpesa_phone || '—'}</td>
-                          <td style="color:var(--yellow);font-weight:700">${p.mpesa_code || '—'}</td>
-                          <td style="color:var(--text-muted);font-size:0.72rem">${p.purchased_at ? new Date(p.purchased_at).toLocaleString() : new Date(p.created_at).toLocaleString()}</td>
-                          <td>${p.country || '—'}</td>
-                          <td><span class="badge ${p.status}">${p.status}</span></td>
-                          <td>${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}</td>
-                          <td><button class="btn btn-red btn-sm" onclick="deleteUserProxy('${p.id}')">Remove</button></td>
-                        </tr>`).join('')}
-                    </tbody>
-                  </table>`}
+                  ${u.proxies.length === 0
+                    ? '<p style="color:var(--text-muted);font-size:0.82rem;">No proxies purchased.</p>'
+                    : `<table class="mini-table">
+                        <thead>
+                          <tr>
+                            <th>Buyer Email</th>
+                            <th>M-Pesa Phone</th>
+                            <th>M-Pesa Code</th>
+                            <th>Payment</th>
+                            <th>Country</th>
+                            <th>Status</th>
+                            <th>Purchased At</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${u.proxies.map(p => `
+                            <tr>
+                              <td style="color:var(--green)">${p.buyer_email || '—'}</td>
+                              <td>${p.mpesa_phone || '—'}</td>
+                              <td style="color:var(--yellow);font-weight:700">${p.mpesa_code || '—'}</td>
+                              <td>${payBadge(p.payment_status)}</td>
+                              <td>${p.country || '—'}</td>
+                              <td><span class="badge ${p.status}">${p.status}</span></td>
+                              <td style="color:var(--text-muted);font-size:0.72rem">${new Date(p.purchased_at || p.created_at).toLocaleString()}</td>
+                              <td><button class="btn btn-red btn-sm" onclick="deleteUserProxy('${p.id}')">Remove</button></td>
+                            </tr>`).join('')}
+                        </tbody>
+                      </table>`}
                 </div>
+
                 <div id="exp-e-${u.id}" style="display:none;">
-                  ${u.emails.length === 0 ? '<p style="color:var(--text-muted);font-size:0.82rem;">No emails purchased.</p>' : `
-                  <table class="mini-table">
-                    <thead>
-                      <tr>
-                        <th>Buyer Email</th>
-                        <th>M-Pesa Phone</th>
-                        <th>M-Pesa Code</th>
-                        <th>Purchased At</th>
-                        <th>Email Account</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${u.emails.map(e => `
-                        <tr>
-                          <td style="color:var(--green)">${e.buyer_email || '—'}</td>
-                          <td>${e.mpesa_phone || '—'}</td>
-                          <td style="color:var(--yellow);font-weight:700">${e.mpesa_code || '—'}</td>
-                          <td style="color:var(--text-muted);font-size:0.72rem">${e.purchased_at ? new Date(e.purchased_at).toLocaleString() : new Date(e.created_at).toLocaleString()}</td>
-                          <td>${e.email}</td>
-                          <td><button class="btn btn-red btn-sm" onclick="deleteUserEmail('${e.id}')">Remove</button></td>
-                        </tr>`).join('')}
-                    </tbody>
-                  </table>`}
+                  ${u.emails.length === 0
+                    ? '<p style="color:var(--text-muted);font-size:0.82rem;">No emails purchased.</p>'
+                    : `<table class="mini-table">
+                        <thead>
+                          <tr>
+                            <th>Buyer Email</th>
+                            <th>M-Pesa Phone</th>
+                            <th>M-Pesa Code</th>
+                            <th>Payment</th>
+                            <th>Email Account</th>
+                            <th>Purchased At</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${u.emails.map(e => `
+                            <tr>
+                              <td style="color:var(--green)">${e.buyer_email || '—'}</td>
+                              <td>${e.mpesa_phone || '—'}</td>
+                              <td style="color:var(--yellow);font-weight:700">${e.mpesa_code || '—'}</td>
+                              <td>${payBadge(e.payment_status)}</td>
+                              <td>${e.email}</td>
+                              <td style="color:var(--text-muted);font-size:0.72rem">${new Date(e.purchased_at || e.created_at).toLocaleString()}</td>
+                              <td><button class="btn btn-red btn-sm" onclick="deleteUserEmail('${e.id}')">Remove</button></td>
+                            </tr>`).join('')}
+                        </tbody>
+                      </table>`}
                 </div>
               </div>
             </td>
@@ -158,22 +178,18 @@ function renderUsers(users) {
     </table>`;
 }
 
-// ── RENDER ALL PURCHASES ─────────────────────────────────────
+// ── RENDER ALL PURCHASES ──────────────────────────────────────
 function renderPurchases(proxies, emails) {
   const wrap = document.getElementById('purchases-wrap');
   if (!wrap) return;
 
-  const allPurchases = [
+  const all = [
     ...proxies.map(p => ({ ...p, _type: 'Proxy' })),
     ...emails.map(e => ({ ...e, _type: 'Email' }))
-  ].sort((a, b) => {
-    const dateA = new Date(a.purchased_at || a.created_at);
-    const dateB = new Date(b.purchased_at || b.created_at);
-    return dateB - dateA;
-  });
+  ].sort((a, b) => new Date(b.purchased_at || b.created_at) - new Date(a.purchased_at || a.created_at));
 
-  if (!allPurchases.length) {
-    wrap.innerHTML = '<table class="data-table"><tbody><tr><td class="empty-cell" colspan="6">No purchases yet.</td></tr></tbody></table>';
+  if (!all.length) {
+    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="7">No purchases yet.</td></tr></tbody></table>`;
     return;
   }
 
@@ -186,19 +202,24 @@ function renderPurchases(proxies, emails) {
           <th>Item</th>
           <th>M-Pesa Phone</th>
           <th>M-Pesa Code</th>
+          <th>Payment</th>
           <th>Purchased At</th>
         </tr>
       </thead>
       <tbody>
-        ${allPurchases.map(p => `
+        ${all.map(p => `
           <tr>
             <td style="color:var(--green);font-family:'DM Mono',monospace;font-size:0.8rem">${p.buyer_email || '—'}</td>
             <td>
-              <span class="badge ${p._type === 'Proxy' ? 'active' : ''}" style="${p._type === 'Email' ? 'background:var(--yellow-glow);color:var(--yellow);border:1px solid rgba(234,179,8,0.3)' : ''}">${p._type}</span>
+              <span class="badge ${p._type === 'Proxy' ? 'active' : ''}"
+                style="${p._type === 'Email' ? 'background:var(--yellow-glow);color:var(--yellow);border:1px solid rgba(234,179,8,0.3)' : ''}">
+                ${p._type}
+              </span>
             </td>
             <td class="mono">${p._type === 'Proxy' ? (p.country || p.host || '—') : (p.email || '—')}</td>
             <td class="mono">${p.mpesa_phone || '—'}</td>
             <td style="color:var(--yellow);font-family:'DM Mono',monospace;font-weight:700">${p.mpesa_code || '—'}</td>
+            <td>${payBadge(p.payment_status)}</td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.purchased_at || p.created_at).toLocaleString()}</td>
           </tr>`).join('')}
       </tbody>
@@ -209,7 +230,7 @@ function renderPurchases(proxies, emails) {
 function renderProxyListings(listings) {
   const wrap = document.getElementById('proxy-listings-wrap');
   if (!listings.length) {
-    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="7">No proxy listings yet. Add one above.</td></tr></tbody></table>`;
+    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="7">No proxy listings yet.</td></tr></tbody></table>`;
     return;
   }
   wrap.innerHTML = `
@@ -224,9 +245,7 @@ function renderProxyListings(listings) {
             <td class="mono" style="color:var(--green)">KES ${p.price_per_day}</td>
             <td><span class="badge ${p.available ? 'active' : 'expired'}">${p.available ? 'Available' : 'Sold'}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.created_at).toLocaleDateString()}</td>
-            <td>
-              ${p.available ? `<button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}
-            </td>
+            <td>${p.available ? `<button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}</td>
           </tr>`).join('')}
       </tbody>
     </table>`;
@@ -236,7 +255,7 @@ function renderProxyListings(listings) {
 function renderEmailListings(listings) {
   const wrap = document.getElementById('email-listings-wrap');
   if (!listings.length) {
-    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="5">No email listings yet. Add one above.</td></tr></tbody></table>`;
+    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="5">No email listings yet.</td></tr></tbody></table>`;
     return;
   }
   wrap.innerHTML = `
@@ -249,9 +268,7 @@ function renderEmailListings(listings) {
             <td class="mono" style="color:var(--green)">KES ${e.price}</td>
             <td><span class="badge ${e.available ? 'active' : 'expired'}">${e.available ? 'Available' : 'Sold'}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(e.created_at).toLocaleDateString()}</td>
-            <td>
-              ${e.available ? `<button class="btn btn-red btn-sm" onclick="removeEmailListing('${e.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}
-            </td>
+            <td>${e.available ? `<button class="btn btn-red btn-sm" onclick="removeEmailListing('${e.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}</td>
           </tr>`).join('')}
       </tbody>
     </table>`;
@@ -262,7 +279,7 @@ function populateDropdowns() {}
 
 // ── SECTION SWITCH ────────────────────────────────────────────
 function showSection(name, btn) {
-  ['users','purchases','proxy-listings','email-listings'].forEach(s => {
+  ['users', 'purchases', 'proxy-listings', 'email-listings'].forEach(s => {
     document.getElementById(`section-${s}`).style.display = s === name ? 'block' : 'none';
   });
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
@@ -290,12 +307,12 @@ function filterUsers() {
 
 // ── ADD PROXY LISTING ─────────────────────────────────────────
 async function addProxyListing() {
-  const country     = document.getElementById('pl-country').value.trim();
-  const flag        = document.getElementById('pl-flag').value.trim();
-  const host        = document.getElementById('pl-host').value.trim();
-  const port        = parseInt(document.getElementById('pl-port').value);
-  const username    = document.getElementById('pl-username').value.trim();
-  const password    = document.getElementById('pl-password').value;
+  const country       = document.getElementById('pl-country').value.trim();
+  const flag          = document.getElementById('pl-flag').value.trim();
+  const host          = document.getElementById('pl-host').value.trim();
+  const port          = parseInt(document.getElementById('pl-port').value);
+  const username      = document.getElementById('pl-username').value.trim();
+  const password      = document.getElementById('pl-password').value;
   const price_per_day = parseInt(document.getElementById('pl-price').value) || 100;
 
   if (!country || !host || !port) { showToast('Country, Host and Port are required', 'error'); return; }
@@ -348,7 +365,7 @@ async function removeEmailListing(id) {
   await loadAll();
 }
 
-// ── DELETE USER PROXY / EMAIL ──────────────────────────────────
+// ── DELETE USER ITEMS ─────────────────────────────────────────
 async function deleteUserProxy(id) {
   if (!confirm('Remove this proxy from user?')) return;
   await db.from('proxies').delete().eq('id', id);

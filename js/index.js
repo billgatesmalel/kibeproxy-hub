@@ -29,6 +29,18 @@ function switchTab(btn, tab) {
   });
 }
 
+// ── PAYMENT STATUS BADGE ──────────────────────────────────────
+function paymentBadge(status) {
+  if (!status || status === 'success') {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-dim);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">✓ Paid</span>';
+  } else if (status === 'pending') {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(234,179,8,0.1);color:#eab308;border:1px solid rgba(234,179,8,0.3);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">⏳ Pending</span>';
+  } else if (status === 'failed') {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">✕ Failed</span>';
+  }
+  return '';
+}
+
 // ── RENDER PROXIES ────────────────────────────────────────────
 function renderProxies(data, panelId, status) {
   const panel = document.getElementById(panelId);
@@ -49,7 +61,16 @@ function renderProxies(data, panelId, status) {
   panel.innerHTML = `
     <table class="data-table">
       <thead>
-        <tr><th>Country</th><th>Host</th><th>Port</th><th>Username</th><th>Password</th><th>Status</th><th>Expires</th></tr>
+        <tr>
+          <th>Country</th>
+          <th>Host</th>
+          <th>Port</th>
+          <th>Username</th>
+          <th>Password</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Expires</th>
+        </tr>
       </thead>
       <tbody>
         ${data.map(p => `
@@ -63,6 +84,7 @@ function renderProxies(data, panelId, status) {
               <button class="show-btn" onclick="togglePass('pass-${p.id}')">Show</button>
             </td>
             <td><span class="badge ${p.status}">${p.status}</span></td>
+            <td>${paymentBadge(p.payment_status)}</td>
             <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
               ${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}
             </td>
@@ -72,8 +94,8 @@ function renderProxies(data, panelId, status) {
 }
 
 function togglePass(id) {
-  const el = document.getElementById(id);
-  if (!el) { console.warn('Element not found:', id); return; }
+  const el  = document.getElementById(id);
+  if (!el) return;
   const btn  = el.nextElementSibling;
   const pass = el.getAttribute('data-pass');
   if (el.textContent.includes('•')) {
@@ -104,7 +126,7 @@ function renderEmails(data) {
   panel.innerHTML = `
     <table class="data-table">
       <thead>
-        <tr><th>Email</th><th>Password</th><th>Purchased</th></tr>
+        <tr><th>Email</th><th>Password</th><th>Payment</th><th>Purchased</th></tr>
       </thead>
       <tbody>
         ${data.map(e => `
@@ -114,8 +136,9 @@ function renderEmails(data) {
               <span class="pass-hidden" id="epass-${e.id}" data-pass="${(e.password||'').replace(/"/g,'&quot;')}">••••••••</span>
               <button class="show-btn" onclick="togglePass('epass-${e.id}')">Show</button>
             </td>
+            <td>${paymentBadge(e.payment_status)}</td>
             <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
-              ${new Date(e.created_at).toLocaleDateString()}
+              ${new Date(e.purchased_at || e.created_at).toLocaleDateString()}
             </td>
           </tr>`).join('')}
       </tbody>

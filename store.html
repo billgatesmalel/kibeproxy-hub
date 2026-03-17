@@ -126,7 +126,7 @@ footer {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
           Telegram
         </a>
-        <a href="mailto:kibetcreations2025@outlook.com" target="_blank">
+        <a href="/cdn-cgi/l/email-protection#f59e9c97908196879094819c9a9b86c7c5c7c0b59a8081999a9a9edb969a98" target="_blank">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           Email Us
         </a>
@@ -204,17 +204,16 @@ footer {
     <!-- MPESA PAYMENT VIEW -->
     <div id="mpesa-view" style="display:none;">
 
-      <!-- FORM VIEW -->
+      <!-- FORM -->
       <div id="mpesa-form-view">
         <div style="text-align:center;margin-bottom:1.5rem;">
           <div style="font-size:3rem;margin-bottom:0.5rem;">📱</div>
           <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.25rem;">Pay with M-Pesa</div>
-          <div style="font-size:0.82rem;color:var(--text-muted);">Enter your M-Pesa number to receive a payment prompt</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);">Enter your number to receive a payment prompt</div>
         </div>
-
         <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
           <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.4rem;">
-            <span style="color:var(--text-muted);">Amount to pay</span>
+            <span style="color:var(--text-muted);">Amount</span>
             <span style="font-family:DM Mono,monospace;font-weight:700;color:var(--green);font-size:1.1rem;" id="mpesa-amount">KES 0</span>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:0.82rem;">
@@ -222,56 +221,93 @@ footer {
             <span style="font-family:DM Mono,monospace;color:var(--text-secondary);">KibeProxy Hub</span>
           </div>
         </div>
-
         <div class="form-group">
-          <label class="form-label">Your M-Pesa Phone Number</label>
+          <label class="form-label">M-Pesa Phone Number</label>
           <div style="position:relative;">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:DM Mono,monospace;font-size:0.85rem;color:var(--text-muted);">+254</span>
-            <input class="form-input" id="mpesa-phone" type="tel" placeholder="7XXXXXXXX"
-              style="padding-left:52px;" maxlength="9" />
+            <input class="form-input" id="mpesa-phone" type="tel" placeholder="7XXXXXXXX" style="padding-left:52px;" maxlength="9" />
           </div>
           <div style="font-size:0.72rem;color:var(--text-muted);margin-top:5px;">e.g. 0712345678 → enter 712345678</div>
         </div>
-
         <div id="mpesa-error" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:1rem;"></div>
-
         <button class="btn-submit" id="mpesa-pay-btn" onclick="initiateMpesaPayment()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;">
           📱 Send M-Pesa Prompt
         </button>
-
         <div style="text-align:center;margin-top:1rem;">
           <button onclick="backToOrder()" style="background:none;border:none;color:var(--text-muted);font-size:0.78rem;cursor:pointer;font-family:Syne,sans-serif;">← Back to order</button>
         </div>
       </div>
 
-      <!-- WAITING VIEW -->
+      <!-- WAITING -->
       <div id="mpesa-wait-view" style="display:none;text-align:center;padding:1rem 0;">
         <div style="font-size:3rem;margin-bottom:1rem;animation:pulse-icon 1.5s ease-in-out infinite;">📲</div>
         <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.5rem;">Check Your Phone!</div>
         <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6;">
-          An M-Pesa prompt has been sent to your phone.<br>
+          An M-Pesa prompt has been sent.<br>
           <strong style="color:var(--text-primary);">Enter your M-Pesa PIN</strong> to complete payment.
         </div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);font-size:0.82rem;">
-          <div class="spinner"></div> Waiting for payment confirmation...
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);font-size:0.82rem;margin-bottom:1.5rem;">
+          <div class="spinner"></div> Waiting for confirmation...
         </div>
-        <div style="margin-top:1.5rem;font-size:0.75rem;color:var(--text-muted);">
-          Didn't receive the prompt?
+        <div style="font-size:0.75rem;color:var(--text-muted);">
+          Prompt not received?
           <button onclick="resetMpesaForm()" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:0.75rem;font-family:Syne,sans-serif;font-weight:600;">Try again</button>
         </div>
       </div>
 
-      <!-- SUCCESS VIEW -->
+      <!-- SUCCESS -->
       <div id="mpesa-success-view" style="display:none;text-align:center;padding:1rem 0;">
         <div style="width:64px;height:64px;background:var(--green-glow);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--green);">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.4rem;">Payment Successful! 🎉</div>
-        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">M-Pesa Receipt: <strong style="color:var(--green);font-family:DM Mono,monospace;" id="mpesa-receipt"></strong></div>
-        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Your order is being activated...</div>
+        <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.4rem;color:var(--green);">✅ Payment Successful!</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">
+          M-Pesa Receipt: <strong style="color:var(--green);font-family:DM Mono,monospace;" id="mpesa-receipt"></strong>
+        </div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Your item is now in your dashboard.</div>
         <button class="btn-submit" style="width:100%;justify-content:center;display:flex;" onclick="goToDashboard()">
           Go to Dashboard →
         </button>
+      </div>
+
+      <!-- FAILED -->
+      <div id="mpesa-failed-view" style="display:none;text-align:center;padding:1rem 0;">
+        <div style="width:64px;height:64px;background:rgba(239,68,68,0.1);border:2px solid rgba(239,68,68,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#ef4444;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;color:#ef4444;">❌ Payment Failed</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;" id="mpesa-fail-reason">Payment was cancelled or failed.</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.5rem;">
+          Need help? Contact us on
+          <a href="https://wa.me/254724031319" target="_blank" style="color:#25D366;font-weight:600;">WhatsApp</a> or
+          <a href="https://t.me/kibeproxy" target="_blank" style="color:#229ED9;font-weight:600;">Telegram</a>
+        </div>
+        <button class="btn-submit" onclick="resetMpesaForm()" style="width:100%;justify-content:center;display:flex;background:var(--border-light);color:var(--text-primary);">
+          Try Again
+        </button>
+      </div>
+
+      <!-- PENDING (STK not received) -->
+      <div id="mpesa-pending-view" style="display:none;text-align:center;padding:1rem 0;">
+        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;color:var(--yellow);">⚠️ Payment Pending</div>
+        <div style="font-size:0.84rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.7;">
+          We didn't receive confirmation yet.<br>
+          <strong style="color:var(--text-primary);">If you already entered your PIN</strong>, the payment may still be processing.
+        </div>
+        <div style="background:var(--yellow-glow);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:12px 16px;margin-bottom:1.5rem;font-size:0.8rem;color:var(--yellow);text-align:left;">
+          📞 Please contact support with your M-Pesa message to confirm:<br>
+          <a href="https://wa.me/254724031319" target="_blank" style="color:#25D366;font-weight:700;">WhatsApp: +254724031319</a> |
+          <a href="https://t.me/kibeproxy" target="_blank" style="color:#229ED9;font-weight:700;">Telegram: @kibeproxy</a>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button onclick="resetMpesaForm()" style="flex:1;background:var(--border-light);color:var(--text-primary);border:none;padding:10px;border-radius:8px;font-family:Syne,sans-serif;font-weight:600;cursor:pointer;">
+            Try Again
+          </button>
+          <button onclick="closeModal('order')" style="flex:1;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);padding:10px;border-radius:8px;font-family:Syne,sans-serif;font-weight:600;cursor:pointer;">
+            Close
+          </button>
+        </div>
       </div>
 
     </div>
@@ -304,7 +340,7 @@ footer {
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/store.js"></script>
 
@@ -361,12 +397,4 @@ footer {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
         </svg>
-        Get Your Website Live, Fast! &nbsp;📞 +254799289214 &nbsp;|&nbsp; ✉️ kibetcreations2025@outlook.com
-      </a>
-    </div>
-
-  </div>
-</footer>
-
-</body>
-</html>
+        Get
