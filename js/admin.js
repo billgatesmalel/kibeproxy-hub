@@ -262,7 +262,7 @@ function populateDropdowns() {}
 
 // ── SECTION SWITCH ────────────────────────────────────────────
 function showSection(name, btn) {
-  ['users','proxy-listings','email-listings'].forEach(s => {
+  ['users','purchases','proxy-listings','email-listings'].forEach(s => {
     document.getElementById(`section-${s}`).style.display = s === name ? 'block' : 'none';
   });
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
