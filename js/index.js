@@ -1,243 +1,149 @@
-// ── KibeProxy Hub M-Pesa STK Push API ─────────────────────────
-require('dotenv').config();
-const express = require('express');
-const axios   = require('axios');
-const cors    = require('cors');
+// ── DASHBOARD LOGIC ───────────────────────────────────────────
+let currentUserId = null;
 
-const app = express();
-app.use(express.json());
-app.use(cors({ origin: '*' }));
+async function initAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'auth.html'; return; }
 
-// ── CONFIG ────────────────────────────────────────────────────
-const {
-  MPESA_CONSUMER_KEY,
-  MPESA_CONSUMER_SECRET,
-  MPESA_SHORTCODE,
-  MPESA_PASSKEY,
-  MPESA_PHONE,
-  CALLBACK_URL,
-  MPESA_ENV
-} = process.env;
+  const user     = session.user;
+  currentUserId  = user.id;
+  const name     = user.user_metadata?.full_name || user.email.split('@')[0];
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-const IS_SANDBOX = MPESA_ENV === 'sandbox';
+  document.getElementById('user-name').textContent     = name;
+  document.getElementById('user-initials').textContent = initials;
 
-const BASE_URL = IS_SANDBOX
-  ? 'https://sandbox.safaricom.co.ke'
-  : 'https://api.safaricom.co.ke';
-
-// In-memory store for payment status (use a DB in production)
-const payments = {};
-
-// ── HELPERS ───────────────────────────────────────────────────
-
-// Get OAuth Token
-async function getToken() {
-  const credentials = Buffer.from(
-    `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`
-  ).toString('base64');
-
-  const res = await axios.get(
-    `${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
-    { headers: { Authorization: `Basic ${credentials}` } }
-  );
-  return res.data.access_token;
-}
-
-// Generate Timestamp
-function getTimestamp() {
-  const now = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  return (
-    now.getFullYear() +
-    pad(now.getMonth() + 1) +
-    pad(now.getDate()) +
-    pad(now.getHours()) +
-    pad(now.getMinutes()) +
-    pad(now.getSeconds())
-  );
-}
-
-// Generate Password
-function getPassword(timestamp) {
-  const str = `${MPESA_SHORTCODE}${MPESA_PASSKEY}${timestamp}`;
-  return Buffer.from(str).toString('base64');
-}
-
-// Format Phone Number (ensure 254XXXXXXXXX format)
-function formatPhone(phone) {
-  phone = String(phone).replace(/\s/g, '');
-  if (phone.startsWith('0'))   return '254' + phone.slice(1);
-  if (phone.startsWith('+'))   return phone.slice(1);
-  if (!phone.startsWith('254')) return '254' + phone;
-  return phone;
-}
-
-// ── ROUTES ────────────────────────────────────────────────────
-
-// Health check
-app.get('/', (req, res) => {
-  res.json({ status: 'KibeProxy M-Pesa API is running ✅', env: MPESA_ENV });
-});
-
-// ── STK PUSH ──────────────────────────────────────────────────
-app.post('/api/stkpush', async (req, res) => {
-  try {
-    const { phone, amount, orderId, description } = req.body;
-
-    if (!phone || !amount || !orderId) {
-      return res.status(400).json({ error: 'phone, amount and orderId are required' });
-    }
-
-    const formattedPhone = formatPhone(phone);
-    const timestamp      = getTimestamp();
-    const password       = getPassword(timestamp);
-    const token          = await getToken();
-
-    const payload = {
-      BusinessShortCode: MPESA_SHORTCODE,
-      Password:          password,
-      Timestamp:         timestamp,
-      TransactionType:   'CustomerPayBillOnline',
-      Amount:            Math.ceil(amount),
-      PartyA:            formattedPhone,
-      PartyB:            MPESA_SHORTCODE,
-      PhoneNumber:       formattedPhone,
-      CallBackURL:       CALLBACK_URL,
-      AccountReference:  `KibeProxy-${orderId}`,
-      TransactionDesc:   description || 'KibeProxy Hub Payment',
-    };
-
-    const response = await axios.post(
-      `${BASE_URL}/mpesa/stkpush/v1/processrequest`,
-      payload,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    const { CheckoutRequestID, ResponseCode, CustomerMessage } = response.data;
-
-    // Store payment as pending
-    payments[CheckoutRequestID] = {
-      orderId,
-      phone: formattedPhone,
-      amount,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    res.json({
-      success:           true,
-      checkoutRequestId: CheckoutRequestID,
-      responseCode:      ResponseCode,
-      message:           CustomerMessage,
-    });
-
-  } catch (err) {
-    console.error('STK Push error:', err.response?.data || err.message);
-    res.status(500).json({
-      error:   'STK Push failed',
-      details: err.response?.data || err.message,
-    });
-  }
-});
-
-// ── CALLBACK (Safaricom calls this after user pays) ────────────
-app.post('/api/callback', (req, res) => {
-  try {
-    const body     = req.body;
-    const stk      = body?.Body?.stkCallback;
-    const checkId  = stk?.CheckoutRequestID;
-    const code     = stk?.ResultCode;
-
-    console.log('M-Pesa Callback received:', JSON.stringify(body, null, 2));
-
-    if (checkId && payments[checkId]) {
-      if (code === 0) {
-        // Payment successful
-        const meta = stk.CallbackMetadata?.Item || [];
-        const get  = name => meta.find(i => i.Name === name)?.Value;
-
-        payments[checkId] = {
-          ...payments[checkId],
-          status:      'success',
-          mpesaCode:   get('MpesaReceiptNumber'),
-          amount:      get('Amount'),
-          phone:       get('PhoneNumber'),
-          completedAt: new Date().toISOString(),
-        };
-      } else {
-        // Payment failed/cancelled
-        payments[checkId] = {
-          ...payments[checkId],
-          status:    'failed',
-          reason:    stk?.ResultDesc,
-          failedAt:  new Date().toISOString(),
-        };
-      }
-    }
-
-    res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
-
-  } catch (err) {
-    console.error('Callback error:', err.message);
-    res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
-  }
-});
-
-// ── CHECK PAYMENT STATUS ──────────────────────────────────────
-app.get('/api/status/:checkoutRequestId', (req, res) => {
-  const { checkoutRequestId } = req.params;
-  const payment = payments[checkoutRequestId];
-
-  if (!payment) {
-    return res.json({ status: 'not_found' });
+  if (user.email === ADMIN_EMAIL) {
+    document.getElementById('admin-link').style.display = 'inline-flex';
   }
 
-  res.json(payment);
-});
+  loadAll();
+}
 
-// ── QUERY STK STATUS (from Safaricom directly) ────────────────
-app.post('/api/query', async (req, res) => {
-  try {
-    const { checkoutRequestId } = req.body;
-    const timestamp = getTimestamp();
-    const password  = getPassword(timestamp);
-    const token     = await getToken();
+// ── TAB SWITCH ────────────────────────────────────────────────
+function switchTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['active', 'expired', 'emails'].forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+}
 
-    const response = await axios.post(
-      `${BASE_URL}/mpesa/stkpushquery/v1/query`,
-      {
-        BusinessShortCode: MPESA_SHORTCODE,
-        Password:          password,
-        Timestamp:         timestamp,
-        CheckoutRequestID: checkoutRequestId,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    const { ResultCode, ResultDesc } = response.data;
-
-    // Update local status
-    if (payments[checkoutRequestId]) {
-      payments[checkoutRequestId].status =
-        ResultCode === '0' ? 'success' : 'failed';
-    }
-
-    res.json({
-      resultCode: ResultCode,
-      resultDesc: ResultDesc,
-      status: ResultCode === '0' ? 'success' : 'failed',
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.response?.data || err.message });
+// ── RENDER PROXIES ────────────────────────────────────────────
+function renderProxies(data, panelId, status) {
+  const panel = document.getElementById(panelId);
+  if (!data || data.length === 0) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 64 64" fill="none">
+          <path d="M32 8L56 20V44L32 56L8 44V20L32 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M8 20L32 32L56 20" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M32 32V56" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <p class="empty-title">No ${status} proxies</p>
+        <p class="empty-sub">${status === 'active' ? 'Visit the store to buy a proxy' : 'Expired proxies will appear here'}</p>
+        ${status === 'active' ? '<a href="store.html" class="buy-link-btn">🛒 Go to Store</a>' : ''}
+      </div>`;
+    return;
   }
-});
+  panel.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr><th>Country</th><th>Host</th><th>Port</th><th>Username</th><th>Password</th><th>Status</th><th>Expires</th></tr>
+      </thead>
+      <tbody>
+        ${data.map(p => `
+          <tr>
+            <td>${p.country || '—'}</td>
+            <td class="mono">${p.host || '—'}</td>
+            <td class="mono">${p.port || '—'}</td>
+            <td class="mono">${p.username || '—'}</td>
+            <td class="mono">
+              <span class="pass-hidden" id="pass-${p.id}" data-pass="${(p.password||'').replace(/"/g,'&quot;')}">••••••••</span>
+              <button class="show-btn" onclick="togglePass('pass-${p.id}')">Show</button>
+            </td>
+            <td><span class="badge ${p.status}">${p.status}</span></td>
+            <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
+              ${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
 
-// ── START SERVER ──────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ KibeProxy M-Pesa API running on port ${PORT}`);
-  console.log(`📱 Environment: ${MPESA_ENV}`);
-});
+function togglePass(id) {
+  const el = document.getElementById(id);
+  if (!el) { console.warn('Element not found:', id); return; }
+  const btn  = el.nextElementSibling;
+  const pass = el.getAttribute('data-pass');
+  if (el.textContent.includes('•')) {
+    el.textContent  = (pass && pass.trim()) ? pass : '(empty)';
+    btn.textContent = 'Hide';
+  } else {
+    el.textContent  = '••••••••';
+    btn.textContent = 'Show';
+  }
+}
 
-module.exports = app;
+// ── RENDER EMAILS ─────────────────────────────────────────────
+function renderEmails(data) {
+  const panel = document.getElementById('panel-emails');
+  if (!data || data.length === 0) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="16" width="48" height="32" rx="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 22L32 38L56 22" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <p class="empty-title">No emails</p>
+        <p class="empty-sub">Visit the store to buy an email</p>
+        <a href="store.html" class="buy-link-btn">🛒 Go to Store</a>
+      </div>`;
+    return;
+  }
+  panel.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr><th>Email</th><th>Password</th><th>Purchased</th></tr>
+      </thead>
+      <tbody>
+        ${data.map(e => `
+          <tr>
+            <td class="mono">${e.email}</td>
+            <td class="mono">
+              <span class="pass-hidden" id="epass-${e.id}" data-pass="${(e.password||'').replace(/"/g,'&quot;')}">••••••••</span>
+              <button class="show-btn" onclick="togglePass('epass-${e.id}')">Show</button>
+            </td>
+            <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
+              ${new Date(e.created_at).toLocaleDateString()}
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── LOAD ALL ──────────────────────────────────────────────────
+async function loadAll() {
+  const [{ data: proxies }, { data: emails }] = await Promise.all([
+    db.from('proxies').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
+    db.from('emails').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false })
+  ]);
+
+  const active    = (proxies || []).filter(p => p.status === 'active');
+  const expired   = (proxies || []).filter(p => p.status === 'expired');
+  const emailList = emails || [];
+
+  document.getElementById('stat-active').textContent  = active.length;
+  document.getElementById('stat-expired').textContent = expired.length;
+  document.getElementById('stat-emails').textContent  = emailList.length;
+
+  document.getElementById('badge-active').textContent  = active.length;
+  document.getElementById('badge-expired').textContent = expired.length;
+  document.getElementById('badge-emails').textContent  = emailList.length;
+
+  renderProxies(active,  'panel-active',  'active');
+  renderProxies(expired, 'panel-expired', 'expired');
+  renderEmails(emailList);
+}
+
+initAuth();
