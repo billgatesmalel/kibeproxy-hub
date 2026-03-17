@@ -9,134 +9,88 @@
   <link rel="stylesheet" href="css/store.css" />
 
 <style>
+</style>
+
+<style>
 /* ── FOOTER ── */
 footer {
   background: #080808;
   border-top: 1px solid #1e1e1e;
   margin-top: 4rem;
 }
-
 .footer-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 2.5rem 1.5rem;
 }
-
-/* TOP */
 .footer-top {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 3rem;
   margin-bottom: 2rem;
 }
-
 .footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex; align-items: center; gap: 10px;
   margin-bottom: 0.75rem;
 }
-
-.footer-logo .logo-icon {
+.footer-logo .f-icon {
   width: 30px; height: 30px;
   border: 1.5px solid #22c55e;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  position: relative;
 }
-
-.footer-logo .logo-icon svg { width: 13px; height: 13px; }
-
-.footer-logo-text {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #f0f0f0;
-}
-
-.footer-tagline {
-  font-size: 0.82rem;
-  color: #555;
-  font-style: italic;
-  line-height: 1.5;
-}
-
+.footer-logo .f-icon svg { width: 13px; height: 13px; }
+.footer-logo-text { font-size: 0.95rem; font-weight: 700; color: #f0f0f0; }
+.footer-tagline { font-size: 0.82rem; color: #555; font-style: italic; line-height: 1.5; }
 .footer-links {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
-
 .footer-col { display: flex; flex-direction: column; gap: 0.5rem; }
-
 .footer-col-title {
-  font-size: 0.72rem;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+  font-size: 0.72rem; color: #888;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  font-weight: 600; margin-bottom: 0.25rem;
 }
-
-.footer-col a,
-.footer-col span {
-  font-size: 0.82rem;
-  color: #555;
-  text-decoration: none;
-  transition: color 0.2s;
+.footer-col a, .footer-col span {
+  font-size: 0.82rem; color: #555;
+  text-decoration: none; transition: color 0.2s;
 }
-
 .footer-col a:hover { color: #22c55e; }
-
-/* DIVIDER */
 .footer-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, #2a2a2a 20%, #2a2a2a 80%, transparent);
   margin-bottom: 1.5rem;
 }
-
-/* BOTTOM */
 .footer-bottom {
-  display: flex;
-  align-items: center;
+  display: flex; align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+  flex-wrap: wrap; gap: 1rem;
 }
-
 .footer-copy {
-  font-size: 0.78rem;
-  color: #444;
-  font-family: "DM Mono", monospace;
+  font-size: 0.78rem; color: #444;
+  font-family: 'DM Mono', monospace;
 }
-
 .footer-dev {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex; align-items: center; gap: 8px;
   background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.05));
   border: 1px solid rgba(34,197,94,0.25);
-  color: #22c55e;
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-decoration: none;
-  font-family: "Syne", sans-serif;
+  color: #22c55e; padding: 8px 18px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700;
+  text-decoration: none; font-family: 'Syne', sans-serif;
   transition: all 0.2s;
   animation: pulse-green 2.5s ease-in-out infinite;
 }
-
 .footer-dev:hover {
   background: rgba(34,197,94,0.2);
   border-color: #22c55e;
   transform: translateY(-1px);
 }
-
 @keyframes pulse-green {
   0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.15); }
-  50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  50%       { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
 }
-
 @media (max-width: 700px) {
   .footer-top { grid-template-columns: 1fr; gap: 2rem; }
   .footer-links { grid-template-columns: repeat(2,1fr); }
@@ -144,6 +98,7 @@ footer {
   .footer-inner { padding: 2rem 1.2rem 1.5rem; }
 }
 </style>
+
 </head>
 <body>
 
@@ -217,9 +172,11 @@ footer {
   </div>
 </main>
 
-<!-- ORDER MODAL -->
+<!-- ORDER + MPESA MODAL -->
 <div class="modal-overlay" id="modal-order">
   <div class="modal">
+
+    <!-- ORDER SUMMARY VIEW -->
     <div id="order-view">
       <div class="modal-title" style="display:flex;align-items:center;gap:10px;">
         <span id="o-icon">🌍</span>
@@ -232,19 +189,93 @@ footer {
         <div class="order-row"><span class="lbl">Expires</span><span class="val" id="o-expires">—</span></div>
         <div class="order-row"><span class="lbl">Total</span><span class="val total" id="o-total">—</span></div>
       </div>
-      <div class="payment-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Contact support on WhatsApp or Telegram to complete payment before confirming.
-      </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('order')">Cancel</button>
-        <button class="btn-submit" id="confirm-btn" onclick="confirmOrder()">✓ Confirm & Buy</button>
+        <button class="btn-submit" id="confirm-btn" onclick="goToMpesaPayment()">
+          Pay with M-Pesa 📱
+        </button>
       </div>
     </div>
 
+    <!-- MPESA PAYMENT VIEW -->
+    <div id="mpesa-view" style="display:none;">
+
+      <!-- FORM VIEW -->
+      <div id="mpesa-form-view">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <div style="font-size:3rem;margin-bottom:0.5rem;">📱</div>
+          <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.25rem;">Pay with M-Pesa</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);">Enter your M-Pesa number to receive a payment prompt</div>
+        </div>
+
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.4rem;">
+            <span style="color:var(--text-muted);">Amount to pay</span>
+            <span style="font-family:DM Mono,monospace;font-weight:700;color:var(--green);font-size:1.1rem;" id="mpesa-amount">KES 0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;">
+            <span style="color:var(--text-muted);">Business</span>
+            <span style="font-family:DM Mono,monospace;color:var(--text-secondary);">KibeProxy Hub</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your M-Pesa Phone Number</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:DM Mono,monospace;font-size:0.85rem;color:var(--text-muted);">+254</span>
+            <input class="form-input" id="mpesa-phone" type="tel" placeholder="7XXXXXXXX"
+              style="padding-left:52px;" maxlength="9" />
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:5px;">e.g. 0712345678 → enter 712345678</div>
+        </div>
+
+        <div id="mpesa-error" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:1rem;"></div>
+
+        <button class="btn-submit" id="mpesa-pay-btn" onclick="initiateMpesaPayment()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;">
+          📱 Send M-Pesa Prompt
+        </button>
+
+        <div style="text-align:center;margin-top:1rem;">
+          <button onclick="backToOrder()" style="background:none;border:none;color:var(--text-muted);font-size:0.78rem;cursor:pointer;font-family:Syne,sans-serif;">← Back to order</button>
+        </div>
+      </div>
+
+      <!-- WAITING VIEW -->
+      <div id="mpesa-wait-view" style="display:none;text-align:center;padding:1rem 0;">
+        <div style="font-size:3rem;margin-bottom:1rem;animation:pulse-icon 1.5s ease-in-out infinite;">📲</div>
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.5rem;">Check Your Phone!</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6;">
+          An M-Pesa prompt has been sent to your phone.<br>
+          <strong style="color:var(--text-primary);">Enter your M-Pesa PIN</strong> to complete payment.
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);font-size:0.82rem;">
+          <div class="spinner"></div> Waiting for payment confirmation...
+        </div>
+        <div style="margin-top:1.5rem;font-size:0.75rem;color:var(--text-muted);">
+          Didn't receive the prompt?
+          <button onclick="resetMpesaForm()" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:0.75rem;font-family:Syne,sans-serif;font-weight:600;">Try again</button>
+        </div>
+      </div>
+
+      <!-- SUCCESS VIEW -->
+      <div id="mpesa-success-view" style="display:none;text-align:center;padding:1rem 0;">
+        <div style="width:64px;height:64px;background:var(--green-glow);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--green);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.4rem;">Payment Successful! 🎉</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">M-Pesa Receipt: <strong style="color:var(--green);font-family:DM Mono,monospace;" id="mpesa-receipt"></strong></div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Your order is being activated...</div>
+        <button class="btn-submit" style="width:100%;justify-content:center;display:flex;" onclick="goToDashboard()">
+          Go to Dashboard →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- FINAL SUCCESS -->
     <div id="success-view" style="display:none;">
-      <div class="success-state">
-        <div class="success-icon">
+      <div style="text-align:center;padding:1rem 0;">
+        <div style="width:56px;height:56px;background:var(--green-glow);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--green);">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:0.5rem;">Order Confirmed!</h3>
@@ -259,13 +290,79 @@ footer {
         </button>
       </div>
     </div>
+
   </div>
 </div>
+
+<style>
+@keyframes pulse-icon { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+</style>
 
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/store.js"></script>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="f-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </div>
+          <span class="footer-logo-text">KibeProxy Hub</span>
+        </div>
+        <p class="footer-tagline">Code with purpose,<br>Build with passion</p>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title">Product</div>
+          <a href="store.html">Buy Proxies</a>
+          <a href="store.html">Buy Emails</a>
+          <a href="docs.html">Documentation</a>
+          <a href="index.html">Dashboard</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Support</div>
+          <a href="https://wa.me/254724031319" target="_blank">WhatsApp</a>
+          <a href="https://t.me/kibeproxy" target="_blank">Telegram</a>
+          <a href="https://chat.whatsapp.com/LyamprdeHHTAypgwwDUZuI" target="_blank">Community Group</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Countries</div>
+          <span>🇵🇭 Philippines</span>
+          <span>🇮🇳 India</span>
+          <span>🇦🇺 Australia</span>
+          <span>🇨🇦 Canada</span>
+          <span>🇺🇸 USA</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">Copyright &copy; 2026 Kibet Creations. All Rights Reserved.</span>
+      <a href="tel:+254799289214" class="footer-dev">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        Get Your Website Live, Fast! &nbsp;📞 +254799289214
+      </a>
+    </div>
+
+  </div>
+</footer>
+
 </body>
 </html>

@@ -14,6 +14,9 @@ const DURATIONS = [
 
 const selectedDays = {};
 
+// ── M-PESA API URL (update after deploying backend) ──────────
+const MPESA_API_URL = 'https://kibeproxy-mpesa.vercel.app';
+
 // ── AUTH GUARD ────────────────────────────────────────────────
 async function initStore() {
   const { data: { session } } = await db.auth.getSession();
@@ -223,6 +226,8 @@ function openProxyOrder(id) {
   btn.dataset.days    = days;
   btn.dataset.expires = new Date(Date.now() + days * 86400000).toISOString();
 
+  // Store for M-Pesa payment
+  pendingOrderData = { type: 'proxy', id, days, expires: btn.dataset.expires };
   showOrderView();
   openModal('order');
 }
@@ -243,6 +248,8 @@ function openEmailOrder(id) {
   btn.dataset.type = 'email';
   btn.dataset.id   = id;
 
+  // Store for M-Pesa payment
+  pendingOrderData = { type: 'email', id };
   showOrderView();
   openModal('order');
 }
@@ -320,6 +327,164 @@ async function confirmOrder() {
 function goToDashboard() {
   closeModal('order');
   window.location.href = 'index.html';
+}
+
+// ── MPESA NAVIGATION ─────────────────────────────────────────
+function goToMpesaPayment() {
+  const total = document.getElementById('o-total').textContent;
+  document.getElementById('mpesa-amount').textContent = total;
+  document.getElementById('order-view').style.display  = 'none';
+  document.getElementById('mpesa-view').style.display  = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  resetMpesaForm();
+}
+
+function backToOrder() {
+  document.getElementById('order-view').style.display  = 'block';
+  document.getElementById('mpesa-view').style.display  = 'none';
+}
+
+// ── MPESA PAYMENT ─────────────────────────────────────────────
+async function initiateMpesaPayment() {
+  const phone  = document.getElementById('mpesa-phone').value.trim();
+  const amount = document.getElementById('mpesa-amount').textContent.replace('KES ','');
+
+  if (!phone || phone.length < 9) {
+    showMpesaError('Please enter a valid phone number');
+    return;
+  }
+
+  const btn = document.getElementById('mpesa-pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-color:rgba(255,255,255,0.3);border-top-color:#fff"></div> Sending prompt...';
+
+  hideMpesaError();
+
+  try {
+    const res = await fetch(MPESA_API_URL + '/api/stkpush', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone:       phone,
+        amount:      parseInt(amount),
+        orderId:     Date.now().toString(),
+        description: 'KibeProxy Hub Payment',
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Show waiting screen
+      showMpesaWaiting(data.checkoutRequestId, phone, parseInt(amount));
+    } else {
+      showMpesaError(data.error || 'Payment initiation failed. Try again.');
+      btn.disabled = false;
+      btn.innerHTML = '📱 Send M-Pesa Prompt';
+    }
+
+  } catch (err) {
+    showMpesaError('Cannot connect to payment server. Please contact support.');
+    btn.disabled = false;
+    btn.innerHTML = '📱 Send M-Pesa Prompt';
+  }
+}
+
+function showMpesaWaiting(checkoutId, phone, amount) {
+  document.getElementById('mpesa-form-view').style.display  = 'none';
+  document.getElementById('mpesa-wait-view').style.display  = 'block';
+  document.getElementById('mpesa-success-view').style.display = 'none';
+
+  // Poll for payment status every 3 seconds
+  let attempts = 0;
+  const maxAttempts = 20; // 60 seconds total
+
+  const poll = setInterval(async () => {
+    attempts++;
+
+    try {
+      const res  = await fetch(MPESA_API_URL + '/api/status/' + checkoutId);
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        clearInterval(poll);
+        showMpesaSuccess(data.mpesaCode, amount);
+      } else if (data.status === 'failed') {
+        clearInterval(poll);
+        showMpesaError(data.reason || 'Payment was cancelled or failed.');
+        resetMpesaForm();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(poll);
+        showMpesaError('Payment timed out. If you paid, contact support.');
+        resetMpesaForm();
+      }
+    } catch (e) {
+      if (attempts >= maxAttempts) {
+        clearInterval(poll);
+        resetMpesaForm();
+      }
+    }
+  }, 3000);
+}
+
+async function showMpesaSuccess(mpesaCode, amount) {
+  document.getElementById('mpesa-form-view').style.display    = 'none';
+  document.getElementById('mpesa-wait-view').style.display    = 'none';
+  document.getElementById('mpesa-success-view').style.display = 'block';
+  document.getElementById('mpesa-receipt').textContent = mpesaCode || 'N/A';
+
+  // Now complete the order
+  await completePaidOrder();
+}
+
+function resetMpesaForm() {
+  document.getElementById('mpesa-form-view').style.display    = 'block';
+  document.getElementById('mpesa-wait-view').style.display    = 'none';
+  document.getElementById('mpesa-success-view').style.display = 'none';
+  const btn = document.getElementById('mpesa-pay-btn');
+  btn.disabled = false;
+  btn.innerHTML = '📱 Send M-Pesa Prompt';
+}
+
+function showMpesaError(msg) {
+  const el = document.getElementById('mpesa-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideMpesaError() {
+  document.getElementById('mpesa-error').style.display = 'none';
+}
+
+// Store pending order data
+let pendingOrderData = null;
+
+async function completePaidOrder() {
+  if (!pendingOrderData) return;
+
+  const { type, id, days, expires } = pendingOrderData;
+
+  if (type === 'proxy') {
+    const listing = proxyListings.find(p => p.id === id);
+    await db.from('proxies').insert([{
+      user_id: currentUserId,
+      host: listing.host, port: listing.port,
+      username: listing.username || '',
+      password: listing.password || '',
+      status: 'active', expires_at: expires,
+    }]);
+    await db.from('proxy_listings').update({ available: false }).eq('id', id);
+  } else {
+    const listing = emailListings.find(e => e.id === id);
+    await db.from('emails').insert([{
+      user_id: currentUserId,
+      email: listing.email, password: listing.password || '',
+    }]);
+    await db.from('email_listings').update({ available: false }).eq('id', id);
+  }
+
+  pendingOrderData = null;
+  loadListings();
 }
 
 initStore();
