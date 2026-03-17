@@ -30,9 +30,9 @@ async function initStore() {
   document.getElementById('user-name').textContent     = name;
   document.getElementById('user-initials').textContent = initials;
 
-  if (session.user.email === ADMIN_EMAIL) {
-    document.getElementById('admin-link').style.display = 'inline-flex';
-  }
+  // Show admin link for all users
+  const adminLink = document.getElementById('admin-link');
+  if (adminLink) adminLink.style.display = 'inline-flex';
 
   loadListings();
 }

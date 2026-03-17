@@ -10,10 +10,7 @@ async function initAdmin() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
 
-  if (session.user.email !== ADMIN_EMAIL) {
-    document.getElementById('access-denied').classList.add('show');
-    return;
-  }
+  // All logged-in users can access admin
 
   const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
