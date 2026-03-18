@@ -377,7 +377,14 @@ function getCountryFlag(countryName) {
   return countryFlagMap[normalized] || '';
 }
 
-// ── ADD PROXY LISTING ─────────────────────────────────────────
+// ── UPDATE FLAG WHEN COUNTRY SELECTED ─────────────────────────
+function updateFlagFromCountry() {
+  const country = document.getElementById('pl-country').value;
+  const flag = getCountryFlag(country);
+  document.getElementById('pl-flag').value = flag;
+}
+
+// ── ADD PROXY LISTING ─────────���───────────────────────────────
 async function addProxyListing() {
   const country       = document.getElementById('pl-country').value.trim();
   let flag            = document.getElementById('pl-flag').value.trim();
