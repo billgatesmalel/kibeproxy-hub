@@ -53,14 +53,49 @@ function setLoading(btnId, loading, defaultText) {
     : defaultText;
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────
+// ── LOGIN (supports email OR username) ────────────────────────
 async function handleLogin() {
-  const email    = document.getElementById('login-email').value.trim();
+  let identifier = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
 
-  if (!email || !password) { showAlert('Please fill in all fields'); return; }
+  if (!identifier || !password) { showAlert('Please fill in all fields'); return; }
 
   setLoading('login-btn', true);
+
+  // If identifier starts with @ or has no @, treat as username
+  let email = identifier;
+  if (!identifier.includes('@')) {
+    const username = identifier.replace(/^@/, '').toLowerCase();
+    const { data: uRow } = await db
+      .from('usernames')
+      .select('user_id')
+      .eq('username', username)
+      .single();
+
+    if (!uRow) {
+      setLoading('login-btn', false, 'Login to Dashboard');
+      showAlert('No account found with username @' + username);
+      return;
+    }
+
+    // Get email from auth using user_id via proxies/emails table
+    // We store email in user metadata — use admin lookup via magic workaround:
+    // Actually fetch email from usernames join: store email in usernames table
+    const { data: emailRow } = await db
+      .from('usernames')
+      .select('email')
+      .eq('username', username)
+      .single();
+
+    if (emailRow && emailRow.email) {
+      email = emailRow.email;
+    } else {
+      setLoading('login-btn', false, 'Login to Dashboard');
+      showAlert('Username found but email not linked. Please login with your email instead.');
+      return;
+    }
+  }
+
   const { error } = await db.auth.signInWithPassword({ email, password });
   setLoading('login-btn', false, 'Login to Dashboard');
 
