@@ -90,14 +90,21 @@ async function handleLogin() {
 
 // ── SIGNUP ────────────────────────────────────────────────────
 async function handleSignup() {
-  const name     = document.getElementById('signup-name').value.trim();
-  const email    = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const confirm  = document.getElementById('signup-confirm').value;
+  const nameEl     = document.getElementById('signup-name');
+  const emailEl    = document.getElementById('signup-email');
+  const passwordEl = document.getElementById('signup-password');
+  const confirmEl  = document.getElementById('signup-confirm');
 
-  if (!name || !email || !password) { showAlert('Please fill in all fields'); return; }
-  if (password.length < 6)          { showAlert('Password must be at least 6 characters'); return; }
-  if (password !== confirm)          { showAlert('Passwords do not match'); return; }
+  const name     = nameEl     ? nameEl.value.trim()     : '';
+  const email    = emailEl    ? emailEl.value.trim()    : '';
+  const password = passwordEl ? passwordEl.value        : '';
+  const confirm  = confirmEl  ? confirmEl.value         : '';
+
+  if (!name)     { showAlert('Please enter your full name'); return; }
+  if (!email)    { showAlert('Please enter your email address'); return; }
+  if (!password) { showAlert('Please enter a password'); return; }
+  if (password.length < 6) { showAlert('Password must be at least 6 characters'); return; }
+  if (confirm && password !== confirm) { showAlert('Passwords do not match'); return; }
 
   setLoading('signup-btn', true);
   const { error } = await db.auth.signUp({

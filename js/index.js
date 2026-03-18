@@ -14,8 +14,10 @@ async function initAuth() {
   document.getElementById('user-initials').textContent = initials;
 
   // Show admin link for all users
-  const adminLink = document.getElementById('admin-link');
-  if (adminLink) adminLink.style.display = 'inline-flex';
+  if (user.email === ADMIN_EMAIL) {
+    const adminLink = document.getElementById('admin-link');
+    if (adminLink) adminLink.style.display = 'inline-flex';
+  }
 
   loadAll();
 }
