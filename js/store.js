@@ -42,11 +42,18 @@ async function initStore() {
 // ── LOAD LISTINGS ─────────────────────────────────────────────
 async function loadListings() {
   const [{ data: proxies }, { data: emails }] = await Promise.all([
-    db.from('proxy_listings').select('*').eq('available', true).order('created_at', { ascending: false }),
+    db.from('proxy_listings').select('*')
+      .or('available.eq.true,buyer_count.lt.max_buyers')
+      .order('created_at', { ascending: false }),
     db.from('email_listings').select('*').eq('available', true).order('created_at', { ascending: false })
   ]);
 
-  proxyListings = proxies || [];
+  // Filter: only show proxies that still have slots available
+  const availableProxies = (proxies || []).filter(p =>
+    p.available && (p.buyer_count || 0) < (p.max_buyers || 1)
+  );
+
+  proxyListings = availableProxies;
   emailListings = emails  || [];
 
   proxyListings.forEach(p => { if (!selectedDays[p.id]) selectedDays[p.id] = 1; });
@@ -110,6 +117,12 @@ function renderProxyListings() {
         <div class="spec-row">
           <span class="spec-label">Price</span>
           <span class="spec-val green">KES ${p.price_per_day}/day</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Slots Left</span>
+          <span class="spec-val" style="color:${((p.max_buyers||1)-(p.buyer_count||0)) <= 2 ? '#ef4444' : 'var(--green)'};">
+            ${(p.max_buyers||1)-(p.buyer_count||0)} / ${p.max_buyers||1}
+          </span>
         </div>
       </div>
 
@@ -421,22 +434,43 @@ async function completePaidOrder(mpesaCode, mpesaPhone) {
   try {
     if (type === 'proxy') {
       const listing = proxyListings.find(p => p.id === id);
-      await db.from('proxies').insert([{
-        user_id:      currentUserId,
-        host:         listing.host,
-        port:         listing.port,
-        country:      listing.country,
-        username:     listing.username || '',
-        password:     listing.password || '',
-        status:       'active',
-        expires_at:   expires,
-        buyer_email:  currentUserEmail,
-        mpesa_phone:  phone,
-        mpesa_code:   mpesaCode || '',
+
+      // Block duplicate purchase — same user cannot buy the same proxy listing
+      const { data: dup } = await db.from('proxies')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .eq('listing_id', id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (dup) throw new Error('You already own this proxy. You cannot buy the same proxy twice.');
+
+      const { error: insertErr } = await db.from('proxies').insert([{
+        user_id:        currentUserId,
+        host:           listing.host,
+        port:           listing.port,
+        country:        listing.country,
+        username:       listing.username || '',
+        password:       listing.password || '',
+        status:         'active',
+        expires_at:     expires,
+        buyer_email:    currentUserEmail,
+        mpesa_phone:    phone,
+        mpesa_code:     mpesaCode || '',
         payment_status: 'success',
-        purchased_at: now,
+        purchased_at:   now,
+        listing_id:     id,
       }]);
-      await db.from('proxy_listings').update({ available: false }).eq('id', id);
+
+      if (insertErr) throw new Error(insertErr.message);
+
+      // Increment buyer_count, remove from store if limit reached
+      const newCount  = (listing.buyer_count || 0) + 1;
+      const maxBuyers = listing.max_buyers  || 1;
+      await db.from('proxy_listings').update({
+        buyer_count: newCount,
+        available:   newCount < maxBuyers,
+      }).eq('id', id);
 
     } else {
       const listing = emailListings.find(e => e.id === id);

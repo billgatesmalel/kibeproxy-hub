@@ -246,7 +246,7 @@ function renderProxyListings(listings) {
   }
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Country</th><th>Host</th><th>Port</th><th>Price/Day</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
+      <thead><tr><th>Country</th><th>Host</th><th>Port</th><th>Price/Day</th><th>Slots</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
       <tbody>
         ${listings.map(p => `
           <tr>
@@ -254,7 +254,10 @@ function renderProxyListings(listings) {
             <td class="mono">${p.host}</td>
             <td class="mono">${p.port}</td>
             <td class="mono" style="color:var(--green)">KES ${p.price_per_day}</td>
-            <td><span class="badge ${p.available ? 'active' : 'expired'}">${p.available ? 'Available' : 'Sold'}</span></td>
+            <td class="mono" style="color:${((p.max_buyers||1)-(p.buyer_count||0))<=1?'var(--red)':'var(--green)'}">
+              ${p.buyer_count||0}/${p.max_buyers||1} sold
+            </td>
+            <td><span class="badge ${p.available ? 'active' : 'expired'}">${p.available ? 'Available' : 'Sold Out'}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.created_at).toLocaleDateString()}</td>
             <td>${p.available ? `<button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}</td>
           </tr>`).join('')}
@@ -325,11 +328,14 @@ async function addProxyListing() {
   const username      = document.getElementById('pl-username').value.trim();
   const password      = document.getElementById('pl-password').value;
   const price_per_day = parseInt(document.getElementById('pl-price').value) || 100;
+  const maxEl = document.getElementById('pl-max-buyers');
+  const max_buyers = maxEl ? (parseInt(maxEl.value) || 1) : 1;
 
   if (!country || !host || !port) { showToast('Country, Host and Port are required', 'error'); return; }
 
   const { error } = await db.from('proxy_listings').insert([{
-    country, flag, host, port, username, password, price_per_day, available: true
+    country, flag, host, port, username, password, price_per_day,
+    max_buyers, buyer_count: 0, available: true
   }]);
 
   if (error) { showToast('Failed: ' + error.message, 'error'); return; }

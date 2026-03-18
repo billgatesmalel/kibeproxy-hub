@@ -1,11 +1,20 @@
 /* ── AUTH PAGE STYLES ────────────────────────────────────────── */
 
-html, body {
+html {
+  height: 100%;
+}
+
+body {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  min-height: 100vh;
+  padding: 2rem 1rem 0;
 }
+
+/* Push footer to bottom */
+.auth-card { flex-shrink: 0; }
 
 /* Background grid */
 body::before {
@@ -101,4 +110,74 @@ body::before {
   border-top-color: #000;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+/* ── AUTH FOOTER ── */
+.auth-page-footer {
+  width: 100%;
+  margin-top: auto;
+  padding: 2rem 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.auth-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-footer-links a {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-footer-links a:hover { color: var(--green); }
+
+.auth-footer-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.auth-footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.auth-footer-copy {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.auth-footer-dev {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.04));
+  border: 1px solid rgba(34,197,94,0.2);
+  color: var(--green);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  font-family: 'Syne', sans-serif;
+  animation: pulse-green 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.15); }
+  50%      { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
 }
