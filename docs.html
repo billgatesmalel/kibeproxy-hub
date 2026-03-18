@@ -878,13 +878,13 @@ console.<span class="fn">log</span>(res.data); <span class="cm">// Shows your pr
             <div class="code-body"><span class="kw">import</span> smtplib
 <span class="kw">from</span> email.mime.text <span class="kw">import</span> MIMEText
 
-email    = <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95ecfae0e7d5f0f8f4fcf9bbf6faf8">[email&#160;protected]</a>"</span>
+email    = <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="067f69737446636b676f6a2865696b">[email&#160;protected]</a>"</span>
 password = <span class="str">"yourpassword"</span>
 
 msg = <span class="fn">MIMEText</span>(<span class="str">"Hello from KibeProxy Hub!"</span>)
 msg[<span class="str">'Subject'</span>] = <span class="str">"Test Email"</span>
 msg[<span class="str">'From'</span>]    = email
-msg[<span class="str">'To'</span>]      = <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cdbfa8aea4bda4a8a3b98da8a0aca4a1e3aea2a0">[email&#160;protected]</a>"</span>
+msg[<span class="str">'To'</span>]      = <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="88f1e7fdfac8ede5e9e1e4a6ebe7e5">[email&#160;protected]</a>"</span>
 
 <span class="kw">with</span> smtplib.<span class="fn">SMTP</span>(<span class="str">"smtp.gmail.com"</span>, <span class="num">587</span>) <span class="kw">as</span> s:
     s.<span class="fn">starttls</span>()
@@ -909,12 +909,12 @@ msg[<span class="str">'To'</span>]      = <span class="str">"<a href="/cdn-cgi/l
 <span class="kw">const</span> transporter = nodemailer.<span class="fn">createTransport</span>({
   host: <span class="str">'smtp.gmail.com'</span>,
   port: <span class="num">587</span>,
-  auth: { user: <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="91e8fee4e3d1f4fcf0f8fdbff2fefc">[email&#160;protected]</a>'</span>, pass: <span class="str">'yourpassword'</span> }
+  auth: { user: <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4f36203a3d0f2a222e2623612c2022">[email&#160;protected]</a>'</span>, pass: <span class="str">'yourpassword'</span> }
 });
 
 <span class="kw">await</span> transporter.<span class="fn">sendMail</span>({
-  from:    <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dba2b4aea99bbeb6bab2b7f5b8b4b6">[email&#160;protected]</a>'</span>,
-  to:      <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="255740464c554c404b51654048444c490b464a48">[email&#160;protected]</a>'</span>,
+  from:    <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="176e78626557727a767e7b3974787a">[email&#160;protected]</a>'</span>,
+  to:      <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4930263c3b092c24282025672a2624">[email&#160;protected]</a>'</span>,
   subject: <span class="str">'Hello from KibeProxy Hub!'</span>,
   text:    <span class="str">'Your email is working perfectly.'</span>
 });
@@ -1043,11 +1043,11 @@ console.<span class="fn">log</span>(<span class="str">'✓ Email sent!'</span>);
           <div class="comm-sub">Join our community. Get tips, share experiences and connect with other users.</div>
           <span class="comm-btn">Join Group →</span>
         </a>
-        <a href="/cdn-cgi/l/email-protection#ea8183888f9e89988f8b9e83858499d8dad8dfaa859f9e86858581c4898587" class="comm-card" style="background:linear-gradient(135deg,#0f172a,#1e1b4b);border:1px solid rgba(99,102,241,0.3);color:#f0f0f0;text-decoration:none;">
+        <a href="#" class="footer-email-placeholder" class="comm-card" style="background:linear-gradient(135deg,#0f172a,#1e1b4b);border:1px solid rgba(99,102,241,0.3);color:#f0f0f0;text-decoration:none;">
           <span class="comm-icon">✉️</span>
           <div class="comm-title">Email Support</div>
           <div class="comm-sub">Send us an email for website development inquiries or technical support.</div>
-          <span class="comm-btn" style="background:rgba(99,102,241,0.25);color:#a5b4fc;">kibetcreations2025@outlook.com →</span>
+          <span class="comm-btn" style="background:rgba(99,102,241,0.25);color:#a5b4fc;"><span class="__cf_email__" data-cfemail="701b191215041302151104191f1e0342404245301f05041c1f1f1b5e131f1d">[email&#160;protected]</span> →</span>
         </a>
       </div>
     </div>
@@ -1055,19 +1055,11 @@ console.<span class="fn">log</span>(<span class="str">'✓ Email sent!'</span>);
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></s
 
 <div class="toast" id="toast"></div>
 
-<script>
-// Render email to prevent encoding issues
-(function(){
-  var e = 'kibetcreations2025' + '@' + 'outlook.com';
-  var els = document.querySelectorAll('.footer-email-placeholder');
-  els.forEach(function(el){ el.textContent = e; el.href = 'mailto:' + e; });
-  var sp = document.getElementById('footer-email');
-  if(sp) sp.textContent = ' ✉️ ' + e;
-})();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/docs.js"></script>
 </body>
 </html>
