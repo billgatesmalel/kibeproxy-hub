@@ -272,6 +272,15 @@ nav {
   transition: all 0.15s;
 }
 
+.support-menu a svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 .support-menu a:hover {
   background: var(--border);
   color: var(--text-primary) !important;

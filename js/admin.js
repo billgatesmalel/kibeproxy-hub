@@ -319,10 +319,68 @@ function filterUsers() {
   renderUsers(allUsers.filter(u => u.id.toLowerCase().includes(q)));
 }
 
+// ── COUNTRY FLAG MAP ──────────────────────────────────────────
+const countryFlagMap = {
+  'philippines': '🇵🇭',
+  'india': '🇮🇳',
+  'australia': '🇦🇺',
+  'canada': '🇨🇦',
+  'usa': '🇺🇸',
+  'united states': '🇺🇸',
+  'new zealand': '🇳🇿',
+  'uk': '🇬🇧',
+  'united kingdom': '🇬🇧',
+  'france': '🇫🇷',
+  'germany': '🇩🇪',
+  'japan': '🇯🇵',
+  'china': '🇨🇳',
+  'brazil': '🇧🇷',
+  'mexico': '🇲🇽',
+  'singapore': '🇸🇬',
+  'south korea': '🇰🇷',
+  'thailand': '🇹🇭',
+  'vietnam': '🇻🇳',
+  'indonesia': '🇮🇩',
+  'malaysia': '🇲🇾',
+  'south africa': '🇿🇦',
+  'egypt': '🇪🇬',
+  'nigeria': '🇳🇬',
+  'kenya': '🇰🇪',
+  'russia': '🇷🇺',
+  'ukraine': '🇺🇦',
+  'poland': '🇵🇱',
+  'netherlands': '🇳🇱',
+  'spain': '🇪🇸',
+  'italy': '🇮🇹',
+  'greece': '🇬🇷',
+  'turkey': '🇹🇷',
+  'israel': '🇮🇱',
+  'uae': '🇦🇪',
+  'united arab emirates': '🇦🇪',
+  'saudi arabia': '🇸🇦',
+  'pakistan': '🇵🇰',
+  'bangladesh': '🇧🇩',
+  'sri lanka': '🇱🇰',
+  'hong kong': '🇭🇰',
+  'taiwan': '🇹🇼',
+  'philippines': '🇵🇭',
+  'argentina': '🇦🇷',
+  'chile': '🇨🇱',
+  'colombia': '🇨🇴',
+  'peru': '🇵🇪'
+};
+
+// ── AUTO-DETECT FLAG FROM COUNTRY ─────────────────────────────
+function getCountryFlag(countryName) {
+  if (!countryName) return '';
+  const normalized = countryName.toLowerCase().trim();
+  return countryFlagMap[normalized] || '';
+}
+
 // ── ADD PROXY LISTING ─────────────────────────────────────────
 async function addProxyListing() {
   const country       = document.getElementById('pl-country').value.trim();
-  const flag          = document.getElementById('pl-flag').value.trim();
+  let flag            = document.getElementById('pl-flag').value.trim();
   const host          = document.getElementById('pl-host').value.trim();
   const port          = parseInt(document.getElementById('pl-port').value);
   const username      = document.getElementById('pl-username').value.trim();
@@ -332,6 +390,14 @@ async function addProxyListing() {
   const max_buyers = maxEl ? (parseInt(maxEl.value) || 1) : 1;
 
   if (!country || !host || !port) { showToast('Country, Host and Port are required', 'error'); return; }
+
+  // Auto-detect flag if not provided
+  if (!flag) {
+    flag = getCountryFlag(country);
+    if (flag) {
+      document.getElementById('pl-flag').value = flag;
+    }
+  }
 
   const { error } = await db.from('proxy_listings').insert([{
     country, flag, host, port, username, password, price_per_day,
