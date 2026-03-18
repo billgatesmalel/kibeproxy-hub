@@ -37,9 +37,21 @@ window.addEventListener('scroll', function() {
 (function() {
   var e = 'kibetcreations2025' + '@' + 'outlook.com';
   document.querySelectorAll('.footer-email-placeholder').forEach(function(el) {
-    el.textContent = e;
-    el.href = 'mailto:' + e;
+    if (el.tagName === 'A') {
+      if (!el.textContent.trim() || el.textContent.trim() === 'Email Us' || el.textContent.trim() === 'Email Support') {
+        el.textContent = el.textContent.replace('Email Us','Email Us').replace('Email Support','Email Support');
+      }
+      el.href = 'mailto:' + e;
+    } else {
+      el.textContent = e;
+      el.onclick = function(){ window.location.href = 'mailto:' + e; };
+    }
   });
-  var sp = document.getElementById('footer-email');
-  if (sp) sp.textContent = ' ' + e;
+  var sp = document.getElementById('footer-email-link');
+  if (sp) {
+    sp.textContent = e;
+    sp.onclick = function(ev){ ev.stopPropagation(); window.location.href = 'mailto:' + e; };
+    sp.style.cursor = 'pointer';
+    sp.style.textDecoration = 'underline';
+  }
 })();
