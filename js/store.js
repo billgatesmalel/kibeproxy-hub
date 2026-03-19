@@ -42,18 +42,11 @@ async function initStore() {
 // ── LOAD LISTINGS ─────────────────────────────────────────────
 async function loadListings() {
   const [{ data: proxies }, { data: emails }] = await Promise.all([
-    db.from('proxy_listings').select('*')
-      .or('available.eq.true,buyer_count.lt.max_buyers')
-      .order('created_at', { ascending: false }),
+    db.from('proxy_listings').select('*').eq('available', true).order('created_at', { ascending: false }),
     db.from('email_listings').select('*').eq('available', true).order('created_at', { ascending: false })
   ]);
 
-  // Filter: only show proxies that still have slots available
-  const availableProxies = (proxies || []).filter(p =>
-    p.available && (p.buyer_count || 0) < (p.max_buyers || 1)
-  );
-
-  proxyListings = availableProxies;
+  proxyListings = (proxies || []);
   emailListings = emails  || [];
 
   proxyListings.forEach(p => { if (!selectedDays[p.id]) selectedDays[p.id] = 1; });
@@ -120,7 +113,7 @@ function renderProxyListings() {
         </div>
         <div class="spec-row">
           <span class="spec-label">Slots Left</span>
-          <span class="spec-val" style="color:${((p.max_buyers||1)-(p.buyer_count||0)) <= 2 ? '#ef4444' : 'var(--green)'};">
+          <span class='spec-val' style='color:${((p.max_buyers||1)-(p.buyer_count||0)) <= 2 ? "#ef4444" : "var(--green)"}'>
             ${(p.max_buyers||1)-(p.buyer_count||0)} / ${p.max_buyers||1}
           </span>
         </div>
