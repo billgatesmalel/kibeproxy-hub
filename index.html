@@ -1,424 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KibeProxy Hub | Dashboard</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/index.css" />
-  <style>
-    footer {
-      background: #080808;
-      border-top: 1px solid #1e1e1e;
-      margin-top: 4rem;
-    }
-
-    .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 3rem 2.5rem 1.5rem;
-    }
-
-    .footer-top {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 3rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 0.75rem;
-    }
-
-    .footer-logo .logo-icon {
-      width: 30px;
-      height: 30px;
-      border: 1.5px solid #22c55e;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .footer-logo .logo-icon svg {
-      width: 13px;
-      height: 13px;
-    }
-
-    .footer-logo-text {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #f0f0f0;
-    }
-
-    .footer-tagline {
-      font-size: 0.82rem;
-      color: #555;
-      font-style: italic;
-    }
-
-    .footer-links {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-    }
-
-    .footer-col {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .footer-col-title {
-      font-size: 0.72rem;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .footer-col a,
-    .footer-col span {
-      font-size: 0.82rem;
-      color: #555;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .footer-col a:hover {
-      color: #22c55e;
-    }
-
-    .footer-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #2a2a2a 20%, #2a2a2a 80%, transparent);
-      margin-bottom: 1.5rem;
-    }
-
-    .footer-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .footer-copy {
-      font-size: 0.78rem;
-      color: #444;
-      font-family: 'DM Mono', monospace;
-    }
-
-    .footer-dev {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.05));
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      color: #22c55e;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-decoration: none;
-      font-family: 'Syne', sans-serif;
-      transition: all 0.2s;
-      animation: pulse-green 2.5s ease-in-out infinite;
-    }
-
-    .footer-dev:hover {
-      background: rgba(34, 197, 94, 0.2);
-      border-color: #22c55e;
-      transform: translateY(-1px);
-    }
-
-    @keyframes pulse-green {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.15);
-      }
-
-      50% {
-        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-      }
-    }
-
-    @media(max-width:700px) {
-      .footer-top {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .footer-links {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .footer-bottom {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .footer-inner {
-        padding: 2rem 1.2rem 1.5rem;
-      }
-    }
-  </style>
 </head>
-
 <body>
 
-  <!-- ── NAVBAR ── -->
-  <nav>
-    <a class="nav-logo" href="#">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"
-          stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-        </svg>
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    </div>
+    <span class="logo-text">KibeProxy Hub</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="store.html">Buy Proxies</a></li>
+    <li><a href="store.html">Buy Emails</a></li>
+    <li class="support-dropdown">
+      <a href="#" onclick="toggleSupport(event)">Support &#9662;</a>
+      <div class="support-menu" id="support-menu">
+        <a href="https://wa.me/254724031319" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        <a href="https://t.me/kibeproxy" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram
+        </a>
+        <a href="mailto:kibetcreations2025@outlook.com" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          kibetcreations2025@outlook.com
+        </a>
       </div>
-      <span class="logo-text">KibeProxy Hub</span>
+    </li>
+    <li><a href="docs.html">Docs</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="balance-pill">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span id="nav-balance">KES 0</span>
+    </div>
+    <a href="admin.html" class="admin-badge" id="admin-link" style="display:none;">ADMIN</a>
+    <a href="profile.html" class="user-btn" style="text-decoration:none;">
+      <div class="user-avatar" id="user-initials">--</div>
+      <span id="user-name">Loading...</span>
     </a>
+    <button class="user-btn" onclick="handleLogout()" style="padding:6px 10px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</nav>
 
-    <ul class="nav-links">
-      <li><a href="store.html">Buy Proxies</a></li>
-      <li><a href="store.html">Buy Emails</a></li>
-      <li class="support-dropdown">
-        <a href="#" onclick="toggleSupport(event)">Support ▾</a>
-        <div class="support-menu" id="support-menu">
-          <a href="https://wa.me/254724031319" target="_blank">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366">
-              <path
-                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-            WhatsApp
-          </a>
-          <a href="https://t.me/kibeproxy" target="_blank">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#229ED9">
-              <path
-                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-            </svg>
-            Telegram
-          </a>
-          <a href="mailto:kibetcreations2025@outlook.com" target="_blank">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-            Email Support
-          </a>
-        </div>
-      </li>
-      <li><a href="docs.html">Docs</a></li>
-    </ul>
+<main>
+  <div class="page-header">
+    <h1 class="page-title">My Dashboard</h1>
+    <p class="page-subtitle">Manage your wallet, proxies and emails</p>
+  </div>
 
-    <div class="nav-right">
-      <div class="balance-pill">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-        </svg>
-        KES 0
-      </div>
-      <a href="admin.html" class="admin-badge" id="admin-link" style="display:none;">ADMIN</a>
-      <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">Dashboard</span>
-      <a href="profile.html" class="user-btn" style="text-decoration:none;" title="My Profile">
-        <div class="user-avatar" id="user-initials">--</div>
-        <span id="user-name">Loading...</span>
-      </a>
-      <button class="user-btn" onclick="handleLogout()" title="Logout" style="padding:6px 10px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-          <polyline points="16 17 21 12 16 7" />
-          <line x1="21" y1="12" x2="9" y2="12" />
-        </svg>
+  <!-- WALLET -->
+  <div class="wallet-card">
+    <div>
+      <div class="wallet-label">&#128176; Wallet Balance</div>
+      <div class="wallet-amount" id="stat-balance">KES 0</div>
+      <div class="wallet-sub">Available to spend in the store</div>
+    </div>
+    <button class="add-money-btn" onclick="openAddMoney()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Money
+    </button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Active Proxies</div>
+      <div class="stat-value green" id="stat-active">&#8212;</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Expired Proxies</div>
+      <div class="stat-value" id="stat-expired">&#8212;</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Emails</div>
+      <div class="stat-value" id="stat-emails">&#8212;</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Transactions</div>
+      <div class="stat-value" id="stat-txns">&#8212;</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab(this,&apos;active&apos;)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Active <span class="tab-badge" id="badge-active">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this,&apos;expired&apos;)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Expired <span class="tab-badge" id="badge-expired">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this,&apos;emails&apos;)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Emails <span class="tab-badge" id="badge-emails">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this,&apos;transactions&apos;)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Transactions <span class="tab-badge" id="badge-transactions">0</span>
       </button>
     </div>
-  </nav>
+    <a href="store.html" class="buy-store-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Buy More
+    </a>
+  </div>
 
-  <!-- ── MAIN ── -->
-  <main>
-    <div class="page-header">
-      <h1 class="page-title">My Dashboard</h1>
-      <p class="page-subtitle">View your purchased proxies and emails</p>
-    </div>
+  <!-- PANELS -->
+  <div class="panel" id="panel-active"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+  <div class="panel" id="panel-expired" style="display:none;"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+  <div class="panel" id="panel-emails" style="display:none;"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+  <div class="panel" id="panel-transactions" style="display:none;"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+</main>
 
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Active Proxies</div>
-        <div class="stat-value green" id="stat-active">—</div>
+<!-- ADD MONEY MODAL -->
+<div class="modal-overlay" id="modal-addmoney">
+  <div class="modal">
+    <div id="am-view">
+      <div class="modal-title">&#128176; Add Money to Wallet</div>
+      <div class="am-note">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Send money via M-Pesa first, then enter the details below to credit your wallet. Contact: +254724031319
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Expired Proxies</div>
-        <div class="stat-value" id="stat-expired">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Emails</div>
-        <div class="stat-value" id="stat-emails">—</div>
-      </div>
-    </div>
-
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <div class="tabs-bar">
-        <button class="tab-btn active" onclick="switchTab(this,'active')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          Active <span class="tab-badge" id="badge-active">0</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab(this,'expired')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-          </svg>
-          Expired <span class="tab-badge" id="badge-expired">0</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab(this,'emails')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-            <polyline points="22,6 12,13 2,6" />
-          </svg>
-          Emails <span class="tab-badge" id="badge-emails">0</span>
-        </button>
-      </div>
-      <a href="store.html" class="buy-store-btn">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="9" cy="21" r="1" />
-          <circle cx="20" cy="21" r="1" />
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-        </svg>
-        Buy More
-      </a>
-    </div>
-
-    <!-- PANELS -->
-    <div class="panel" id="panel-active">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-    <div class="panel" id="panel-expired" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-    <div class="panel" id="panel-emails" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-  </main>
-
-  <!-- ── FOOTER ── -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div class="footer-logo">
-            <div class="logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            </div>
-            <span class="footer-logo-text">KibeProxy Hub</span>
-          </div>
-          <p class="footer-tagline">Code with purpose, Build with passion</p>
+      <div id="am-error" class="am-error"></div>
+      <div class="am-row">
+        <div class="am-group">
+          <label class="am-label">Amount (KES)</label>
+          <input class="am-input" id="am-amount" type="number" placeholder="e.g. 500" min="1" />
         </div>
-        <div class="footer-links">
-          <div class="footer-col">
-            <div class="footer-col-title">Product</div>
-            <a href="store.html">Buy Proxies</a>
-            <a href="store.html">Buy Emails</a>
-            <a href="docs.html">Documentation</a>
-          </div>
-          <div class="footer-col">
-            <div class="footer-col-title">Support</div>
-            <a href="https://wa.me/254724031319" target="_blank">WhatsApp</a>
-            <a href="https://t.me/kibeproxy" target="_blank">Telegram</a>
-            <a href="https://chat.whatsapp.com/LyamprdeHHTAypgwwDUZuI" target="_blank">Community</a>
-            <a href="mailto:kibetcreations2025@outlook.com" target="_blank">Email Support</a>
-          </div>
-          <div class="footer-col">
-            <div class="footer-col-title">Countries</div>
-            <span>🇵🇭 Philippines</span>
-            <span>🇮🇳 India</span>
-            <span>🇦🇺 Australia</span>
-            <span>🇨🇦 Canada</span>
-            <span>🇺🇸 USA</span>
-            <span>🇳🇿 New Zealand</span>
-          </div>
+        <div class="am-group">
+          <label class="am-label">M-Pesa Code</label>
+          <input class="am-input" id="am-code" type="text" placeholder="e.g. QJK7XT4Z2" style="text-transform:uppercase;" />
         </div>
       </div>
-      <div class="footer-divider"></div>
-      <div class="footer-bottom">
-        <span class="footer-copy">Copyright &copy; 2026 Kibet Creations. All Rights Reserved.</span>
-        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-          <a href="tel:+254799289214" class="footer-dev">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path
-                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-            Get Your Website Live, Fast! &nbsp;📞 +254799289214
-          </a>
-          <a href="mailto:kibetcreations2025@outlook.com" target="_blank" class="footer-dev"
-            style="background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.05));border:1px solid rgba(34,197,94,0.25);color:#22c55e;padding:8px 18px;border-radius:20px;font-size:0.78rem;font-weight:700;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-            kibetcreations2025@outlook.com
-          </a>
+      <div class="am-row">
+        <div class="am-group">
+          <label class="am-label">M-Pesa Phone Number</label>
+          <input class="am-input" id="am-phone" type="tel" placeholder="e.g. 254712345678" />
+        </div>
+        <div class="am-group">
+          <label class="am-label">M-Pesa Account Name</label>
+          <input class="am-input" id="am-name" type="text" placeholder="Name on M-Pesa" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal(&apos;addmoney&apos;)">Cancel</button>
+        <button class="am-submit" id="am-btn" onclick="confirmAddMoney()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Add Money
+        </button>
+      </div>
+    </div>
+    <div id="am-success" style="display:none;text-align:center;padding:1rem 0;">
+      <div class="am-success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.5rem;color:var(--green);">Money Added!</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">
+        <span id="am-success-amount" style="color:var(--green);font-weight:700;font-family:DM Mono,monospace;"></span> added to your wallet.
+      </div>
+      <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">
+        New balance: <strong id="am-success-balance" style="color:var(--text-primary);"></strong>
+      </div>
+      <button class="am-submit" onclick="closeModal(&apos;addmoney&apos;)">Done &#10003;</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <span class="footer-logo-text">KibeProxy Hub</span>
+        </div>
+        <p class="footer-tagline">Code with purpose, Build with passion</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title">Product</div>
+          <a href="store.html">Buy Proxies</a>
+          <a href="store.html">Buy Emails</a>
+          <a href="docs.html">Documentation</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Support</div>
+          <a href="https://wa.me/254724031319" target="_blank">WhatsApp</a>
+          <a href="https://t.me/kibeproxy" target="_blank">Telegram</a>
+          <a href="https://chat.whatsapp.com/LyamprdeHHTAypgwwDUZuI" target="_blank">Community</a>
+          <a href="mailto:kibetcreations2025@outlook.com">Email Support</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Countries</div>
+          <span>&#127477;&#127469; Philippines</span>
+          <span>&#127470;&#127475; India</span>
+          <span>&#127462;&#127482; Australia</span>
+          <span>&#127464;&#127462; Canada</span>
+          <span>&#127482;&#127480; USA</span>
+          <span>&#127475;&#127487; New Zealand</span>
         </div>
       </div>
     </div>
-  </footer>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <span class="footer-copy">Copyright &copy; 2026 Kibet Creations. All Rights Reserved.</span>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <a href="tel:+254799289214" class="footer-dev">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Get Your Website Live! +254799289214
+        </a>
+        <a href="mailto:kibetcreations2025@outlook.com" class="footer-dev">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          kibetcreations2025@outlook.com
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
 
-  <!-- ── TOAST ── -->
-  <div class="toast" id="toas
-
-<div class=" toast" id="toast"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js"></script>
-  <script src="js/index.js"></script>
-  <script>
-    // Render email to prevent encoding issues
-    (function () {
-      var e = 'kibetcreations2025' + '@' + 'outlook.com';
-      // Support dropdown and footer email links
-      document.querySelectorAll('.footer-email-placeholder').forEach(function (el) {
-        if (el.tagName === 'A') {
-          el.textContent = el.textContent.trim() || e;
-          el.href = 'mailto:' + e;
-        } else {
-          el.textContent = e;
-          el.onclick = function () { window.location.href = 'mailto:' + e; };
-          el.style.cursor = 'pointer';
-        }
-      });
-      // Footer dev email span
-      var sp = document.getElementById('footer-email-link');
-      if (sp) {
-        sp.textContent = e;
-        sp.onclick = function (e2) { e2.stopPropagation(); window.location.href = 'mailto:' + e; };
-      }
-    })();
-  </script>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/index.js"></script>
 </body>
-
 </html>

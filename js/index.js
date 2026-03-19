@@ -1,5 +1,6 @@
 // ── DASHBOARD LOGIC ───────────────────────────────────────────
 let currentUserId = null;
+let currentBalance = 0;
 
 async function initAuth() {
   const { data: { session } } = await db.auth.getSession();
@@ -13,10 +14,8 @@ async function initAuth() {
   document.getElementById('user-name').textContent     = name;
   document.getElementById('user-initials').textContent = initials;
 
-  // Show admin link for all users
   if (user.email === ADMIN_EMAIL) {
-    const adminLink = document.getElementById('admin-link');
-    if (adminLink) adminLink.style.display = 'inline-flex';
+    document.getElementById('admin-link').style.display = 'inline-flex';
   }
 
   loadAll();
@@ -26,7 +25,7 @@ async function initAuth() {
 function switchTab(btn, tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  ['active', 'expired', 'emails'].forEach(t => {
+  ['active', 'expired', 'emails', 'transactions'].forEach(t => {
     document.getElementById('panel-' + t).style.display = t === tab ? 'block' : 'none';
   });
 }
@@ -37,10 +36,8 @@ function paymentBadge(status) {
     return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-dim);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">✓ Paid</span>';
   } else if (status === 'pending') {
     return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(234,179,8,0.1);color:#eab308;border:1px solid rgba(234,179,8,0.3);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">⏳ Pending</span>';
-  } else if (status === 'failed') {
-    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">✕ Failed</span>';
   }
-  return '';
+  return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:20px;font-size:0.7rem;font-family:DM Mono,monospace;font-weight:600;">✕ Failed</span>';
 }
 
 // ── RENDER PROXIES ────────────────────────────────────────────
@@ -63,16 +60,7 @@ function renderProxies(data, panelId, status) {
   panel.innerHTML = `
     <table class="data-table">
       <thead>
-        <tr>
-          <th>Country</th>
-          <th>Host</th>
-          <th>Port</th>
-          <th>Username</th>
-          <th>Password</th>
-          <th>Status</th>
-          <th>Payment</th>
-          <th>Expires</th>
-        </tr>
+        <tr><th>Country</th><th>Host</th><th>Port</th><th>Username</th><th>Password</th><th>Status</th><th>Payment</th><th>Expires</th></tr>
       </thead>
       <tbody>
         ${data.map(p => `
@@ -100,13 +88,8 @@ function togglePass(id) {
   if (!el) return;
   const btn  = el.nextElementSibling;
   const pass = el.getAttribute('data-pass');
-  if (el.textContent.includes('•')) {
-    el.textContent  = (pass && pass.trim()) ? pass : '(empty)';
-    btn.textContent = 'Hide';
-  } else {
-    el.textContent  = '••••••••';
-    btn.textContent = 'Show';
-  }
+  if (el.textContent.includes('•')) { el.textContent = pass || '(empty)'; btn.textContent = 'Hide'; }
+  else                               { el.textContent = '••••••••'; btn.textContent = 'Show'; }
 }
 
 // ── RENDER EMAILS ─────────────────────────────────────────────
@@ -127,9 +110,7 @@ function renderEmails(data) {
   }
   panel.innerHTML = `
     <table class="data-table">
-      <thead>
-        <tr><th>Email</th><th>Password</th><th>Payment</th><th>Purchased</th></tr>
-      </thead>
+      <thead><tr><th>Email</th><th>Password</th><th>Payment</th><th>Purchased</th></tr></thead>
       <tbody>
         ${data.map(e => `
           <tr>
@@ -147,28 +128,178 @@ function renderEmails(data) {
     </table>`;
 }
 
+// ── RENDER TRANSACTIONS ───────────────────────────────────────
+function renderTransactions(data) {
+  const panel = document.getElementById('panel-transactions');
+  if (!data || data.length === 0) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 64 64" fill="none">
+          <path d="M32 8v48M8 32h48" stroke="currentColor" stroke-width="2"/>
+          <rect x="12" y="12" width="40" height="40" rx="4" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <p class="empty-title">No transactions yet</p>
+        <p class="empty-sub">Add money to your wallet to get started</p>
+      </div>`;
+    return;
+  }
+  panel.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+          <th>M-Pesa Name</th>
+          <th>M-Pesa Number</th>
+          <th>M-Pesa Code</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date & Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(t => `
+          <tr>
+            <td>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;font-family:DM Mono,monospace;
+                ${t.type === 'deposit'
+                  ? 'background:var(--green-glow);color:var(--green);border:1px solid var(--green-dim);'
+                  : 'background:var(--blue-glow);color:var(--blue);border:1px solid rgba(59,130,246,0.3);'}">
+                ${t.type === 'deposit' ? '↓ Deposit' : '↑ Purchase'}
+              </span>
+            </td>
+            <td style="font-size:0.82rem;color:var(--text-secondary);">${t.description || '—'}</td>
+            <td class="mono">${t.mpesa_name || '—'}</td>
+            <td class="mono">${t.mpesa_phone || '—'}</td>
+            <td class="mono" style="color:var(--yellow);font-weight:600;">${t.mpesa_code || '—'}</td>
+            <td class="mono" style="color:${t.type === 'deposit' ? 'var(--green)' : 'var(--red)'};font-weight:600;">
+              ${t.type === 'deposit' ? '+' : '-'}KES ${t.amount}
+            </td>
+            <td>${paymentBadge(t.status)}</td>
+            <td class="mono" style="font-size:0.75rem;color:var(--text-muted);">
+              ${new Date(t.created_at).toLocaleString()}
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
 // ── LOAD ALL ──────────────────────────────────────────────────
 async function loadAll() {
-  const [{ data: proxies }, { data: emails }] = await Promise.all([
+  const [
+    { data: proxies },
+    { data: emails },
+    { data: wallet },
+    { data: txns }
+  ] = await Promise.all([
     db.from('proxies').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
-    db.from('emails').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false })
+    db.from('emails').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
+    db.from('wallets').select('balance').eq('user_id', currentUserId).single(),
+    db.from('transactions').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
   ]);
 
   const active    = (proxies || []).filter(p => p.status === 'active');
   const expired   = (proxies || []).filter(p => p.status === 'expired');
   const emailList = emails || [];
+  const txList    = txns  || [];
 
-  document.getElementById('stat-active').textContent  = active.length;
-  document.getElementById('stat-expired').textContent = expired.length;
-  document.getElementById('stat-emails').textContent  = emailList.length;
+  // Update balance
+  currentBalance = wallet?.balance || 0;
+  document.getElementById('stat-balance').textContent = 'KES ' + currentBalance;
+  document.getElementById('nav-balance').textContent  = 'KES ' + currentBalance;
 
-  document.getElementById('badge-active').textContent  = active.length;
-  document.getElementById('badge-expired').textContent = expired.length;
-  document.getElementById('badge-emails').textContent  = emailList.length;
+  document.getElementById('stat-active').textContent   = active.length;
+  document.getElementById('stat-expired').textContent  = expired.length;
+  document.getElementById('stat-emails').textContent   = emailList.length;
+  document.getElementById('stat-txns').textContent     = txList.length;
+
+  document.getElementById('badge-active').textContent       = active.length;
+  document.getElementById('badge-expired').textContent      = expired.length;
+  document.getElementById('badge-emails').textContent       = emailList.length;
+  document.getElementById('badge-transactions').textContent = txList.length;
 
   renderProxies(active,  'panel-active',  'active');
   renderProxies(expired, 'panel-expired', 'expired');
   renderEmails(emailList);
+  renderTransactions(txList);
+}
+
+// ── ADD MONEY MODAL ───────────────────────────────────────────
+function openAddMoney() {
+  document.getElementById('modal-addmoney').classList.add('open');
+  // Reset form
+  document.getElementById('am-amount').value   = '';
+  document.getElementById('am-phone').value    = '';
+  document.getElementById('am-name').value     = '';
+  document.getElementById('am-code').value     = '';
+  document.getElementById('am-error').style.display = 'none';
+  document.getElementById('am-view').style.display    = 'block';
+  document.getElementById('am-success').style.display = 'none';
+}
+
+async function confirmAddMoney() {
+  const amountRaw = document.getElementById('am-amount').value.trim();
+  const phone     = document.getElementById('am-phone').value.trim();
+  const name      = document.getElementById('am-name').value.trim();
+  const code      = document.getElementById('am-code').value.trim().toUpperCase();
+
+  const amount = parseInt(amountRaw);
+
+  if (!amount || amount < 1)  { showAmError('Please enter a valid amount'); return; }
+  if (!phone)                  { showAmError('Please enter your M-Pesa number'); return; }
+  if (!name)                   { showAmError('Please enter the M-Pesa account name'); return; }
+  if (!code)                   { showAmError('Please enter the M-Pesa transaction code'); return; }
+  if (code.length < 8)         { showAmError('M-Pesa code seems too short'); return; }
+
+  const btn = document.getElementById('am-btn');
+  btn.disabled  = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Processing...';
+
+  try {
+    // Upsert wallet
+    const newBalance = currentBalance + amount;
+    const { error: walletErr } = await db.from('wallets').upsert([{
+      user_id:    currentUserId,
+      balance:    newBalance,
+      updated_at: new Date().toISOString(),
+    }], { onConflict: 'user_id' });
+
+    if (walletErr) throw new Error(walletErr.message);
+
+    // Record transaction
+    const { error: txErr } = await db.from('transactions').insert([{
+      user_id:     currentUserId,
+      type:        'deposit',
+      amount:      amount,
+      description: 'Wallet top-up via M-Pesa',
+      mpesa_phone: phone,
+      mpesa_name:  name,
+      mpesa_code:  code,
+      status:      'success',
+    }]);
+
+    if (txErr) throw new Error(txErr.message);
+
+    // Show success
+    document.getElementById('am-view').style.display    = 'none';
+    document.getElementById('am-success').style.display = 'block';
+    document.getElementById('am-success-amount').textContent = 'KES ' + amount;
+    document.getElementById('am-success-balance').textContent = 'KES ' + newBalance;
+
+    // Refresh dashboard
+    loadAll();
+
+  } catch (err) {
+    showAmError(err.message);
+    btn.disabled  = false;
+    btn.innerHTML = '✓ Add Money';
+  }
+}
+
+function showAmError(msg) {
+  const el = document.getElementById('am-error');
+  el.textContent    = msg;
+  el.style.display  = 'block';
 }
 
 initAuth();
