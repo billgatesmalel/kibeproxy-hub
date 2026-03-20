@@ -1,12 +1,17 @@
 // ── STORE LOGIC ───────────────────────────────────────────────
 let currentUserId    = null;
 let currentUserEmail = null;
+let currentBalance   = 0;
 let proxyListings    = [];
 let emailListings    = [];
 let activeTab        = 'proxies';
 let pendingOrderData = null;
+let selectedPaymentMethod = 'mpesa';
 
-const MPESA_API_URL = 'https://kibeproxy-mpesa.vercel.app';
+// Use different backend URLs based on environment
+const MPESA_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3000'
+  : 'https://kibeproxy-hub-app.vercel.app';
 
 const DURATIONS = [
   { days: 1,  label: 'day'  },
@@ -24,6 +29,12 @@ async function initStore() {
 
   currentUserId    = session.user.id;
   currentUserEmail = session.user.email;
+  const walletRes  = await db.from('wallets').select('balance').eq('user_id', currentUserId).single();
+  currentBalance   = walletRes.data?.balance || 0;
+
+  const balancePill = document.querySelector('.balance-pill');
+  if (balancePill) balancePill.textContent = 'KES ' + currentBalance;
+
   const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -258,6 +269,138 @@ function showOrderView() {
   document.getElementById('order-view').style.display    = 'block';
   document.getElementById('mpesa-view').style.display    = 'none';
   document.getElementById('success-view').style.display  = 'none';
+  hideOrderError();
+  renderPaymentOptions();
+}
+
+function showOrderError(msg) {
+  const el = document.getElementById('order-error');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+}
+
+function hideOrderError() {
+  const el = document.getElementById('order-error');
+  if (el) el.style.display = 'none';
+}
+
+function renderPaymentOptions() {
+  const totalText = document.getElementById('o-total').textContent || '0';
+  const total = parseInt(totalText.replace(/KES\s?/, '').replace(/,/g, '')) || 0;
+  const methodEl = document.getElementById('o-payment-method');
+  const optionsEl = document.getElementById('o-payment-options');
+  selectedPaymentMethod = 'mpesa';
+
+  if (methodEl) {
+    methodEl.textContent = currentBalance >= total
+      ? 'Choose payment method'
+      : 'Wallet insufficient, pay with M-Pesa';
+  }
+
+  if (optionsEl) {
+    if (currentBalance >= total && total > 0) {
+      optionsEl.innerHTML = `
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="radio" name="payment_method" value="wallet" checked onchange="onPaymentMethodChange('wallet')" />
+          Use wallet balance (KES ${currentBalance})
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+          <input type="radio" name="payment_method" value="mpesa" onchange="onPaymentMethodChange('mpesa')" />
+          Pay with M-Pesa
+        </label>
+      `;
+      selectedPaymentMethod = 'wallet';
+      const btn = document.getElementById('confirm-btn');
+      if (btn) btn.textContent = 'Pay from Wallet';
+    } else {
+      optionsEl.innerHTML = `
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="radio" name="payment_method" value="mpesa" checked onchange="onPaymentMethodChange('mpesa')" />
+          Pay with M-Pesa
+        </label>
+      `;
+      selectedPaymentMethod = 'mpesa';
+      const btn = document.getElementById('confirm-btn');
+      if (btn) btn.textContent = 'Pay with M-Pesa 📱';
+    }
+  }
+}
+
+function onPaymentMethodChange(method) {
+  selectedPaymentMethod = method;
+  const btn = document.getElementById('confirm-btn');
+  if (!btn) return;
+  if (method === 'wallet') btn.textContent = 'Pay from Wallet';
+  else btn.textContent = 'Pay with M-Pesa 📱';
+}
+
+function confirmOrderPayment() {
+  hideOrderError();
+  if (selectedPaymentMethod === 'wallet') {
+    payWithWallet();
+  } else {
+    goToMpesaPayment();
+  }
+}
+
+async function payWithWallet() {
+  if (!pendingOrderData) return;
+
+  const totalText = document.getElementById('o-total').textContent || '0';
+  const total = parseInt(totalText.replace(/KES\s?/, '').replace(/,/g, '')) || 0;
+
+  if (currentBalance < total) {
+    showOrderError('Insufficient wallet balance. Please deposit first or select M-Pesa.');
+    return;
+  }
+
+  const btn = document.getElementById('confirm-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+  }
+
+  try {
+    const newBalance = currentBalance - total;
+
+    const { error: walletErr } = await db.from('wallets').upsert([{
+      user_id: currentUserId,
+      balance: newBalance,
+      updated_at: new Date().toISOString(),
+    }], { onConflict: 'user_id' });
+
+    if (walletErr) throw new Error(walletErr.message);
+
+    const { error: txErr } = await db.from('transactions').insert([{
+      user_id: currentUserId,
+      type: 'purchase',
+      amount: total,
+      description: 'Store purchase using wallet',
+      mpesa_phone: null,
+      status: 'success',
+      created_at: new Date().toISOString(),
+    }]);
+
+    if (txErr) throw new Error(txErr.message);
+
+    currentBalance = newBalance;
+    const balancePill = document.querySelector('.balance-pill');
+    if (balancePill) balancePill.textContent = 'KES ' + currentBalance;
+
+    await completePaidOrder('', '');
+    closeModal('order');
+    window.location.href = 'index.html';
+
+  } catch (err) {
+    showOrderError(err.message || 'Wallet payment failed.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = selectedPaymentMethod === 'wallet' ? 'Pay from Wallet' : 'Pay with M-Pesa 📱';
+    }
+  }
 }
 
 // ── GO TO MPESA PAYMENT ───────────────────────────────────────
@@ -335,24 +478,29 @@ function showMpesaWaiting(checkoutId, phone) {
     attempts++;
 
     try {
-      const res  = await fetch(MPESA_API_URL + '/api/status/' + checkoutId);
+      const res  = await fetch(MPESA_API_URL + '/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkoutRequestId: checkoutId })
+      });
       const data = await res.json();
 
-      if (data.status === 'success') {
+      if (data.success && data.status === 'completed') {
         clearInterval(poll);
         // Save purchase with payment details
         await completePaidOrder(data.mpesaCode, phone);
         showMpesaSuccess(data.mpesaCode);
 
-      } else if (data.status === 'failed') {
+      } else if (!data.success && data.status === 'failed') {
         clearInterval(poll);
-        showMpesaFailed(data.reason || 'Payment was cancelled or failed.');
+        showMpesaFailed(data.error || 'Payment was cancelled or failed.');
 
       } else if (attempts >= maxAttempts) {
         clearInterval(poll);
         showMpesaPending();
       }
     } catch (e) {
+      console.error('Poll error:', e);
       if (attempts >= maxAttempts) {
         clearInterval(poll);
         showMpesaPending();

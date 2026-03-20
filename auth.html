@@ -122,6 +122,30 @@ footer {
     <!-- ALERT -->
     <div class="alert" id="alert"></div>
 
+    <!-- LOGGED IN STATE -->
+    <div id="logged-in" style="display:none;text-align:center;">
+      <div style="margin-bottom:1rem;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="margin:0 auto 1rem;">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <h3 style="color:#f0f0f0;margin:0 0 0.5rem;">Already Logged In</h3>
+        <p style="color:#888;margin:0 0 1.5rem;">You are currently logged in as <span id="current-user-email" style="color:#22c55e;"></span></p>
+        <p style="color:#666;font-size:0.9rem;margin:0 0 2rem;">To switch accounts or log out, click the button below.</p>
+      </div>
+      <button class="submit-btn" onclick="handleLogout()" style="background:#ef4444;border-color:#ef4444;margin-bottom:1rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sign Out & Switch Account
+      </button>
+      <button class="submit-btn" onclick="window.location.href='index.html'" style="background:#666;border-color:#666;">
+        Go to Dashboard
+      </button>
+    </div>
+
     <!-- LOGIN FORM -->
     <div id="form-login">
       <div class="form-group">

@@ -135,10 +135,13 @@
         <div class="order-row"><span class="lbl">Price</span><span class="val" id="o-price">—</span></div>
         <div class="order-row"><span class="lbl">Expires</span><span class="val" id="o-expires">—</span></div>
         <div class="order-row"><span class="lbl">Total</span><span class="val total" id="o-total">—</span></div>
+        <div class="order-row"><span class="lbl">Payment</span><span class="val" id="o-payment-method">Choose option below</span></div>
+        <div id="o-payment-options" style="margin-top:0.5rem;"></div>
+        <div id="order-error" style="display:none;color:#ef4444;font-size:0.82rem;margin-top:0.6rem;"></div>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('order')">Cancel</button>
-        <button class="btn-submit" id="confirm-btn" onclick="goToMpesaPayment()">Pay with M-Pesa 📱</button>
+        <button class="btn-submit" id="confirm-btn" onclick="confirmOrderPayment()">Proceed</button>
       </div>
     </div>
 

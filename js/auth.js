@@ -19,9 +19,17 @@ function togglePasswordVisibility(inputId, iconId) {
        <circle cx="12" cy="12" r="3"/>`;
 }
 
-// Redirect to dashboard if already logged in
+// Check if already logged in - show sign out option instead of redirecting
 db.auth.getSession().then(({ data }) => {
-  if (data.session) window.location.href = 'index.html';
+  if (data.session) {
+    // User is logged in - show logged-in UI
+    document.getElementById('logged-in').style.display = 'block';
+    document.getElementById('current-user-email').textContent = data.session.user.email;
+    // Hide tabs and forms
+    document.querySelector('.auth-tabs').style.display = 'none';
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('form-signup').style.display = 'none';
+  }
 });
 
 // ── TAB SWITCH ────────────────────────────────────────────────

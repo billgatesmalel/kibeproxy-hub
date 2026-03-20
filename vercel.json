@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "buildCommand": "npm install",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": [
+    "MPESA_CONSUMER_KEY",
+    "MPESA_CONSUMER_SECRET",
+    "MPESA_SHORTCODE",
+    "MPESA_PASSKEY",
+    "MPESA_ENV",
+    "CALLBACK_URL",
+    "NODE_ENV"
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS, PUT, DELETE"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
+}
