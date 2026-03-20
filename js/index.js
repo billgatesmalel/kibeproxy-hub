@@ -149,9 +149,7 @@ function renderTransactions(data) {
         <tr>
           <th>Type</th>
           <th>Description</th>
-          <th>M-Pesa Name</th>
           <th>M-Pesa Number</th>
-          <th>M-Pesa Code</th>
           <th>Amount</th>
           <th>Status</th>
           <th>Date & Time</th>
@@ -169,9 +167,7 @@ function renderTransactions(data) {
               </span>
             </td>
             <td style="font-size:0.82rem;color:var(--text-secondary);">${t.description || '—'}</td>
-            <td class="mono">${t.mpesa_name || '—'}</td>
             <td class="mono">${t.mpesa_phone || '—'}</td>
-            <td class="mono" style="color:var(--yellow);font-weight:600;">${t.mpesa_code || '—'}</td>
             <td class="mono" style="color:${t.type === 'deposit' ? 'var(--green)' : 'var(--red)'};font-weight:600;">
               ${t.type === 'deposit' ? '+' : '-'}KES ${t.amount}
             </td>
@@ -203,7 +199,6 @@ async function loadAll() {
   const emailList = emails || [];
   const txList    = txns  || [];
 
-  // Update balance
   currentBalance = wallet?.balance || 0;
   document.getElementById('stat-balance').textContent = 'KES ' + currentBalance;
   document.getElementById('nav-balance').textContent  = 'KES ' + currentBalance;
@@ -227,36 +222,27 @@ async function loadAll() {
 // ── ADD MONEY MODAL ───────────────────────────────────────────
 function openAddMoney() {
   document.getElementById('modal-addmoney').classList.add('open');
-  // Reset form
-  document.getElementById('am-amount').value   = '';
-  document.getElementById('am-phone').value    = '';
-  document.getElementById('am-name').value     = '';
-  document.getElementById('am-code').value     = '';
-  document.getElementById('am-error').style.display = 'none';
-  document.getElementById('am-view').style.display    = 'block';
+  document.getElementById('am-amount').value = '';
+  document.getElementById('am-phone').value  = '';
+  document.getElementById('am-error').style.display  = 'none';
+  document.getElementById('am-view').style.display   = 'block';
   document.getElementById('am-success').style.display = 'none';
 }
 
 async function confirmAddMoney() {
   const amountRaw = document.getElementById('am-amount').value.trim();
   const phone     = document.getElementById('am-phone').value.trim();
-  const name      = document.getElementById('am-name').value.trim();
-  const code      = document.getElementById('am-code').value.trim().toUpperCase();
 
   const amount = parseInt(amountRaw);
 
-  if (!amount || amount < 1)  { showAmError('Please enter a valid amount'); return; }
-  if (!phone)                  { showAmError('Please enter your M-Pesa number'); return; }
-  if (!name)                   { showAmError('Please enter the M-Pesa account name'); return; }
-  if (!code)                   { showAmError('Please enter the M-Pesa transaction code'); return; }
-  if (code.length < 8)         { showAmError('M-Pesa code seems too short'); return; }
+  if (!amount || amount < 1) { showAmError('Please enter a valid amount'); return; }
+  if (!phone)                 { showAmError('Please enter your M-Pesa number'); return; }
 
   const btn = document.getElementById('am-btn');
   btn.disabled  = true;
   btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Processing...';
 
   try {
-    // Upsert wallet
     const newBalance = currentBalance + amount;
     const { error: walletErr } = await db.from('wallets').upsert([{
       user_id:    currentUserId,
@@ -266,27 +252,22 @@ async function confirmAddMoney() {
 
     if (walletErr) throw new Error(walletErr.message);
 
-    // Record transaction
     const { error: txErr } = await db.from('transactions').insert([{
       user_id:     currentUserId,
       type:        'deposit',
       amount:      amount,
       description: 'Wallet top-up via M-Pesa',
       mpesa_phone: phone,
-      mpesa_name:  name,
-      mpesa_code:  code,
       status:      'success',
     }]);
 
     if (txErr) throw new Error(txErr.message);
 
-    // Show success
     document.getElementById('am-view').style.display    = 'none';
     document.getElementById('am-success').style.display = 'block';
-    document.getElementById('am-success-amount').textContent = 'KES ' + amount;
+    document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
     document.getElementById('am-success-balance').textContent = 'KES ' + newBalance;
 
-    // Refresh dashboard
     loadAll();
 
   } catch (err) {
@@ -298,8 +279,12 @@ async function confirmAddMoney() {
 
 function showAmError(msg) {
   const el = document.getElementById('am-error');
-  el.textContent    = msg;
-  el.style.display  = 'block';
+  el.textContent   = msg;
+  el.style.display = 'block';
+}
+
+function closeModal(id) {
+  document.getElementById('modal-' + id).classList.remove('open');
 }
 
 initAuth();
