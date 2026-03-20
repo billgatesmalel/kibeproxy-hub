@@ -81,6 +81,11 @@ async function getAccessToken() {
 function formatPhoneNumber(phone) {
   let cleaned = phone.replace(/\D/g, '');
   
+  // If already starts with 254, return as is
+  if (cleaned.startsWith('254')) {
+    return cleaned;
+  }
+  
   // Remove leading zero if exists
   if (cleaned.startsWith('0')) {
     cleaned = cleaned.substring(1);

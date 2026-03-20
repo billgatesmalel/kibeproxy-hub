@@ -247,7 +247,11 @@ async function confirmAddMoney() {
     const orderId = 'WALLET_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
     // Call STK Push API
-    const response = await fetch('https://kibeproxy-hub-app.vercel.app/api/stkpush', {
+    const apiUrl = window.location.hostname === '127.0.0.1' 
+      ? 'http://localhost:3000/api/stkpush' 
+      : 'https://kibeproxy-hub-app.vercel.app/api/stkpush';
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
