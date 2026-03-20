@@ -87,6 +87,11 @@ export default async function handler(req, res) {
     return handleQuery(req, res);
   }
 
+  // Route to callback handler
+  if (req.url.endsWith('/callback') && req.method === 'POST') {
+    return handleCallback(req, res);
+  }
+
   // Health check
   if (req.url === '/health' && req.method === 'GET') {
     return res.status(200).json({ status: 'ok' });

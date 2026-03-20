@@ -243,32 +243,51 @@ async function confirmAddMoney() {
   btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Processing...';
 
   try {
-    const newBalance = currentBalance + amount;
-    const { error: walletErr } = await db.from('wallets').upsert([{
-      user_id:    currentUserId,
-      balance:    newBalance,
-      updated_at: new Date().toISOString(),
-    }], { onConflict: 'user_id' });
+    // Generate unique order ID
+    const orderId = 'WALLET_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-    if (walletErr) throw new Error(walletErr.message);
+    // Call STK Push API
+    const response = await fetch('https://kibeproxy-hub-app.vercel.app/api/stkpush', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone: phone,
+        amount: amount,
+        orderId: orderId,
+        description: 'Wallet Top-up'
+      })
+    });
 
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error || 'STK Push failed');
+    }
+
+    // For now, show success message - in production, wait for callback
+    // The callback will update the balance when payment is confirmed
+    document.getElementById('am-view').style.display    = 'none';
+    document.getElementById('am-success').style.display = 'block';
+    document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
+    document.getElementById('am-success-balance').textContent = 'Balance will update after payment confirmation';
+
+    // Optionally, add a pending transaction
     const { error: txErr } = await db.from('transactions').insert([{
       user_id:     currentUserId,
       type:        'deposit',
       amount:      amount,
-      description: 'Wallet top-up via M-Pesa',
+      description: 'Wallet top-up via M-Pesa (pending)',
       mpesa_phone: phone,
-      status:      'success',
+      status:      'pending',
+      checkout_request_id: data.checkoutRequestId
     }]);
 
-    if (txErr) throw new Error(txErr.message);
+    if (txErr) console.error('Transaction log error:', txErr);
 
-    document.getElementById('am-view').style.display    = 'none';
-    document.getElementById('am-success').style.display = 'block';
-    document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
-    document.getElementById('am-success-balance').textContent = 'KES ' + newBalance;
-
-    loadAll();
+    // Reload after a delay to check for updates
+    setTimeout(() => loadAll(), 10000);
 
   } catch (err) {
     showAmError(err.message);
