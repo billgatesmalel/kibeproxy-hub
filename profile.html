@@ -201,6 +201,7 @@
       <div class="card-sub">Update your account password</div>
     </div>
     <div class="card-body">
+      <form id="password-form" onsubmit="event.preventDefault(); changePassword();">
       <div class="palert" id="alert-pass"></div>
       <div class="form-row">
         <div class="form-group">
@@ -222,7 +223,8 @@
           </div>
         </div>
       </div>
-      <button class="save-btn" id="btn-save-pass" onclick="changePassword()">🔒 Update Password</button>
+      <button class="save-btn" id="btn-save-pass" type="submit">🔒 Update Password</button>
+      </form>
     </div>
   </div>
 
