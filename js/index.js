@@ -185,12 +185,12 @@ async function loadAll() {
   const [
     { data: proxies },
     { data: emails },
-    { data: wallet },
+    { data: wallets },
     { data: txns }
   ] = await Promise.all([
     db.from('proxies').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
     db.from('emails').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
-    db.from('wallets').select('balance').eq('user_id', currentUserId).single(),
+    db.from('wallets').select('balance').eq('user_id', currentUserId).limit(1),
     db.from('transactions').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
   ]);
 
@@ -199,7 +199,7 @@ async function loadAll() {
   const emailList = emails || [];
   const txList    = txns  || [];
 
-  currentBalance = wallet?.balance || 0;
+  currentBalance = (wallets && wallets.length > 0) ? wallets[0].balance : 0;
   document.getElementById('stat-balance').textContent = 'KES ' + currentBalance;
   document.getElementById('nav-balance').textContent  = 'KES ' + currentBalance;
 
