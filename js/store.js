@@ -52,12 +52,15 @@ async function initStore() {
 
 // ── LOAD LISTINGS ─────────────────────────────────────────────
 async function loadListings() {
-  const [{ data: proxies }, { data: emails }] = await Promise.all([
+  const [{ data: proxies }, { data: emails }, { data: userProxies }] = await Promise.all([
     db.from('proxy_listings').select('*').eq('available', true).order('created_at', { ascending: false }),
-    db.from('email_listings').select('*').eq('available', true).order('created_at', { ascending: false })
+    db.from('email_listings').select('*').eq('available', true).order('created_at', { ascending: false }),
+    db.from('proxies').select('listing_id').eq('user_id', currentUserId).eq('status', 'active')
   ]);
 
-  proxyListings = (proxies || []);
+  // Filter out proxies the user already owns
+  const ownedListingIds = new Set((userProxies || []).map(p => p.listing_id));
+  proxyListings = (proxies || []).filter(p => !ownedListingIds.has(p.id));
   emailListings = emails  || [];
 
   proxyListings.forEach(p => { if (!selectedDays[p.id]) selectedDays[p.id] = 1; });
