@@ -3,6 +3,7 @@ let currentUserId = null;
 let currentBalance = 0;
 
 async function initAuth() {
+  document.body.style.visibility = 'hidden';
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
 
@@ -17,6 +18,8 @@ async function initAuth() {
   if (user.email === ADMIN_EMAIL) {
     document.getElementById('admin-link').style.display = 'inline-flex';
   }
+
+  document.body.style.visibility = 'visible';
 
   loadAll();
 }
