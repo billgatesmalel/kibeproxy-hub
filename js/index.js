@@ -211,8 +211,21 @@ async function loadAll() {
     db.from('transactions').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
   ]);
 
-  const active    = (proxies || []).filter(p => p.status === 'active');
-  const expired   = (proxies || []).filter(p => p.status === 'expired');
+  // Filter proxies: only show the latest one per listing_id, hide older duplicates
+  const uniqueProxies = [];
+  const seenListings = new Set();
+  
+  if (proxies) {
+    for (const proxy of proxies.sort((a, b) => new Date(b.purchased_at) - new Date(a.purchased_at))) {
+      if (!seenListings.has(proxy.listing_id)) {
+        uniqueProxies.push(proxy);
+        seenListings.add(proxy.listing_id);
+      }
+    }
+  }
+
+  const active    = (uniqueProxies || []).filter(p => p.status === 'active');
+  const expired   = (uniqueProxies || []).filter(p => p.status === 'expired');
   const emailList = emails || [];
   const txList    = txns  || [];
 
