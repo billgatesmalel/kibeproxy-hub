@@ -571,6 +571,16 @@ async function completePaidOrder(mpesaCode, mpesaPhone) {
     if (type === 'proxy') {
       const listing = proxyListings.find(p => p.id === id);
 
+      // Prevent duplicate purchase — user cannot buy the same proxy listing twice
+      const { data: dup } = await db.from('proxies')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .eq('listing_id', id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (dup) throw new Error('You already own this proxy. You cannot buy the same proxy twice.');
+
       const { error: insertErr } = await db.from('proxies').insert([{
         user_id:        currentUserId,
         host:           listing.host,
