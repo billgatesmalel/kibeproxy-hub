@@ -4,8 +4,21 @@ let currentBalance = 0;
 
 async function initAuth() {
   document.body.style.visibility = 'hidden';
+
+  // If auth check does not complete quickly, force redirect to login
+  const authTimeout = setTimeout(() => {
+    if (document.body.style.visibility !== 'visible') {
+      window.location.href = 'auth.html';
+    }
+  }, 2000);
+
   const { data: { session } } = await db.auth.getSession();
-  if (!session) { window.location.href = 'auth.html'; return; }
+  if (!session || !session.user || !session.user.id) {
+    clearTimeout(authTimeout);
+    await db.auth.signOut();
+    window.location.href = 'auth.html';
+    return;
+  }
 
   const user     = session.user;
   currentUserId  = user.id;
@@ -19,6 +32,7 @@ async function initAuth() {
     document.getElementById('admin-link').style.display = 'inline-flex';
   }
 
+  clearTimeout(authTimeout);
   document.body.style.visibility = 'visible';
 
   loadAll();
