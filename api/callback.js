@@ -7,7 +7,10 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 const db = createClient(supabaseUrl, supabaseKey);
 
+const { setCorsHeaders } = require('./_cors');
+
 module.exports = async function handler(req, res) {
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }

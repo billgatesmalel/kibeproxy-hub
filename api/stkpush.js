@@ -62,7 +62,10 @@ function generatePassword(shortcode, passkey, timestamp) {
   return Buffer.from(shortcode + passkey + timestamp).toString('base64');
 }
 
+const { setCorsHeaders } = require('./_cors');
+
 module.exports = async function handler(req, res) {
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
