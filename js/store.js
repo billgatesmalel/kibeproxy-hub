@@ -125,10 +125,6 @@ function renderProxyListings() {
           <span class="spec-label">Host</span>
           <span class="spec-val mono locked">🔒 Hidden</span>
         </div>
-        <div class="spec-row">
-          <span class="spec-label">Slots</span>
-          <span class="spec-val">${(p.max_buyers || 1) - (p.buyer_count || 0)} left</span>
-        </div>
       </div>
       <div class="duration-section">
         <div class="price-row">
