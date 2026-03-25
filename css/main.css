@@ -228,6 +228,17 @@ nav {
   animation: spin 0.7s linear infinite;
 }
 
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { padding: 12px 18px; text-align: left; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); font-weight: 600; }
+.data-table td { padding: 14px 18px; font-size: 0.85rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-secondary); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; font-family: 'DM Mono', monospace; }
+.badge.active  { background: var(--green-glow); color: var(--green); border: 1px solid var(--green-dim); }
+.badge.expired { background: var(--red-glow);   color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes float  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
