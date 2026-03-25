@@ -114,6 +114,17 @@
     </button>
   </div>
 
+  <!-- DURATION FILTER (Only for Proxies) -->
+  <div class="duration-filter-wrap" id="duration-filter-wrap">
+    <div class="filter-label">How many days do you need?</div>
+    <div class="duration-filter">
+      <button class="dur-filter-btn active" onclick="setStoreDuration(1, this)">Daily</button>
+      <button class="dur-filter-btn" onclick="setStoreDuration(7, this)">7 Days</button>
+      <button class="dur-filter-btn" onclick="setStoreDuration(14, this)">14 Days</button>
+      <button class="dur-filter-btn" onclick="setStoreDuration(30, this)">Monthly</button>
+    </div>
+  </div>
+
   <div class="store-grid" id="store-grid">
     <div class="store-empty"><div class="spinner" style="margin:0 auto 1rem;"></div> Loading...</div>
   </div>

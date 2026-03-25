@@ -246,13 +246,13 @@ function renderProxyListings(listings) {
   }
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Country</th><th>Host</th><th>Port</th><th>Price/Day</th><th>Slots</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
+      <thead><tr><th>Country</th><th>Host</th><th>Duration</th><th>Price</th><th>Slots</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
       <tbody>
         ${listings.map(p => `
           <tr>
             <td>${p.flag || ''} ${p.country}</td>
             <td class="mono">${p.host}</td>
-            <td class="mono">${p.port}</td>
+            <td class="mono" style="color:var(--yellow)">${p.duration_days || 1} Days</td>
             <td class="mono" style="color:var(--green)">KES ${p.price_per_day}</td>
             <td class="mono" style="color:${((p.max_buyers||1)-(p.buyer_count||0))<=1?'var(--red)':'var(--green)'}">
               ${p.buyer_count||0}/${p.max_buyers||1} sold
@@ -393,6 +393,7 @@ async function addProxyListing() {
   const username      = document.getElementById('pl-username').value.trim();
   const password      = document.getElementById('pl-password').value;
   const price_per_day = parseInt(document.getElementById('pl-price').value) || 100;
+  const duration_days = parseInt(document.getElementById('pl-duration').value) || 1;
   const maxEl = document.getElementById('pl-max-buyers');
   const max_buyers = maxEl ? (parseInt(maxEl.value) || 1) : 1;
 
@@ -408,7 +409,7 @@ async function addProxyListing() {
 
   const { error } = await db.from('proxy_listings').insert([{
     country, flag, host, port, username, password, price_per_day,
-    max_buyers, buyer_count: 0, available: true
+    duration_days, max_buyers, buyer_count: 0, available: true
   }]);
 
   if (error) { showToast('Failed: ' + error.message, 'error'); return; }

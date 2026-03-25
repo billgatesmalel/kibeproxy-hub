@@ -14,13 +14,14 @@ const MPESA_API_URL = window.location.hostname === 'localhost' || window.locatio
   : 'https://kibeproxy-hub-app.vercel.app';
 
 const PROXY_PLANS = [
-  { days: 1,  label: 'Daily',   price: 100,  savings: '' },
-  { days: 7,  label: '7 Days',  price: 600,  savings: 'Save 14%' },
-  { days: 14, label: '14 Days', price: 1100, savings: 'Save 22%' },
-  { days: 30, label: 'Monthly', price: 2000, savings: 'Save 33%' },
+  { days: 1,  label: 'Daily' },
+  { days: 7,  label: '7 Days' },
+  { days: 14, label: '14 Days' },
+  { days: 30, label: 'Monthly' },
 ];
 
-const selectedPlans = {}; // Format: { country: days }
+let currentDuration = 1;
+const selectedPlans = {}; // Not used anymore in fixed mode
 
 // ── AUTH GUARD ────────────────────────────────────────────────
 async function initStore() {
@@ -80,89 +81,71 @@ function renderTab(tab) {
 }
 
 // ── RENDER PROXY LISTINGS ─────────────────────────────────────
+// ── SET DURATION ──────────────────────────────────────────────
+function setStoreDuration(days, btn) {
+  currentDuration = days;
+  document.querySelectorAll('.dur-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProxyListings();
+}
+
+// ── RENDER PROXY LISTINGS ─────────────────────────────────────
 function renderProxyListings() {
   const grid = document.getElementById('store-grid');
-  if (!proxyListings.length) {
+  const filterWrap = document.getElementById('duration-filter-wrap');
+  
+  if (activeTab === 'proxies') filterWrap.style.display = 'block';
+  else                         filterWrap.style.display = 'none';
+
+  const filtered = proxyListings.filter(p => (p.duration_days || 1) === currentDuration);
+
+  if (!filtered.length) {
     grid.innerHTML = `
       <div class="store-empty">
-        <p>No proxies available right now.</p>
-        <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.5rem;">Check back soon or contact support.</p>
+        <p>No ${currentDuration}-day proxies available right now.</p>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.5rem;">Try a different duration or check back soon.</p>
       </div>`;
     return;
   }
 
-  // Group by country
-  const grouped = {};
-  proxyListings.forEach(p => {
-    if (!grouped[p.country]) {
-      grouped[p.country] = {
-        name: p.country,
-        flag: p.flag || '🌍',
-        items: []
-      };
-    }
-    grouped[p.country].items.push(p);
-  });
-
-  grid.innerHTML = Object.values(grouped).map(group => {
-    const country = group.name;
-    if (!selectedPlans[country]) selectedPlans[country] = 1; // Default to Daily
-    const plan = PROXY_PLANS.find(p => p.days === selectedPlans[country]);
-
-    return `
+  grid.innerHTML = filtered.map(p => `
     <div class="listing-card">
       <div class="card-header">
-        <div class="country-flag">${group.flag}</div>
+        <div class="country-flag">${p.flag || '🌍'}</div>
         <div class="country-info">
-          <div class="country-name">${country} Proxy</div>
-          <div class="country-sub">High Speed Residential</div>
+          <div class="country-name">${p.country} Proxy</div>
+          <div class="country-sub">${currentDuration === 1 ? 'Daily Offer' : currentDuration + ' Days Plan'}</div>
         </div>
-        <span class="avail-badge">● Pool: ${group.items.length}</span>
+        <span class="avail-badge">● Available</span>
       </div>
-
       <div class="card-specs">
         <div class="spec-row">
-          <span class="spec-label">Protocol</span>
-          <span class="spec-val">HTTP / SOCKS5</span>
+          <span class="spec-label">Duration</span>
+          <span class="spec-val">${currentDuration} Day${currentDuration > 1 ? 's' : ''}</span>
         </div>
         <div class="spec-row">
-          <span class="spec-label">Uptime</span>
-          <span class="spec-val green">99.9%</span>
+          <span class="spec-label">Host</span>
+          <span class="spec-val mono locked">🔒 Hidden</span>
         </div>
         <div class="spec-row">
-          <span class="spec-label">Location</span>
-          <span class="spec-val">${country}</span>
+          <span class="spec-label">Slots</span>
+          <span class="spec-val">${(p.max_buyers || 1) - (p.buyer_count || 0)} left</span>
         </div>
       </div>
-
       <div class="duration-section">
-        <div class="dur-label">Select Your Plan</div>
-        <div class="dur-options" style="grid-template-columns: repeat(2, 1fr);">
-          ${PROXY_PLANS.map(p => `
-            <button class="dur-btn ${selectedPlans[country] === p.days ? 'active' : ''}"
-              onclick="selectProxyPlan('${country}', ${p.days}, this)"
-              style="padding: 12px 6px; position: relative;">
-              <span class="dur-lbl" style="font-weight: 800; font-size: 0.85rem; margin-bottom: 2px;">${p.label}</span>
-              <span class="dur-days" style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500;">KES ${p.price}</span>
-              ${p.savings ? `<span style="position: absolute; top: -5px; right: -5px; background: var(--green); color: #000; font-size: 0.55rem; padding: 2px 5px; border-radius: 4px; font-weight: 800;">${p.savings}</span>` : ''}
-            </button>`).join('')}
-        </div>
-        
         <div class="price-row">
-          <span class="price-label">Selected: ${plan.label}</span>
-          <span class="price-val" id="price-${country.replace(/\s/g, '-')}">KES ${plan.price}</span>
+          <span class="price-label">Total Price</span>
+          <span class="price-val">KES ${p.price_per_day}</span>
         </div>
-
-        <button class="buy-btn" onclick="openProxyOrder('${country}')">
+        <button class="buy-btn" onclick="openProxyOrder('${p.id}')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
-          Get Started
+          Buy Now
         </button>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
 // ── RENDER EMAIL LISTINGS ─────────────────────────────────────
@@ -230,23 +213,18 @@ function selectProxyPlan(country, days, btn) {
 }
 
 // ── OPEN PROXY ORDER ──────────────────────────────────────────
-function openProxyOrder(country) {
-  // Find first available proxy for this country
-  const availableProbies = proxyListings.filter(p => p.country === country);
-  if (!availableProbies.length) {
-    showToast('No proxies currently available for this country.', 'error');
-    return;
-  }
-  const listing = availableProbies[0];
-  const days    = selectedPlans[country] || 1;
-  const plan    = PROXY_PLANS.find(p => p.days === days);
-  const total   = plan.price;
+function openProxyOrder(id) {
+  const listing = proxyListings.find(p => p.id === id);
+  if (!listing) return;
+
+  const days    = listing.duration_days || 1;
+  const total   = listing.price_per_day;
   const expires = new Date(Date.now() + days * 86400000).toLocaleDateString();
 
   document.getElementById('o-icon').textContent    = listing.flag || '🌍';
-  document.getElementById('o-title').textContent   = `${country} ${plan.label} Plan`;
+  document.getElementById('o-title').textContent   = `${listing.country} ${days}-Day Proxy`;
   document.getElementById('o-host').textContent    = listing.host;
-  document.getElementById('o-dur').textContent     = plan.label;
+  document.getElementById('o-dur').textContent     = `${days} Days`;
   document.getElementById('o-price').textContent   = `KES ${total}`;
   document.getElementById('o-expires').textContent = expires;
   document.getElementById('o-total').textContent   = `KES ${total}`;
