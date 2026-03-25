@@ -14,10 +14,10 @@ const MPESA_API_URL = window.location.hostname === 'localhost' || window.locatio
   : 'https://kibeproxy-hub-app.vercel.app';
 
 const PROXY_PLANS = [
-  { days: 1,  label: 'Daily',   price: 150,  savings: '' },
-  { days: 7,  label: '7 Days',  price: 900,  savings: 'Save 15%' },
-  { days: 14, label: '14 Days', price: 1600, savings: 'Save 25%' },
-  { days: 30, label: 'Monthly', price: 3000, savings: 'Save 40%' },
+  { days: 1,  label: 'Daily',   price: 100,  savings: '' },
+  { days: 7,  label: '7 Days',  price: 600,  savings: 'Save 14%' },
+  { days: 14, label: '14 Days', price: 1100, savings: 'Save 22%' },
+  { days: 30, label: 'Monthly', price: 2000, savings: 'Save 33%' },
 ];
 
 const selectedPlans = {}; // Format: { country: days }
