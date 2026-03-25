@@ -28,8 +28,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 .empty-icon { width: 56px; height: 56px; margin-bottom: 1.25rem; opacity: 0.3; }
 .empty-title { font-size: 1.1rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.5rem; }
 .empty-sub { font-size: 0.88rem; margin-bottom: 1.5rem; }
-.buy-link-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green-glow); color: var(--green); border: 1px solid var(--green-dim); padding: 11px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.88rem; transition: all 0.2s; }
-.buy-link-btn:hover { opacity: 0.88; }
+.buy-link-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #000; border: none; padding: 12px 28px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 0.9rem; transition: all 0.2s; box-shadow: 0 4px 15px rgba(34,197,94,0.2); }
+.buy-link-btn:hover { opacity: 0.88; transform: translateY(-1px); }
 
 @media (max-width: 600px) {
   main { padding: 2rem 1rem; }
