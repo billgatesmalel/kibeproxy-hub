@@ -350,10 +350,10 @@ footer {
   background: rgba(0,0,0,0.15);
   border: 1px solid rgba(255,255,255,0.2);
   color: #fff;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  padding: 11px 18px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 700;
   text-decoration: none;
   font-family: 'Syne', sans-serif;
   transition: all 0.2s;
