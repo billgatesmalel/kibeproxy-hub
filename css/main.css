@@ -23,11 +23,14 @@
 html, body {
   background: var(--bg);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Syne', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
+
+.inter-ui { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.mono { font-family: 'DM Mono', monospace; font-size: 0.88rem; }
 
 h1, h2, h3, h4, h5, h6, .logo-text, .nav-link, .btn, .store-tab, .dur-lbl {
   font-family: 'Syne', sans-serif;
