@@ -62,42 +62,16 @@ function generatePassword(shortcode, passkey, timestamp) {
   return Buffer.from(shortcode + passkey + timestamp).toString('base64');
 }
 
-// Set CORS headers
-function setCorsHeaders(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Max-Age', '86400');
-}
-
 module.exports = async function handler(req, res) {
-  setCorsHeaders(res);
-
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Route to stkpush handler
-  if (req.url.endsWith('/stkpush') && req.method === 'POST') {
-    return handleStkPush(req, res);
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Route to query handler
-  if (req.url.endsWith('/query') && req.method === 'POST') {
-    return handleQuery(req, res);
-  }
-
-  // Route to callback handler
-  if (req.url.endsWith('/callback') && req.method === 'POST') {
-    return handleCallback(req, res);
-  }
-
-  // Health check
-  if (req.url === '/health' && req.method === 'GET') {
-    return res.status(200).json({ status: 'ok' });
-  }
-
-  return res.status(404).json({ error: 'Not found' });
+  return handleStkPush(req, res);
 }
 
 async function handleStkPush(req, res) {
@@ -164,65 +138,4 @@ async function handleStkPush(req, res) {
   }
 }
 
-async function handleQuery(req, res) {
-  try {
-    const { checkoutRequestId } = req.body;
-
-    if (!checkoutRequestId) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Missing checkoutRequestId' 
-      });
-    }
-
-    const token = await getAccessToken();
-    const timestamp = generateTimestamp();
-    const password = generatePassword(MPESA_SHORTCODE, MPESA_PASSKEY, timestamp);
-
-    const response = await axios.post(
-      `${SAFARICOM_BASE_URL}/mpesa/stkpushquery/v1/query`,
-      {
-        BusinessShortCode: MPESA_SHORTCODE,
-        Password: password,
-        Timestamp: timestamp,
-        CheckoutRequestID: checkoutRequestId
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    const data = response.data;
-    
-    if (data.ResponseCode === '0') {
-      return res.json({
-        success: true,
-        status: 'completed',
-        resultCode: data.ResultCode,
-        mpesaCode: data.ResultParameter?.find(p => p.Key === 'MpesaReceiptNumber')?.Value
-      });
-    } else if (data.ResponseCode === '1' || data.ResponseCode === '500.001.1001') {
-      return res.json({
-        success: false,
-        status: 'pending',
-        error: 'Payment processing'
-      });
-    } else {
-      return res.json({
-        success: false,
-        status: 'failed',
-        error: data.ResponseDescription
-      });
-    }
-
-  } catch (error) {
-    console.error('Query Error:', error.response?.data || error.message);
-    return res.status(500).json({
-      success: false,
-      error: 'Query failed'
-    });
-  }
 }
