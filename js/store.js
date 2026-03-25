@@ -188,14 +188,27 @@ function openProxyOrder(country) {
     showToast('No proxies currently available for this country.', 'error');
     return;
   }
-  
-  const listing = avai  const btn = document.getElementById('confirm-btn');
+  const listing = availableProbies[0];
+  const days    = selectedPlans[country] || 1;
+  const plan    = PROXY_PLANS.find(p => p.days === days);
+  const total   = plan.price;
+  const expires = new Date(Date.now() + days * 86400000).toLocaleDateString();
+
+  document.getElementById('o-icon').textContent    = listing.flag || '🌍';
+  document.getElementById('o-title').textContent   = `${country} ${plan.label} Plan`;
+  document.getElementById('o-host').textContent    = listing.host;
+  document.getElementById('o-dur').textContent     = plan.label;
+  document.getElementById('o-price').textContent   = `KES ${total}`;
+  document.getElementById('o-expires').textContent = expires;
+  document.getElementById('o-total').textContent   = `KES ${total}`;
+
+  const btn = document.getElementById('confirm-btn');
   btn.dataset.type    = 'proxy';
   btn.dataset.id      = listing.id;
   btn.dataset.days    = days;
   btn.dataset.expires = new Date(Date.now() + days * 86400000).toISOString();
 
-  pendingOrderData = { type: 'proxy', id: listing.id, days, expires: btn.dataset.expires };
+  pendingOrderData = { type: 'proxy', id: listing.id, days, expires: btn.dataset.expires, total };
 
   showOrderView();
   openModal('order');
@@ -217,7 +230,7 @@ function openEmailOrder(id) {
   btn.dataset.type = 'email';
   btn.dataset.id   = id;
 
-  pendingOrderData = { type: 'email', id };
+  pendingOrderData = { type: 'email', id, total: listing.price };
 
   showOrderView();
   openModal('order');
@@ -242,11 +255,10 @@ function hideOrderError() {
 }
 
 function renderPaymentOptions() {
-  const totalText = document.getElementById('o-total').textContent || '0';
-  const total = parseInt(totalText.replace(/KES\s?/, '').replace(/,/g, '')) || 0;
+  const total = pendingOrderData?.total || 0;
   const methodEl = document.getElementById('o-payment-method');
   const optionsEl = document.getElementById('o-payment-options');
-  selectedPaymentMethod = 'mpesa';
+  selectedPaymentMethod = 'mpesa'; // Default to mpesa
 
   if (methodEl) {
     methodEl.textContent = currentBalance >= total
@@ -296,8 +308,7 @@ function confirmOrderPayment() {
 
 async function payWithWallet() {
   if (!pendingOrderData) return;
-  const totalText = document.getElementById('o-total').textContent || '0';
-  const total = parseInt(totalText.replace(/KES\s?/, '').replace(/,/g, '')) || 0;
+  const total = pendingOrderData.total;
 
   if (currentBalance < total) {
     showOrderError('Insufficient wallet balance.');
@@ -313,7 +324,7 @@ async function payWithWallet() {
       user_id: currentUserId,
       balance: newBalance,
       updated_at: new Date().toISOString(),
-    }]);
+    }], { onConflict: 'user_id' });
 
     if (walletErr) throw new Error(walletErr.message);
 
@@ -321,8 +332,10 @@ async function payWithWallet() {
       user_id: currentUserId,
       type: 'purchase',
       amount: total,
-      description: 'Store purchase (Wallet)',
-      status: 'success'
+      description: 'Store purchase using wallet',
+      mpesa_phone: null,
+      status: 'success',
+      created_at: new Date().toISOString(),
     }]);
 
     currentBalance = newBalance;
@@ -334,7 +347,7 @@ async function payWithWallet() {
     window.location.href = 'index.html';
 
   } catch (err) {
-    showOrderError(err.message || 'Payment failed.');
+    showOrderError(err.message || 'Wallet payment failed.');
   } finally {
     if (btn) { btn.disabled = false; onPaymentMethodChange(selectedPaymentMethod); }
   }
@@ -362,7 +375,7 @@ async function initiateMpesaPayment() {
   btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;"></div> Sending...';
 
   try {
-    const amount = parseInt(document.getElementById('mpesa-amount').textContent.replace(/\D/g, '')) || 100;
+    const amount = pendingOrderData.total;
     const res = await fetch(MPESA_API_URL + '/api/stkpush', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -410,6 +423,7 @@ function showMpesaSuccess(code) {
 }
 
 function showMpesaFailed(reason) {
+  document.getElementById('mpesa-form-view').style.display = 'none';
   document.getElementById('mpesa-wait-view').style.display = 'none';
   document.getElementById('mpesa-failed-view').style.display = 'block';
   document.getElementById('mpesa-fail-reason').textContent = reason;
@@ -434,60 +448,30 @@ function showMpesaError(msg) {
 
 function hideMpesaError() { document.getElementById('mpesa-error').style.display = 'none'; }
 
-async function completePaidOrder(mpesaCode, mpesaPhone) {
+async function completePaidOrder(mpesaCode, phone) {
   if (!pendingOrderData) return;
-  const { type, id, days, expires } = pendingOrderData;
+  const { type, id, days, expires, total } = pendingOrderData;
   const now = new Date().toISOString();
 
   try {
+    // Record transaction
+    await db.from('transactions').insert([{
+      user_id:      currentUserId,
+      type:         'purchase',
+      amount:       total,
+      description:  `Store purchase (${type === 'proxy' ? 'Proxy' : 'Email'})`,
+      mpesa_phone:  phone === 'N/A' ? null : phone,
+      status:       'success',
+      created_at:   now,
+    }]);
+
     if (type === 'proxy') {
       const listing = proxyListings.find(p => p.id === id);
-      await db.from('proxies').insert([{
-        user_id: currentUserId,
-        host: listing.host,
-        port: listing.port,
-        country: listing.country,
-        status: 'active',
-        expires_at: expires,
-        mpesa_code: mpesaCode,
-        purchased_at: now,
-        listing_id: id
-      }]);
-
-      const newCount = (listing.buyer_count || 0) + 1;
-      await db.from('proxy_listings').update({
-        buyer_count: newCount,
-        available: newCount < (listing.max_buyers || 1)
-      }).eq('id', id);
-
-    } else {
-      const listing = emailListings.find(e => e.id === id);
-      await db.from('emails').insert([{
-        user_id: currentUserId,
-        email: listing.email,
-        password: listing.password,
-        mpesa_code: mpesaCode,
-        purchased_at: now
-      }]);
-      await db.from('email_listings').update({ available: false }).eq('id', id);
-    }
-    loadListings();
-  } catch (err) { console.error('Order Error:', err); }
-}
-
-function goToDashboard() { window.location.href = 'index.html'; }
-
-function openModal(id) { document.getElementById('modal-' + id).classList.add('active'); }
-function closeModal(id) { document.getElementById('modal-' + id).classList.remove('active'); }
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  setTimeout(() => t.className = 'toast', 3000);
-}
-
-initStore();
-,
+      const { error: insertErr } = await db.from('proxies').insert([{
+        user_id:        currentUserId,
+        host:           listing.host,
+        port:           listing.port,
+        country:        listing.country,
         status:         'active',
         expires_at:     expires,
         buyer_email:    currentUserEmail,
