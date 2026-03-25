@@ -23,7 +23,9 @@
     "MPESA_PASSKEY",
     "MPESA_ENV",
     "CALLBACK_URL",
-    "NODE_ENV"
+    "NODE_ENV",
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY"
   ],
   "headers": [
     {

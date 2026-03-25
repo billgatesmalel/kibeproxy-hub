@@ -1,9 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const app = express();
+
+// ── SUPABASE CLIENT ────────────────────────────────────────────
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
 
 // ──────────────────────────────────────────────────
 // MIDDLEWARE
@@ -279,31 +287,101 @@ app.post('/api/query', async (req, res) => {
 });
 
 // Callback endpoint for Safaricom
-app.post('/api/callback', (req, res) => {
-  try {
-    console.log('Callback received:', JSON.stringify(req.body, null, 2));
-    
-    // Safaricom requires a 200 response quickly
-    res.json({ status: 'ok' });
+app.post('/api/callback', async (req, res) => {
+  // Respond to Safaricom immediately (required within 5 seconds)
+  res.json({ status: 'ok' });
 
-    // Process callback asynchronously
+  try {
     const body = req.body;
-    
-    if (body.Body?.stkCallback) {
-      const callback = body.Body.stkCallback;
-      const checkoutRequestId = callback.CheckoutRequestID;
-      const resultCode = callback.ResultCode;
-      const resultDesc = callback.ResultDesc;
-      
-      console.log(`Payment Update - CheckoutID: ${checkoutRequestId}, Result: ${resultCode}, Desc: ${resultDesc}`);
-      
-      // Here you would typically update your database with the payment status
-      // and notify the client via WebSocket or polling
+    console.log('Callback received:', JSON.stringify(body, null, 2));
+
+    if (!body.Body?.stkCallback) return;
+
+    const callback       = body.Body.stkCallback;
+    const checkoutId     = callback.CheckoutRequestID;
+    const resultCode     = callback.ResultCode;
+    const resultDesc     = callback.ResultDesc;
+
+    console.log(`Payment Update — CheckoutID: ${checkoutId}, Code: ${resultCode}, Desc: ${resultDesc}`);
+
+    if (resultCode === 0) {
+      // ── PAYMENT SUCCESSFUL ──────────────────────────────────
+      // 1. Find the pending transaction
+      const { data: txRows, error: txErr } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('checkout_request_id', checkoutId)
+        .eq('status', 'pending');
+
+      if (txErr || !txRows || txRows.length === 0) {
+        console.error('No pending transaction found for:', checkoutId, txErr);
+        return;
+      }
+
+      const tx     = txRows[0];
+      const userId = tx.user_id;
+      const amount = tx.amount;
+
+      // 2. Mark transaction as success
+      const { error: updateErr } = await supabase
+        .from('transactions')
+        .update({ status: 'success' })
+        .eq('checkout_request_id', checkoutId);
+
+      if (updateErr) {
+        console.error('Failed to update transaction status:', updateErr);
+        return;
+      }
+
+      // 3. Get current wallet balance
+      const { data: wallet, error: walletErr } = await supabase
+        .from('wallets')
+        .select('balance')
+        .eq('user_id', userId)
+        .single();
+
+      if (walletErr && walletErr.code !== 'PGRST116') {
+        console.error('Wallet fetch error:', walletErr);
+        return;
+      }
+
+      const currentBalance = wallet?.balance || 0;
+      const newBalance     = currentBalance + amount;
+
+      // 4. Upsert wallet with new balance
+      const { error: upsertErr } = await supabase
+        .from('wallets')
+        .upsert([{
+          user_id:    userId,
+          balance:    newBalance,
+          updated_at: new Date().toISOString(),
+        }], { onConflict: 'user_id' });
+
+      if (upsertErr) {
+        console.error('Wallet upsert error:', upsertErr);
+        return;
+      }
+
+      console.log(`✅ Wallet updated for user ${userId}: KES ${currentBalance} → KES ${newBalance}`);
+
+    } else {
+      // ── PAYMENT FAILED / CANCELLED ──────────────────────────
+      if (checkoutId) {
+        const { error: failErr } = await supabase
+          .from('transactions')
+          .update({ status: 'failed' })
+          .eq('checkout_request_id', checkoutId);
+
+        if (failErr) {
+          console.error('Failed to mark transaction as failed:', failErr);
+        } else {
+          console.log(`❌ Transaction marked failed for CheckoutID: ${checkoutId}`);
+        }
+      }
     }
 
   } catch (error) {
-    console.error('Callback Error:', error.message);
-    res.status(500).json({ status: 'error' });
+    console.error('Callback processing error:', error.message);
   }
 });
 
