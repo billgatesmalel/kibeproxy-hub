@@ -137,5 +137,3 @@ async function handleStkPush(req, res) {
     });
   }
 }
-
-}
