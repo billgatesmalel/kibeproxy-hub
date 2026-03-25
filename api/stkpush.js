@@ -44,6 +44,7 @@ async function getAccessToken() {
 
 function formatPhoneNumber(phone) {
   let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('254')) return cleaned;
   if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
   return `254${cleaned}`;
 }
@@ -133,10 +134,11 @@ async function handleStkPush(req, res) {
     }
 
   } catch (error) {
+    const errorMessage = error.response?.data?.errorMessage || error.response?.data?.ResponseDescription || error.message;
     console.error('STK Error:', error.response?.data || error.message);
     return res.status(500).json({
       success: false,
-      error: 'Payment initiation failed'
+      error: errorMessage || 'Payment initiation failed'
     });
   }
 }

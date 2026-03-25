@@ -273,13 +273,12 @@ async function confirmAddMoney() {
   btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Processing...';
 
   try {
-    // Generate unique order ID
-    const orderId = 'WALLET_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    // Generate unique order ID - MUST be short for AccountReference (max 20 chars)
+    const orderId = 'WL' + Date.now().toString().slice(-10);
 
     // Call STK Push API
-    const apiUrl = window.location.hostname === '127.0.0.1' 
-      ? 'http://localhost:3000/api/stkpush' 
-      : 'https://kibeproxy-hub-app.vercel.app/api/stkpush';
+    // Call STK Push API - Always hit the Vercel backend for now as it contains the secrets
+    const apiUrl = 'https://kibeproxy-hub-app.vercel.app/api/stkpush';
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -297,7 +296,8 @@ async function confirmAddMoney() {
     const data = await response.json();
 
     if (!data.success) {
-      throw new Error(data.error || 'STK Push failed');
+      console.error('STK API Error:', data);
+      throw new Error(data.error || 'STK Push failed at server');
     }
 
     // For now, show success message - in production, wait for callback
