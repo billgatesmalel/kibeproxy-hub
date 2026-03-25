@@ -166,7 +166,56 @@ function renderProxyListings() {
 }
 
 // ── RENDER EMAIL LISTINGS ─────────────────────────────────────
-// ... (email logic remains same, but I'll update it for consistency if needed)
+function renderEmailListings() {
+  const grid = document.getElementById('store-grid');
+  if (!emailListings.length) {
+    grid.innerHTML = `
+      <div class="store-empty">
+        <p>No emails available right now.</p>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.5rem;">Check back soon or contact support.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = emailListings.map(e => `
+    <div class="listing-card email-card">
+      <div class="card-header">
+        <div class="country-flag">✉️</div>
+        <div class="country-info">
+          <div class="country-name">Email Account</div>
+          <div class="country-sub">Premium Email</div>
+        </div>
+        <span class="avail-badge">● Available</span>
+      </div>
+      <div class="card-specs">
+        <div class="spec-row">
+          <span class="spec-label">Email</span>
+          <span class="spec-val mono locked">🔒 Hidden until purchased</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Access</span>
+          <span class="spec-val mono">Full Access</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Price</span>
+          <span class="spec-val green">KES ${e.price} one-time</span>
+        </div>
+      </div>
+      <div class="duration-section">
+        <div class="price-row">
+          <span class="price-label">Total</span>
+          <span class="price-val">KES ${e.price}</span>
+        </div>
+        <button class="buy-btn" onclick="openEmailOrder('${e.id}')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          Buy Email
+        </button>
+      </div>
+    </div>`).join('');
+}
 
 // ── SELECT PLAN ───────────────────────────────────────────────
 function selectProxyPlan(country, days, btn) {
