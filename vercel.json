@@ -16,17 +16,6 @@
       "dest": "/$1"
     }
   ],
-  "env": [
-    "MPESA_CONSUMER_KEY",
-    "MPESA_CONSUMER_SECRET",
-    "MPESA_SHORTCODE",
-    "MPESA_PASSKEY",
-    "MPESA_ENV",
-    "CALLBACK_URL",
-    "NODE_ENV",
-    "SUPABASE_URL",
-    "SUPABASE_ANON_KEY"
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
