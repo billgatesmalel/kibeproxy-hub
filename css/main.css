@@ -6,9 +6,9 @@
   --surface: #111111;
   --border: #1e1e1e;
   --border-light: #2a2a2a;
-  --text-primary: #f0f0f0;
-  --text-secondary: #888;
-  --text-muted: #555;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
   --green: #22c55e;
   --green-dim: #166534;
   --green-glow: rgba(34,197,94,0.15);
@@ -23,8 +23,14 @@
 html, body {
   background: var(--bg);
   color: var(--text-primary);
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6, .logo-text, .nav-link, .btn, .store-tab, .dur-lbl {
+  font-family: 'Syne', sans-serif;
 }
 
 /* ── NAVBAR ── */
@@ -136,9 +142,10 @@ nav {
 
 .form-label {
   display: block;
-  font-size: 0.78rem; color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: 0.07em;
-  margin-bottom: 6px;
+  font-size: 0.75rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .form-input {
