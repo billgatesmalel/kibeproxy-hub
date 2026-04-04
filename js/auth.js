@@ -165,15 +165,18 @@ async function handleSignup() {
     signupOptions.options.data.referred_by = referralCode;
   }
 
-  const { error } = await db.auth.signUp(signupOptions);
+  const { data, error } = await db.auth.signUp(signupOptions);
   setLoading('signup-btn', false, 'Create Account');
 
   if (error) {
     showAlert(error.message);
   } else {
-    showAlert('Account created! You can now login.', 'success');
-
-    // Browser will offer to save password automatically due to autocomplete attributes
+    if (data.session) {
+      showAlert('Account created! Welcome to KibeProxy.', 'success');
+      setTimeout(() => window.location.href = 'index.html', 1500);
+    } else {
+      showAlert('Account created! Please check your email to verify.', 'success');
+    }
   }
 }
 
