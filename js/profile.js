@@ -9,34 +9,31 @@ async function initProfile() {
   const meta     = currentUser.user_metadata || {};
   const name     = meta.full_name || currentUser.email.split('@')[0];
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  
+  AppCache.set('user_meta', { name, initials });
 
-  // Navbar
+  // Update navbar/hero immediately via cache (common.js does this automatically on load, but we re-verify)
   document.getElementById('user-name').textContent     = name;
   document.getElementById('user-initials').textContent = initials;
 
-  // Admin badge
   if (currentUser.email === ADMIN_EMAIL) {
     document.getElementById('admin-link').style.display  = 'inline-flex';
     document.getElementById('badge-admin').style.display = 'inline-flex';
   }
 
-  // Verified badge
   if (currentUser.email_confirmed_at) {
     document.getElementById('badge-verified').style.display = 'inline-flex';
   }
 
-  // Hero
   document.getElementById('avatar-initials').textContent = initials;
   document.getElementById('hero-name').textContent        = name;
   document.getElementById('hero-email').textContent       = currentUser.email;
-  document.getElementById('hero-joined').style.display    = 'none';
 
-  // Pre-fill form — name is read-only
   document.getElementById('display-name').value  = name;
   document.getElementById('user-email').value    = currentUser.email;
   document.getElementById('phone-number').value  = meta.phone || '';
 
-  // Load username
+  // Parallel load non-critical data
   loadUsername();
   loadStats();
 }

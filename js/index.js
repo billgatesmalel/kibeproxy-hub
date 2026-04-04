@@ -122,42 +122,27 @@ async function initAuth() {
 
   // If auth check does not complete quickly, force redirect to login
   const authTimeout = setTimeout(() => {
-    if (document.body.style.visibility !== 'visible') {
-      window.location.href = 'auth.html';
-    }
-  }, 2000);
-
+async function init() {
   const { data: { session } } = await db.auth.getSession();
-  if (!session || !session.user || !session.user.id) {
-    clearTimeout(authTimeout);
-    await db.auth.signOut();
-    window.location.href = 'auth.html';
-    return;
-  }
+  if (!session) { window.location.href = 'auth.html'; return; }
 
-  const user     = session.user;
-  currentUserId  = user.id;
-  const name     = user.user_metadata?.full_name || user.email.split('@')[0];
+  currentUserId    = session.user.id;
+  currentUserEmail = session.user.email;
+
+  const meta = session.user.user_metadata || {};
+  const name = meta.full_name || currentUserEmail.split('@')[0];
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
+  AppCache.set('user_meta', { name, initials });
   document.getElementById('user-name').textContent     = name;
   document.getElementById('user-initials').textContent = initials;
 
-  if (user.email === ADMIN_EMAIL) {
+  if (currentUserEmail === ADMIN_EMAIL) {
     document.getElementById('admin-link').style.display = 'inline-flex';
   }
 
-  clearTimeout(authTimeout);
-  document.body.style.visibility = 'visible';
-
-  // Handle tab switching via URL hash (e.g. #active, #emails)
-  const hash = window.location.hash.substring(1);
-  if (['active', 'expired', 'emails', 'transactions'].includes(hash)) {
-    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${hash}'`));
-    if (btn) switchTab(btn, hash);
-  }
-
-  loadAll();
+  // Load everything in parallel
+  loadStats();
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────────
@@ -355,12 +340,12 @@ async function loadAll() {
   const [
     { data: proxies },
     { data: emails },
-    { data: wallets },
+    walletRes,
     { data: txns }
   ] = await Promise.all([
     db.from('proxies').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
     db.from('emails').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
-    db.from('wallets').select('balance').eq('user_id', currentUserId).limit(1),
+    db.from('wallets').select('balance').eq('user_id', currentUserId).limit(1).single(),
     db.from('transactions').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false }),
   ]);
 
@@ -382,9 +367,8 @@ async function loadAll() {
   const emailList = emails || [];
   const txList    = txns  || [];
 
-  currentBalance = (wallets && wallets.length > 0) ? wallets[0].balance : 0;
-  document.getElementById('stat-balance').textContent = 'KES ' + currentBalance;
-  document.getElementById('nav-balance').textContent  = 'KES ' + currentBalance;
+  const currentBalance = (walletRes?.data?.balance || 0);
+  updateGlobalBalance(currentBalance);
 
   // Referral Stats
   const refEarned = (txList || []).filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);

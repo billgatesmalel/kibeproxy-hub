@@ -23,24 +23,27 @@ const selectedPlans = {}; // Not used anymore in fixed mode
 
 // ── AUTH GUARD ────────────────────────────────────────────────
 async function initStore() {
-  const { data: { session } } = await db.auth.getSession();
+  const [{ data: { session } }, walletRes] = await Promise.all([
+    db.auth.getSession(),
+    db.from('wallets').select('balance').eq('user_id', currentUserId).single()
+  ]);
+
   if (!session) { window.location.href = 'auth.html'; return; }
 
   currentUserId    = session.user.id;
   currentUserEmail = session.user.email;
-  const walletRes  = await db.from('wallets').select('balance').eq('user_id', currentUserId).single();
-  currentBalance   = walletRes.data?.balance || 0;
-
-  const balancePill = document.querySelector('.balance-pill');
-  if (balancePill) balancePill.textContent = 'KES ' + currentBalance;
+  currentBalance   = walletRes?.data?.balance || 0;
+  
+  updateGlobalBalance(currentBalance);
 
   const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  
+  AppCache.set('user_meta', { name, initials });
 
   document.getElementById('user-name').textContent     = name;
   document.getElementById('user-initials').textContent = initials;
 
-  // Show admin link for all users
   if (session.user.email === ADMIN_EMAIL) {
     const adminLink = document.getElementById('admin-link');
     if (adminLink) adminLink.style.display = 'inline-flex';
