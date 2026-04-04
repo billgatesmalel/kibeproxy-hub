@@ -267,7 +267,7 @@ function renderProxyListings(listings) {
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.created_at).toLocaleDateString()}</td>
             <td><button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button></td>
           </tr>`;
-        }).sort((a,b) => b.isExpired - a.isExpired).join('')}
+        }).join('')}
       </tbody>
     </table>`;
 }
