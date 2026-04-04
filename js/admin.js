@@ -246,21 +246,24 @@ function renderProxyListings(listings) {
   }
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Country</th><th>Host</th><th>Duration</th><th>Price</th><th>Slots</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
+      <thead><tr><th>Country</th><th>Host</th><th>Duration</th><th>Price</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
       <tbody>
-        ${listings.map(p => `
+        ${listings.map(p => {
+          const isExpired = (new Date() - new Date(p.created_at)) > 24 * 60 * 60 * 1000;
+          const statusText = isExpired ? 'Expired' : (p.available ? 'Available' : 'Sold Out');
+          const statusClass = (isExpired || !p.available) ? 'expired' : 'active';
+          
+          return `
           <tr>
             <td>${p.flag || ''} ${p.country}</td>
             <td class="mono">${p.host}</td>
             <td class="mono" style="color:var(--yellow)">${p.duration_days || 1} Days</td>
             <td class="mono" style="color:var(--green)">KES ${p.price_per_day}</td>
-            <td class="mono" style="color:${((p.max_buyers||1)-(p.buyer_count||0))<=1?'var(--red)':'var(--green)'}">
-              ${p.buyer_count||0}/${p.max_buyers||1} sold
-            </td>
-            <td><span class="badge ${p.available ? 'active' : 'expired'}">${p.available ? 'Available' : 'Sold Out'}</span></td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.created_at).toLocaleDateString()}</td>
-            <td>${p.available ? `<button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}</td>
-          </tr>`).join('')}
+            <td>${p.available && !isExpired ? `<button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Inactive</span>'}</td>
+          </tr>`;
+        }).join('')}
       </tbody>
     </table>`;
 }

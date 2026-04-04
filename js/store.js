@@ -51,9 +51,18 @@ async function initStore() {
 
 // ── LOAD LISTINGS ─────────────────────────────────────────────
 async function loadListings() {
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const [{ data: proxies }, { data: emails }, { data: userProxies }] = await Promise.all([
-    db.from('proxy_listings').select('*').eq('available', true).order('created_at', { ascending: false }),
-    db.from('email_listings').select('*').eq('available', true).order('created_at', { ascending: false }),
+    db.from('proxy_listings')
+      .select('*')
+      .eq('available', true)
+      .gt('created_at', twentyFourHoursAgo)
+      .order('created_at', { ascending: false }),
+    db.from('email_listings')
+      .select('*')
+      .eq('available', true)
+      .gt('created_at', twentyFourHoursAgo)
+      .order('created_at', { ascending: false }),
     db.from('proxies').select('listing_id').eq('user_id', currentUserId).eq('status', 'active')
   ]);
 

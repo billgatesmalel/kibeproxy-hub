@@ -36,7 +36,7 @@ const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET;
 const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE || '174379';
 const MPESA_PASSKEY = process.env.MPESA_PASSKEY;
 const MPESA_ENV = process.env.MPESA_ENV || 'sandbox';
-const CALLBACK_URL = process.env.CALLBACK_URL || 'https://kibeproxy-mpesa.vercel.app/api/callback';
+const CALLBACK_URL = process.env.CALLBACK_URL || 'https://kibeproxy-hub-app.vercel.app/api/callback';
 
 // Determine Safaricom API URLs based on environment
 const SAFARICOM_BASE_URL = MPESA_ENV === 'sandbox' 
@@ -286,7 +286,15 @@ app.post('/api/query', async (req, res) => {
   }
 });
 
-// Callback endpoint for Safaricom
+// Callback endpoint for Safaricom (GET for status/test, POST for actual webhook)
+app.get('/api/callback', (req, res) => {
+  res.json({
+    status: 'online',
+    message: 'M-Pesa Callback endpoint is active. Use POST for webhook notifications.',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.post('/api/callback', async (req, res) => {
   // Respond to Safaricom immediately (required within 5 seconds)
   res.json({ status: 'ok' });
