@@ -99,7 +99,7 @@ async function confirmRenewal() {
     
     showToast(`Proxy renewed for ${currentRenewDays} more days!`);
     closeModal('renew');
-    loadAll();
+    loadStats();
   } catch (err) {
     document.getElementById('rn-error').textContent = err.message;
     document.getElementById('rn-error').style.display = 'block';
@@ -117,11 +117,6 @@ function updateBalanceDisplay() {
   });
 }
 
-async function initAuth() {
-  document.body.style.visibility = 'hidden';
-
-  // If auth check does not complete quickly, force redirect to login
-  const authTimeout = setTimeout(() => {
 async function init() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
@@ -141,7 +136,13 @@ async function init() {
     document.getElementById('admin-link').style.display = 'inline-flex';
   }
 
-  // Load everything in parallel
+  // Handle tab switching via URL hash (e.g. #active, #emails)
+  const hash = window.location.hash.substring(1);
+  if (['active', 'expired', 'emails', 'transactions'].includes(hash)) {
+    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${hash}'`));
+    if (btn) switchTab(btn, hash);
+  }
+
   loadStats();
 }
 
@@ -335,8 +336,8 @@ function renderTransactions(data) {
     </table>`;
 }
 
-// ── LOAD ALL ──────────────────────────────────────────────────
-async function loadAll() {
+// ── LOAD STATS ────────────────────────────────────────────────
+async function loadStats() {
   const [
     { data: proxies },
     { data: emails },
@@ -464,7 +465,7 @@ async function confirmAddMoney() {
     if (txErr) console.error('Transaction log error:', txErr);
 
     // Reload after a delay to check for updates
-    setTimeout(() => loadAll(), 10000);
+    setTimeout(() => loadStats(), 10000);
 
   } catch (err) {
     showAmError(err.message);
@@ -605,4 +606,9 @@ async function submitFeedback() {
   }
 }
 
-initAuth();
+async function init() {
+  await loadStats();
+  updateGlobalBalance();
+}
+
+init();
