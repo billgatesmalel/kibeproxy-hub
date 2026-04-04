@@ -110,41 +110,10 @@ async function confirmRenewal() {
 }
 
 function updateBalanceDisplay() {
-  const pills = document.querySelectorAll('.balance-pill span, #stat-balance');
+  const pills = document.querySelectorAll('.balance-pill span, #stat-balance, #nav-balance');
   pills.forEach(p => {
-    if (p.id === 'stat-balance') p.textContent = 'KES ' + currentBalance;
-    else p.textContent = 'KES ' + currentBalance;
+    p.textContent = 'KES ' + currentBalance;
   });
-}
-
-async function init() {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session) { window.location.href = 'auth.html'; return; }
-
-  currentUserId    = session.user.id;
-  currentUserEmail = session.user.email;
-
-  const meta = session.user.user_metadata || {};
-  const name = meta.full_name || currentUserEmail.split('@')[0];
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-  AppCache.set('user_meta', { name, initials });
-  document.getElementById('user-name').textContent     = name;
-  document.getElementById('user-initials').textContent = initials;
-
-  if (currentUserEmail === ADMIN_EMAIL) {
-    document.getElementById('admin-link').style.display = 'inline-flex';
-  }
-
-  // Handle tab switching via URL hash (e.g. #active, #emails)
-  const hash = window.location.hash.substring(1);
-  if (['active', 'expired', 'emails', 'transactions'].includes(hash)) {
-    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${hash}'`));
-    if (btn) switchTab(btn, hash);
-  }
-
-  await loadStats();
-  updateBalanceDisplay();
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────────
@@ -372,11 +341,7 @@ async function loadStats() {
   currentBalance = (walletRes?.data?.balance || 0);
   updateBalanceDisplay();
 
-  // Referral Stats
-  const refEarned = (txList || []).filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
-  document.getElementById('ref-earned').textContent = 'KES ' + refEarned;
-  const refLink = window.location.origin + '/auth.html?ref=' + currentUserId;
-  document.getElementById('ref-link-input').value = refLink;
+  // (Referral Stats moved to profile.html)
 
   document.getElementById('stat-active').textContent   = active.length;
   document.getElementById('stat-expired').textContent  = expired.length;
@@ -600,8 +565,33 @@ async function submitFeedback() {
 }
 
 async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session || !session.user) { window.location.href = 'auth.html'; return; }
+
+  currentUserId    = session.user.id;
+  currentUserEmail = session.user.email;
+
+  const meta = session.user.user_metadata || {};
+  const name = meta.full_name || currentUserEmail.split('@')[0];
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+  AppCache.set('user_meta', { name, initials });
+  document.getElementById('user-name').textContent     = name;
+  document.getElementById('user-initials').textContent = initials;
+
+  if (currentUserEmail === ADMIN_EMAIL) {
+    const al = document.getElementById('admin-link');
+    if (al) al.style.display = 'inline-flex';
+  }
+
+  // Handle tab switching via URL hash
+  const hash = window.location.hash.substring(1);
+  if (hash && ['active', 'expired', 'emails', 'transactions'].includes(hash)) {
+    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick')?.includes(`'${hash}'`));
+    if (btn) switchTab(btn, hash);
+  }
+
   await loadStats();
-  updateGlobalBalance();
 }
 
 init();
