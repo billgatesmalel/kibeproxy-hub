@@ -104,7 +104,8 @@ async function loadAll() {
     document.getElementById('s-emails').textContent  = emailsCount;
     document.getElementById('s-sold').textContent    = allProxies.length + allEmails.length;
 
-    renderUsers(allUsers);
+    // Initially, don't show the user list until searched
+    renderUsers([]); 
     renderPurchases(allProxies, allEmails);
     renderProxyListings(proxyListings);
     renderEmailListings(emailListings);
@@ -121,10 +122,16 @@ async function loadAll() {
 }
 
 // ── RENDER USERS ──────────────────────────────────────────────
-function renderUsers(users) {
+function renderUsers(users, searchActive = false) {
   const wrap = document.getElementById('users-wrap');
+  
+  if (!searchActive) {
+    wrap.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">Use the search bar above to find a specific user by ID, email, or username.</div>`;
+    return;
+  }
+
   if (!users.length) {
-    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="6">No users found.</td></tr></tbody></table>`;
+    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="7">No matching users found.</td></tr></tbody></table>`;
     return;
   }
   wrap.innerHTML = `
@@ -360,8 +367,19 @@ function switchExpandTab(userId, tab, btn) {
 
 // ── SEARCH ────────────────────────────────────────────────────
 function filterUsers() {
-  const q = document.getElementById('user-search').value.toLowerCase();
-  renderUsers(allUsers.filter(u => u.id.toLowerCase().includes(q)));
+  const q = document.getElementById('user-search').value.toLowerCase().trim();
+  if (!q) {
+    renderUsers([], false);
+    return;
+  }
+  
+  const filtered = allUsers.filter(u => 
+    u.id.toLowerCase().includes(q) || 
+    (u.email && u.email.toLowerCase().includes(q)) ||
+    (u.username && u.username.toLowerCase().includes(q))
+  );
+  
+  renderUsers(filtered, true);
 }
 
 // ── COUNTRY FLAG MAP ──────────────────────────────────────────
