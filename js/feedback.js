@@ -3,6 +3,7 @@ let currentUserId = null;
 let currentUserName = null;
 let feedbacks = [];
 let userVotes = {};
+let editingId = null; // Track if we are editing an existing review
 
 async function initFeedback() {
   const { data: { session } } = await db.auth.getSession();
@@ -96,6 +97,7 @@ function renderFeedbacks() {
     const starString = '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating);
     const date = new Date(f.created_at).toLocaleDateString();
     const userVote = userVotes[f.id];
+    const isOwner = f.user_id === currentUserId;
 
     return `
       <div class="review-card">
@@ -104,7 +106,15 @@ function renderFeedbacks() {
             <div class="review-user">${f.user_name || 'Anonymous User'}</div>
             <div class="review-stars">${starString}</div>
           </div>
-          <div class="review-date">${date}</div>
+          <div style="text-align:right;">
+             <div class="review-date">${date}</div>
+             ${isOwner ? `
+               <div style="margin-top:8px;display:flex;gap:10px;justify-content:flex-end;">
+                 <button onclick="editFeedback('${f.id}')" style="background:none;border:none;color:var(--blue);font-size:0.75rem;cursor:pointer;padding:0;">Edit</button>
+                 <button onclick="deleteFeedback('${f.id}')" style="background:none;border:none;color:var(--red);font-size:0.75rem;cursor:pointer;padding:0;">Delete</button>
+               </div>
+             ` : ''}
+          </div>
         </div>
         <div class="review-content">${f.content}</div>
         
@@ -169,7 +179,48 @@ async function vote(feedbackId, type) {
 // ── SUBMIT FEEDBACK ───────────────────────────────────────────
 function openFeedbackModal() {
   if (!currentUserId) { window.location.href = 'auth.html'; return; }
+  editingId = null;
+  document.getElementById('feedback-content').value = '';
+  document.getElementById('rating-val').value = '5';
+  document.querySelector('.modal-title').textContent = 'Share Your Experience';
+  document.getElementById('submit-feedback-btn').textContent = 'Submit Review';
+  
+  // Reset star rating UI to 5
+  const stars = document.querySelectorAll('#star-input-wrap span');
+  stars.forEach(s => s.classList.add('selected'));
+  
   openModal('feedback');
+}
+
+function editFeedback(id) {
+  const f = feedbacks.find(item => item.id === id);
+  if (!f) return;
+
+  editingId = id;
+  document.getElementById('feedback-content').value = f.content;
+  document.getElementById('rating-val').value = f.rating;
+  document.querySelector('.modal-title').textContent = 'Edit Your Review';
+  document.getElementById('submit-feedback-btn').textContent = 'Save Changes';
+
+  // Update star rating UI
+  const stars = document.querySelectorAll('#star-input-wrap span');
+  stars.forEach(s => {
+    s.classList.toggle('selected', parseInt(s.getAttribute('data-val')) <= f.rating);
+  });
+
+  openModal('feedback');
+}
+
+async function deleteFeedback(id) {
+  if (!confirm('Are you sure you want to delete your review?')) return;
+
+  const { error } = await db.from('feedbacks').delete().eq('id', id);
+  if (error) {
+    showToast(error.message, 'error');
+  } else {
+    showToast('Review deleted successfully');
+    loadFeedbacks();
+  }
 }
 
 async function submitFeedback() {
@@ -179,25 +230,38 @@ async function submitFeedback() {
   if (!content) { showToast('Please write your feedback', 'error'); return; }
 
   const btn = document.getElementById('submit-feedback-btn');
+  const originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Submitting...';
+  btn.textContent = 'Processing...';
 
-  const { error } = await db.from('feedbacks').insert([{
-    user_id: currentUserId,
-    user_name: currentUserName,
-    rating: rating,
-    content: content
-  }]);
+  let res;
+  if (editingId) {
+    // Update existing
+    res = await db.from('feedbacks').update({
+      rating: rating,
+      content: content,
+      created_at: new Date().toISOString() // Optional: update date on edit
+    }).eq('id', editingId);
+  } else {
+    // Insert new
+    res = await db.from('feedbacks').insert([{
+      user_id: currentUserId,
+      user_name: currentUserName,
+      rating: rating,
+      content: content
+    }]);
+  }
 
   btn.disabled = false;
-  btn.textContent = 'Submit Review';
+  btn.textContent = originalText;
 
-  if (error) {
-    showToast(error.message, 'error');
+  if (res.error) {
+    showToast(res.error.message, 'error');
   } else {
-    showToast('Feedback submitted! Thank you.');
+    showToast(editingId ? 'Feedback updated!' : 'Feedback submitted! Thank you.');
     closeModal('feedback');
     document.getElementById('feedback-content').value = '';
+    editingId = null;
     loadFeedbacks();
   }
 }

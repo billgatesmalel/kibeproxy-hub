@@ -341,7 +341,44 @@ function closeModal(id) {
 }
 
 // ── FEEDBACK LOGIC ────────────────────────────────────────────
-function openFeedbackModal() {
+let feedbackEditingId = null;
+
+async function openFeedbackModal() {
+  const btn = document.getElementById('submit-feedback-btn');
+  btn.textContent = 'Checking...';
+  btn.disabled = true;
+
+  // Check if user already has a review to allow editing it
+  const { data, error } = await db.from('feedbacks')
+    .select('*')
+    .eq('user_id', currentUserId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  btn.disabled = false;
+  
+  if (data) {
+    feedbackEditingId = data.id;
+    document.getElementById('feedback-content').value = data.content;
+    document.getElementById('rating-val').value = data.rating;
+    document.querySelector('#modal-feedback .modal-title').textContent = 'Update Your Feedback';
+    btn.textContent = 'Update Review';
+  } else {
+    feedbackEditingId = null;
+    document.getElementById('feedback-content').value = '';
+    document.getElementById('rating-val').value = '5';
+    document.querySelector('#modal-feedback .modal-title').textContent = 'Share Your Experience';
+    btn.textContent = 'Submit Review';
+  }
+
+  // Sync star UI
+  const rating = parseInt(document.getElementById('rating-val').value);
+  const stars = document.querySelectorAll('#star-input-wrap span');
+  stars.forEach(s => {
+    s.style.color = parseInt(s.getAttribute('data-val')) <= rating ? '#eab308' : '#333';
+  });
+
   openModal('feedback');
   initStarRating();
 }
@@ -377,25 +414,36 @@ async function submitFeedback() {
   if (!content) { showToast('Please write your feedback', 'error'); return; }
 
   const btn = document.getElementById('submit-feedback-btn');
+  const originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Submitting...';
+  btn.textContent = 'Processing...';
 
-  const { error } = await db.from('feedbacks').insert([{
-    user_id: currentUserId,
-    user_name: name,
-    rating: rating,
-    content: content
-  }]);
+  let res;
+  if (feedbackEditingId) {
+    res = await db.from('feedbacks').update({
+      rating: rating,
+      content: content,
+      created_at: new Date().toISOString()
+    }).eq('id', feedbackEditingId);
+  } else {
+    res = await db.from('feedbacks').insert([{
+      user_id: currentUserId,
+      user_name: name,
+      rating: rating,
+      content: content
+    }]);
+  }
 
   btn.disabled = false;
-  btn.textContent = 'Submit Review';
+  btn.textContent = originalText;
 
-  if (error) {
-    showToast(error.message, 'error');
+  if (res.error) {
+    showToast(res.error.message, 'error');
   } else {
-    showToast('Feedback submitted! Thank you.');
+    showToast(feedbackEditingId ? 'Feedback updated!' : 'Feedback submitted! Thank you.');
     closeModal('feedback');
     document.getElementById('feedback-content').value = '';
+    feedbackEditingId = null;
   }
 }
 
