@@ -35,6 +35,13 @@ async function initAuth() {
   clearTimeout(authTimeout);
   document.body.style.visibility = 'visible';
 
+  // Handle tab switching via URL hash (e.g. #active, #emails)
+  const hash = window.location.hash.substring(1);
+  if (['active', 'expired', 'emails', 'transactions'].includes(hash)) {
+    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${hash}'`));
+    if (btn) switchTab(btn, hash);
+  }
+
   loadAll();
 }
 

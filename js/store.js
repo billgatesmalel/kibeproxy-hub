@@ -509,6 +509,8 @@ async function completePaidOrder(mpesaCode, phone) {
         user_id:        currentUserId,
         host:           listing.host,
         port:           listing.port,
+        username:       listing.username || '',
+        password:       listing.password || '',
         country:        listing.country,
         status:         'active',
         expires_at:     expires,
@@ -555,7 +557,7 @@ async function completePaidOrder(mpesaCode, phone) {
 
 function goToDashboard() {
   closeModal('order');
-  window.location.href = 'index.html';
+  window.location.href = 'index.html#active';
 }
 
 initStore();
