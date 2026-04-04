@@ -143,7 +143,8 @@ async function init() {
     if (btn) switchTab(btn, hash);
   }
 
-  loadStats();
+  await loadStats();
+  updateBalanceDisplay();
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────────
@@ -368,8 +369,8 @@ async function loadStats() {
   const emailList = emails || [];
   const txList    = txns  || [];
 
-  const currentBalance = (walletRes?.data?.balance || 0);
-  updateGlobalBalance(currentBalance);
+  currentBalance = (walletRes?.data?.balance || 0);
+  updateBalanceDisplay();
 
   // Referral Stats
   const refEarned = (txList || []).filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
@@ -489,14 +490,6 @@ function copyReferralLink() {
   input.select();
   document.execCommand('copy');
   showToast('Referral link copied! 🚀');
-}
-
-function copyToClipboard(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    const original = btn.innerHTML;
-    btn.innerHTML = '✓';
-    setTimeout(() => btn.innerHTML = original, 1500);
-  });
 }
 
 // ── FEEDBACK LOGIC ────────────────────────────────────────────
