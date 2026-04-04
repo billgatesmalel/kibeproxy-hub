@@ -41,14 +41,57 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 }
 
 /* ── WALLET CARD ── */
-.wallet-card { background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%); border: 1px solid var(--border-light); border-radius: 16px; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; }
+.wallet-card { 
+  background: linear-gradient(135deg, #0e0e0e 0%, #171717 100%);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%);
+  border: 1px solid rgba(255,255,255,0.05); 
+  border-radius: 24px; 
+  padding: 2rem 2.5rem; 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 1.5rem; 
+  margin-bottom: 2.5rem; 
+  position: relative; 
+  overflow: hidden;
+  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+}
+.wallet-card::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.03) 0%, transparent 70%);
+  animation: rotate-slow 20s linear infinite;
+  pointer-events: none;
+}
+@keyframes rotate-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
 @media (max-width: 600px) {
-  .wallet-card { flex-direction: column; align-items: flex-start; padding: 1.5rem; }
-  .wallet-amount { font-size: 1.8rem; }
+  .wallet-card { flex-direction: column; align-items: flex-start; padding: 1.5rem; border-radius: 20px; }
+  .wallet-amount { font-size: 2rem; }
   .add-money-btn { width: 100%; justify-content: center; }
 }
-.add-money-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #000; border: none; border-radius: 10px; padding: 12px 24px; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 15px rgba(34,197,94,0.2); }
-.add-money-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.wallet-amount { font-size: 2.4rem; font-weight: 800; color: var(--text-primary); font-family: 'Syne', sans-serif; letter-spacing: -0.02em; margin: 4px 0; }
+.wallet-label { font-size: 0.75rem; color: var(--green); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+.add-money-btn { 
+  display: inline-flex; align-items: center; gap: 10px; 
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); 
+  color: #000; border: none; border-radius: 14px; 
+  padding: 14px 28px; font-size: 0.95rem; font-weight: 800; 
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  white-space: nowrap; flex-shrink: 0; 
+  box-shadow: 0 8px 25px rgba(34,197,94,0.3);
+  position: relative; overflow: hidden;
+}
+.add-money-btn:hover { 
+  transform: translateY(-3px) scale(1.02); 
+  box-shadow: 0 12px 30px rgba(34,197,94,0.4);
+  filter: brightness(1.1);
+}
+.add-money-btn:active { transform: translateY(-1px); }
 
 /* ── ADD MONEY MODAL ── */
 .am-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
