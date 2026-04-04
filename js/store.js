@@ -556,10 +556,10 @@ async function handleReferralReward() {
     if (count > 1) return; // Not the first successful one (current one + previous)
     // Actually, count will be 1 if this is the first success we just inserted.
 
-    // Add KES 20 to referrer wallet
+    // Add KES 10 to referrer wallet
     const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', referredBy).single();
     const currentRefBalance = wallet?.balance || 0;
-    const newRefBalance = currentRefBalance + 20;
+    const newRefBalance = currentRefBalance + 10;
 
     await db.from('wallets').upsert([{
       user_id: referredBy,
@@ -571,7 +571,7 @@ async function handleReferralReward() {
     await db.from('transactions').insert([{
       user_id: referredBy,
       type: 'bonus',
-      amount: 20,
+      amount: 10,
       description: `Referral Bonus (from ${currentUserEmail})`,
       status: 'success',
       created_at: new Date().toISOString()
