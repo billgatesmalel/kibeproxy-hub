@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -141,6 +142,21 @@
           </div>
           <div class="stat-label">Total Purchases</div>
           <div class="stat-value" id="s-sold">—</div>
+        </div>
+      </div>
+
+      <!-- ── REVENUE ANALYTICS ── -->
+      <div id="section-analytics">
+        <div class="section-card" style="margin-bottom:2rem;">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Revenue Analytics</div>
+              <div class="section-sub">Daily earnings over the last 7 days</div>
+            </div>
+          </div>
+          <div style="padding:1.5rem;height:300px;position:relative;">
+            <canvas id="revenueChart"></canvas>
+          </div>
         </div>
       </div>
 

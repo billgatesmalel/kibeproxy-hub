@@ -277,6 +277,45 @@
     </div>
   </div>
 
+<!-- RENEW MODAL -->
+<div class="modal-overlay" id="modal-renew">
+  <div class="modal">
+    <div class="modal-title" style="display:flex;align-items:center;gap:1.25rem;">
+      <span style="font-size:1.5rem;">🔄</span>
+      <span>Renew Proxy</span>
+    </div>
+    <p class="modal-sub">Extend the duration of this proxy instantly using your wallet balance.</p>
+    
+    <div class="order-summary" style="margin-bottom:1.5rem;background:rgba(255,255,255,0.02);">
+      <div class="order-row"><span class="lbl">Proxy</span><span class="val" id="rn-host">—</span></div>
+      <div class="order-row"><span class="lbl">Country</span><span class="val" id="rn-country">—</span></div>
+      <div class="order-row"><span class="lbl">Current Expiry</span><span class="val" id="rn-current-exp">—</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Extension Duration</label>
+      <div class="duration-filter" style="margin-top:0.5rem;justify-content:flex-start;">
+        <button class="dur-filter-btn renew-dur active" onclick="setRenewDuration(1, this)">+1 Day</button>
+        <button class="dur-filter-btn renew-dur" onclick="setRenewDuration(7, this)">+7 Days</button>
+        <button class="dur-filter-btn renew-dur" onclick="setRenewDuration(30, this)">+30 Days</button>
+      </div>
+    </div>
+
+    <div class="order-summary" style="margin-top:1.5rem;">
+       <div class="order-row">
+         <span class="lbl">Renewal Cost</span>
+         <span class="val total" id="rn-total" style="color:var(--green)">KES 100</span>
+       </div>
+       <div id="rn-error" style="display:none;color:#ef4444;font-size:0.82rem;margin-top:0.6rem;"></div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:2rem;">
+      <button class="btn-cancel" onclick="closeModal('renew')">Cancel</button>
+      <button class="btn-submit" id="rn-confirm-btn" onclick="confirmRenewal()">Confirm Renewal</button>
+    </div>
+  </div>
+</div>
+
   <!-- FOOTER -->
   <footer>
     <div class="footer-inner">

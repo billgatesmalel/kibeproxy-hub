@@ -44,7 +44,7 @@ async function loadAll() {
       db.from('proxy_listings').select('*').order('created_at', { ascending: false }),
       db.from('email_listings').select('*').order('created_at', { ascending: false }),
       db.from('user_bans').select('*'),
-      db.from('transactions').select('amount').eq('status', 'success'),
+      db.from('transactions').select('*').eq('status', 'success'),
       db.from('feedbacks').select('id'),
       db.from('usernames').select('*'),
       db.from('wallets').select('*')
@@ -116,6 +116,7 @@ async function loadAll() {
     renderPurchases(allProxies, allEmails);
     renderProxyListings(proxyListings);
     renderEmailListings(emailListings);
+    renderRevenueChart(txns);
     populateDropdowns();
   } catch (err) {
     console.error("loadAll Error:", err);
@@ -321,6 +322,74 @@ function renderProxyListings(listings) {
         }).join('')}
       </tbody>
     </table>`;
+}
+
+// ── RENDER REVENUE CHART ──────────────────────────────────────
+function renderRevenueChart(txns) {
+  const ctx = document.getElementById('revenueChart');
+  if (!ctx) return;
+
+  // 1. Get last 7 days labels
+  const labels = [];
+  const dailyData = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    labels.push(dateStr);
+    dailyData[dateStr] = 0;
+  }
+
+  // 2. Aggregate amounts
+  txns.forEach(t => {
+    const dStr = new Date(t.created_at).toISOString().split('T')[0];
+    if (dailyData[dStr] !== undefined) {
+      dailyData[dStr] += t.amount;
+    }
+  });
+
+  const chartData = labels.map(l => dailyData[l]);
+
+  if (window.myChart) window.myChart.destroy();
+
+  window.myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.map(l => {
+        const d = new Date(l);
+        return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      }),
+      datasets: [{
+        label: 'Revenue (KES)',
+        data: chartData,
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderWidth: 3,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#22c55e',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { color: '#94a3b8', font: { size: 10 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#94a3b8', font: { size: 10 } }
+        }
+      }
+    }
+  });
 }
 
 // ── RENDER EMAIL LISTINGS ─────────────────────────────────────

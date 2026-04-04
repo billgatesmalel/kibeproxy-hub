@@ -24,6 +24,99 @@ function copyToClipboard(text, btn) {
   });
 }
 
+// ── RENEWAL LOGIC ─────────────────────────────────────────────
+let currentRenewProxyId = null;
+let currentRenewDays = 1;
+let currentRenewPricePerDay = 100; // Default
+
+function openRenewModal(pId, host, country, currentExp) {
+  currentRenewProxyId = pId;
+  currentRenewDays = 1;
+  
+  document.getElementById('rn-host').textContent = host;
+  document.getElementById('rn-country').textContent = country;
+  document.getElementById('rn-current-exp').textContent = new Date(currentExp).toLocaleString();
+  document.getElementById('rn-total').textContent = `KES ${currentRenewPricePerDay}`;
+  
+  document.querySelectorAll('.renew-dur').forEach(b => b.classList.remove('active'));
+  document.querySelector('.renew-dur').classList.add('active'); // First one
+  
+  document.getElementById('rn-error').style.display = 'none';
+  openModal('renew');
+}
+
+function setRenewDuration(days, btn) {
+  currentRenewDays = days;
+  document.querySelectorAll('.renew-dur').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rn-total').textContent = `KES ${days * currentRenewPricePerDay}`;
+}
+
+async function confirmRenewal() {
+  const total = currentRenewDays * currentRenewPricePerDay;
+  if (currentBalance < total) {
+    document.getElementById('rn-error').textContent = 'Insufficient wallet balance.';
+    document.getElementById('rn-error').style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('rn-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Renewing...';
+
+  try {
+    // 1. Get current proxy to find its expiry
+    const { data: proxy } = await db.from('proxies').select('expires_at').eq('id', currentRenewProxyId).single();
+    const currentExp = new Date(proxy.expires_at);
+    const newExp = new Date(currentExp.getTime() + currentRenewDays * 86400000);
+
+    // 2. Deduct from wallet
+    const newBalance = currentBalance - total;
+    await db.from('wallets').upsert([{
+      user_id: currentUserId,
+      balance: newBalance,
+      updated_at: new Date().toISOString()
+    }], { onConflict: 'user_id' });
+
+    // 3. Update proxy expiry
+    await db.from('proxies').update({
+      expires_at: newExp.toISOString(),
+      status: 'active'
+    }).eq('id', currentRenewProxyId);
+
+    // 4. Record transaction
+    await db.from('transactions').insert([{
+      user_id: currentUserId,
+      type: 'purchase',
+      amount: total,
+      description: `Proxy Renewal (${currentRenewDays} days)`,
+      status: 'success',
+      created_at: new Date().toISOString()
+    }]);
+
+    currentBalance = newBalance;
+    updateBalanceDisplay();
+    
+    showToast(`Proxy renewed for ${currentRenewDays} more days!`);
+    closeModal('renew');
+    loadAll();
+  } catch (err) {
+    document.getElementById('rn-error').textContent = err.message;
+    document.getElementById('rn-error').style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirm Renewal';
+  }
+}
+
+function updateBalanceDisplay() {
+  const pills = document.querySelectorAll('.balance-pill span, #stat-balance');
+  pills.forEach(p => {
+    if (p.id === 'stat-balance') p.textContent = 'KES ' + currentBalance;
+    else p.textContent = 'KES ' + currentBalance;
+  });
+}
+
 async function initAuth() {
   document.body.style.visibility = 'hidden';
 
@@ -137,10 +230,15 @@ function renderProxies(data, panelId, status) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>
             </td>
-            <td><span class="badge ${p.status}">${p.status}</span></td>
+            <td>
+              <span class="badge ${p.status} ${p.status === 'active' && (new Date(p.expires_at) - new Date()) < 86400000 ? 'pulse' : ''}">
+                ${p.status}
+              </span>
+              ${p.status === 'active' ? `<button class="renew-btn" onclick="openRenewModal('${p.id}', '${p.host}', '${p.country}', '${p.expires_at}')">Renew</button>` : ''}
+            </td>
             <td>${paymentBadge(p.payment_status)}</td>
             <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
-              ${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}
+              ${p.expires_at ? new Date(p.expires_at).toLocaleString() : '—'}
             </td>
           </tr>`).join('')}
       </tbody>
