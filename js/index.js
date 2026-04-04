@@ -340,4 +340,63 @@ function closeModal(id) {
   document.getElementById('modal-' + id).classList.remove('open');
 }
 
+// ── FEEDBACK LOGIC ────────────────────────────────────────────
+function openFeedbackModal() {
+  openModal('feedback');
+  initStarRating();
+}
+
+function initStarRating() {
+  const stars = document.querySelectorAll('#star-input-wrap span');
+  const input = document.getElementById('rating-val');
+  if (!stars.length) return;
+
+  stars.forEach(s => {
+    s.onclick = () => {
+      const val = parseInt(s.getAttribute('data-val'));
+      input.value = val;
+      updateStars(val);
+    };
+    s.onmouseover = () => updateStars(parseInt(s.getAttribute('data-val')));
+    s.onmouseout = () => updateStars(parseInt(input.value));
+  });
+
+  function updateStars(val) {
+    stars.forEach(s => {
+      s.style.color = parseInt(s.getAttribute('data-val')) <= val ? '#eab308' : '#333';
+    });
+  }
+  updateStars(parseInt(input.value));
+}
+
+async function submitFeedback() {
+  const content = document.getElementById('feedback-content').value.trim();
+  const rating = parseInt(document.getElementById('rating-val').value);
+  const name = document.getElementById('user-name').textContent;
+
+  if (!content) { showToast('Please write your feedback', 'error'); return; }
+
+  const btn = document.getElementById('submit-feedback-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const { error } = await db.from('feedbacks').insert([{
+    user_id: currentUserId,
+    user_name: name,
+    rating: rating,
+    content: content
+  }]);
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Review';
+
+  if (error) {
+    showToast(error.message, 'error');
+  } else {
+    showToast('Feedback submitted! Thank you.');
+    closeModal('feedback');
+    document.getElementById('feedback-content').value = '';
+  }
+}
+
 initAuth();

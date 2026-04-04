@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KibeProxy Hub | Feedback & Reviews</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .feedback-hero { text-align: center; padding: 4rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+    .rating-summary { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+    .stars-large { font-size: 2.5rem; color: #eab308; letter-spacing: 4px; }
+    .avg-label { font-size: 0.9rem; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+    
+    .reviews-container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    .review-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; position: relative; }
+    .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .review-user { font-weight: 700; font-size: 1.1rem; }
+    .review-stars { color: #eab308; font-size: 0.9rem; margin-top: 4px; }
+    .review-date { font-size: 0.75rem; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+    .review-content { line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.5rem; }
+    
+    .admin-reply { background: rgba(34, 197, 94, 0.05); border-left: 3px solid var(--green); padding: 1.25rem; border-radius: 0 12px 12px 0; margin-top: 1rem; position: relative; }
+    .admin-reply-label { font-size: 0.72rem; font-weight: 800; color: var(--green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+    
+    .review-actions { display: flex; gap: 1rem; border-top: 1px solid var(--border-light); padding-top: 1rem; margin-top: 1rem; }
+    .action-btn { background: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .action-btn:hover:not(:disabled) { background: var(--border-light); color: var(--text-primary); border-color: var(--text-muted); }
+    .action-btn.active { background: var(--green-glow); color: var(--green); border-color: var(--green-dim); }
+    .action-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .star-rating-input { display: flex; gap: 8px; font-size: 2rem; cursor: pointer; color: #333; }
+    .star-rating-input span:hover, .star-rating-input span.selected { color: #eab308; }
+    
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5rem; border-bottom: 1px solid var(--border); background: var(--bg); }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--green); }
+    .logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; }
+    .nav-right { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-link { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+    .nav-link:hover { color: var(--green); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <span class="logo-text">KibeProxy Hub</span>
+    </a>
+    <div class="nav-right">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="store.html" class="nav-link">Store</a>
+    </div>
+  </nav>
+
+  <div class="feedback-hero">
+    <h1 class="page-title">Community Feedback</h1>
+    <p class="page-subtitle">See what others are saying about our proxies and emails</p>
+    <div class="rating-summary">
+      <div class="stars-large" id="avg-stars">★★★★★</div>
+      <div class="avg-label" id="avg-text">4.9 / 5.0 base on -- reviews</div>
+    </div>
+    <button class="btn btn-green" style="margin-top:1.5rem;" onclick="openFeedbackModal()">Add Your Review</button>
+  </div>
+
+  <main class="reviews-container" id="reviews-list">
+    <div class="loading"><div class="spinner"></div> Loading reviews...</div>
+  </main>
+
+  <!-- MODAL: ADD FEEDBACK -->
+  <div class="modal-overlay" id="modal-feedback">
+    <div class="modal">
+      <div class="modal-title">Share Your Experience</div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;">Your feedback helps us improve and guides other users.</p>
+      
+      <div class="form-group" style="margin-bottom:1.5rem;">
+        <label class="form-label">Rating</label>
+        <div class="star-rating-input" id="star-input-wrap">
+          <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
+        </div>
+        <input type="hidden" id="rating-val" value="5" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Review Content</label>
+        <textarea id="feedback-content" class="form-input" style="height:120px;resize:none;" placeholder="What do you think of our service?"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal('feedback')">Cancel</button>
+        <button class="btn btn-green" id="submit-feedback-btn" onclick="submitFeedback()">Submit Review</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/feedback.js"></script>
+</body>
+</html>

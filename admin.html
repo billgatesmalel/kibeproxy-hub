@@ -90,6 +90,12 @@
         </svg>
         Email Listings
       </button>
+      <button class="sidebar-btn" onclick="showSection('feedback-mgmt', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        User Feedback
+      </button>
     </aside>
 
     <!-- MAIN -->
@@ -296,6 +302,21 @@
             </div>
           </div>
           <div id="email-listings-wrap">
+            <div class="loading"><div class="spinner"></div> Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FEEDBACK MANAGEMENT SECTION ── -->
+      <div id="section-feedback-mgmt" style="display:none;">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Manage User Feedback</div>
+              <div class="section-sub">Read reviews and provide official replies</div>
+            </div>
+          </div>
+          <div id="feedback-wrap" style="padding:1rem;">
             <div class="loading"><div class="spinner"></div> Loading...</div>
           </div>
         </div>

@@ -19,6 +19,7 @@ async function initAdmin() {
   document.getElementById('app').style.display          = 'block';
 
   loadAll();
+  loadFeedbackMgmt();
 }
 
 // ── PAYMENT STATUS BADGE ──────────────────────────────────────
@@ -35,30 +36,37 @@ function payBadge(status) {
 
 // ── LOAD ALL ──────────────────────────────────────────────────
 async function loadAll() {
-  const [
-    { data: proxies },
-    { data: emails },
-    { data: pListings },
-    { data: eListings },
-    { data: bans }
-  ] = await Promise.all([
+  // Use map to handle potential missing tables gracefully
+  const tables = [
     db.from('proxies').select('*').order('purchased_at', { ascending: false }),
     db.from('emails').select('*').order('purchased_at', { ascending: false }),
     db.from('proxy_listings').select('*').order('created_at', { ascending: false }),
     db.from('email_listings').select('*').order('created_at', { ascending: false }),
     db.from('user_bans').select('*'),
-  ]);
+    db.from('transactions').select('amount').eq('status', 'success'),
+    db.from('feedbacks').select('id')
+  ];
+
+  const results = await Promise.all(tables.map(p => p.catch(e => ({ data: null, error: e }))));
+  
+  const proxies       = results[0].data || [];
+  const emails        = results[1].data || [];
+  const pListings     = results[2].data || [];
+  const eListings     = results[3].data || [];
+  const bans          = results[4].data || [];
+  const txns          = results[5].data || [];
+  const feedbacks     = results[6].data || [];
 
   // Build bans map
   window.bannedUsers = {};
-  (bans || []).forEach(b => { if (b.banned) window.bannedUsers[b.user_id] = true; });
+  bans.forEach(b => { if (b.banned) window.bannedUsers[b.user_id] = true; });
 
-  allProxies    = proxies    || [];
-  allEmails     = emails     || [];
-  proxyListings = pListings  || [];
-  emailListings = eListings  || [];
+  allProxies    = proxies;
+  allEmails     = emails;
+  proxyListings = pListings;
+  emailListings = eListings;
 
-  // Build users map
+  // Build users map from purchases
   const userMap = {};
   allProxies.forEach(p => {
     if (!p.user_id) return;
@@ -73,9 +81,16 @@ async function loadAll() {
   allUsers = Object.values(userMap);
 
   // Stats
-  document.getElementById('s-users').textContent   = allUsers.length;
-  document.getElementById('s-proxies').textContent = proxyListings.filter(p => p.available).length;
-  document.getElementById('s-emails').textContent  = emailListings.filter(e => e.available).length;
+  // Use allUsers.length for total unique customers
+  const usersCount   = allUsers.length;
+  // Count available proxies that haven't expired
+  const proxiesCount = proxyListings.filter(p => p.available).length;
+  const emailsCount  = emailListings.filter(e => e.available).length;
+  const soldCount    = txns.length;
+
+  document.getElementById('s-users').textContent   = usersCount;
+  document.getElementById('s-proxies').textContent = proxiesCount;
+  document.getElementById('s-emails').textContent  = emailsCount;
   document.getElementById('s-sold').textContent    = allProxies.length + allEmails.length;
 
   renderUsers(allUsers);
@@ -300,7 +315,8 @@ function populateDropdowns() {}
 
 // ── SECTION SWITCH ────────────────────────────────────────────
 function showSection(name, btn) {
-  ['users', 'purchases', 'proxy-listings', 'email-listings'].forEach(s => {
+  const sections = ['users', 'purchases', 'proxy-listings', 'email-listings', 'feedback-mgmt'];
+  sections.forEach(s => {
     document.getElementById(`section-${s}`).style.display = s === name ? 'block' : 'none';
   });
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
@@ -491,6 +507,71 @@ async function banUser(userId, ban) {
   if (error) { showToast('Failed: ' + error.message, 'error'); return; }
   showToast('User ' + action + 'ned successfully.');
   await loadAll();
+}
+
+// ── FEEDBACK MANAGEMENT ───────────────────────────────────────
+async function loadFeedbackMgmt() {
+  const wrap = document.getElementById('feedback-wrap');
+  if (!wrap) return;
+  
+  const { data, error } = await db.from('feedbacks').select('*').order('created_at', { ascending: false });
+
+  if (error) { wrap.innerHTML = `<div class="error">${error.message}</div>`; return; }
+
+  if (!data || !data.length) {
+    wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">No feedback yet.</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+      ${data.map(f => `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;align-items:center;">
+            <strong style="font-size:1.05rem;color:var(--green)">${f.user_name || 'Anonymous'}</strong>
+            <span style="font-family:DM Mono,monospace;font-size:0.72rem;color:var(--text-muted);">${new Date(f.created_at).toLocaleString()}</span>
+          </div>
+          <div style="color:#eab308;margin-bottom:0.75rem;font-size:0.8rem;">${'★'.repeat(f.rating)}${'☆'.repeat(5-f.rating)}</div>
+          <p style="color:var(--text-secondary);line-height:1.5;margin-bottom:1.25rem;font-size:0.9rem;">${f.content || '(No content)'}</p>
+          
+          <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border-light);border-radius:10px;padding:1.25rem;">
+            <label class="form-label" style="font-size:0.65rem;color:var(--text-muted);margin-bottom:8px;display:block;">OFFICIAL REPLY</label>
+            <textarea id="reply-${f.id}" class="form-input" style="height:70px;margin-bottom:1rem;resize:none;font-size:0.85rem;" placeholder="Write your reply...">${f.admin_reply || ''}</textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+               <div style="display:flex;gap:10px;align-items:center;">
+                 <span style="font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;">👍 ${f.helpful_count || 0}</span>
+                 <span style="font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;">👎 ${f.not_helpful_count || 0}</span>
+               </div>
+               <button class="btn btn-green btn-sm" onclick="submitReply('${f.id}')" style="padding:6px 15px;">💾 Save Reply</button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function submitReply(id) {
+  const replyInput = document.getElementById('reply-' + id);
+  const btn = event.target;
+  const originalText = btn.textContent;
+  
+  const reply = replyInput.value.trim();
+  
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const { error } = await db.from('feedbacks').update({ admin_reply: reply }).eq('id', id);
+
+  btn.disabled = false;
+  btn.textContent = originalText;
+
+  if (error) { 
+    showToast(error.message, 'error'); 
+  } else {
+    showToast('Reply saved successfully!');
+    loadFeedbackMgmt();
+  }
 }
 
 initAdmin();
