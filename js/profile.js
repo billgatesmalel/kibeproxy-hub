@@ -74,7 +74,7 @@ async function loadUsername() {
 
 // ── STATS ─────────────────────────────────────────────────────
 async function loadStats() {
-  const [{ data: proxies }, { data: emails }] = await Promise.all([
+  const [{ data: proxies }, { data: emails }, { data: txns }] = await Promise.all([
     db.from('proxies').select('id,status').eq('user_id', currentUser.id),
     db.from('emails').select('id').eq('user_id', currentUser.id),
     db.from('transactions').select('amount,type,status').eq('user_id', currentUser.id)
@@ -89,7 +89,7 @@ async function loadStats() {
   document.getElementById('stat-total').textContent   = totalPurchases;
 
   // Referral Stats
-  const refEarned = txList.filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
+  const refEarned = (txns || []).filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
   document.getElementById('ref-earned').textContent = 'KES ' + refEarned;
   
   const refLink = window.location.origin + '/auth.html?ref=' + currentUser.id;
