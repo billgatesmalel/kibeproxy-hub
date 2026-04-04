@@ -36,68 +36,78 @@ function payBadge(status) {
 
 // ── LOAD ALL ──────────────────────────────────────────────────
 async function loadAll() {
-  // Use map to handle potential missing tables gracefully
-  const tables = [
-    db.from('proxies').select('*').order('purchased_at', { ascending: false }),
-    db.from('emails').select('*').order('purchased_at', { ascending: false }),
-    db.from('proxy_listings').select('*').order('created_at', { ascending: false }),
-    db.from('email_listings').select('*').order('created_at', { ascending: false }),
-    db.from('user_bans').select('*'),
-    db.from('transactions').select('amount').eq('status', 'success'),
-    db.from('feedbacks').select('id')
-  ];
+  try {
+    // Use map to handle potential missing tables gracefully
+    const tables = [
+      db.from('proxies').select('*').order('purchased_at', { ascending: false }),
+      db.from('emails').select('*').order('purchased_at', { ascending: false }),
+      db.from('proxy_listings').select('*').order('created_at', { ascending: false }),
+      db.from('email_listings').select('*').order('created_at', { ascending: false }),
+      db.from('user_bans').select('*'),
+      db.from('transactions').select('amount').eq('status', 'success'),
+      db.from('feedbacks').select('id')
+    ];
 
-  const results = await Promise.all(tables.map(p => p.catch(e => ({ data: null, error: e }))));
-  
-  const proxies       = results[0].data || [];
-  const emails        = results[1].data || [];
-  const pListings     = results[2].data || [];
-  const eListings     = results[3].data || [];
-  const bans          = results[4].data || [];
-  const txns          = results[5].data || [];
-  const feedbacks     = results[6].data || [];
+    const results = await Promise.all(tables.map(p => p.catch(e => {
+        console.error("Table load error:", e);
+        return { data: [], error: e };
+    })));
+    
+    const proxies       = results[0].data || [];
+    const emails        = results[1].data || [];
+    const pListings     = results[2].data || [];
+    const eListings     = results[3].data || [];
+    const bans          = results[4].data || [];
+    const txns          = results[5].data || [];
+    const feedbacks     = results[6].data || [];
 
-  // Build bans map
-  window.bannedUsers = {};
-  bans.forEach(b => { if (b.banned) window.bannedUsers[b.user_id] = true; });
+    // Build bans map
+    window.bannedUsers = {};
+    bans.forEach(b => { if (b.banned) window.bannedUsers[b.user_id] = true; });
 
-  allProxies    = proxies;
-  allEmails     = emails;
-  proxyListings = pListings;
-  emailListings = eListings;
+    allProxies    = proxies;
+    allEmails     = emails;
+    proxyListings = pListings;
+    emailListings = eListings;
 
-  // Build users map from purchases
-  const userMap = {};
-  allProxies.forEach(p => {
-    if (!p.user_id) return;
-    if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, proxies: [], emails: [] };
-    userMap[p.user_id].proxies.push(p);
-  });
-  allEmails.forEach(e => {
-    if (!e.user_id) return;
-    if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, proxies: [], emails: [] };
-    userMap[e.user_id].emails.push(e);
-  });
-  allUsers = Object.values(userMap);
+    // Build users map from purchases
+    const userMap = {};
+    allProxies.forEach(p => {
+      if (!p.user_id) return;
+      if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, proxies: [], emails: [] };
+      userMap[p.user_id].proxies.push(p);
+    });
+    allEmails.forEach(e => {
+      if (!e.user_id) return;
+      if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, proxies: [], emails: [] };
+      userMap[e.user_id].emails.push(e);
+    });
+    allUsers = Object.values(userMap);
 
-  // Stats
-  // Use allUsers.length for total unique customers
-  const usersCount   = allUsers.length;
-  // Count available proxies that haven't expired
-  const proxiesCount = proxyListings.filter(p => p.available).length;
-  const emailsCount  = emailListings.filter(e => e.available).length;
-  const soldCount    = txns.length;
+    // Stats
+    const usersCount   = allUsers.length;
+    const proxiesCount = proxyListings.filter(p => p.available).length;
+    const emailsCount  = emailListings.filter(e => e.available).length;
 
-  document.getElementById('s-users').textContent   = usersCount;
-  document.getElementById('s-proxies').textContent = proxiesCount;
-  document.getElementById('s-emails').textContent  = emailsCount;
-  document.getElementById('s-sold').textContent    = allProxies.length + allEmails.length;
+    document.getElementById('s-users').textContent   = usersCount;
+    document.getElementById('s-proxies').textContent = proxiesCount;
+    document.getElementById('s-emails').textContent  = emailsCount;
+    document.getElementById('s-sold').textContent    = allProxies.length + allEmails.length;
 
-  renderUsers(allUsers);
-  renderPurchases(allProxies, allEmails);
-  renderProxyListings(proxyListings);
-  renderEmailListings(emailListings);
-  populateDropdowns();
+    renderUsers(allUsers);
+    renderPurchases(allProxies, allEmails);
+    renderProxyListings(proxyListings);
+    renderEmailListings(emailListings);
+    populateDropdowns();
+  } catch (err) {
+    console.error("loadAll Error:", err);
+    showToast("Dashboard Error: " + err.message, "error");
+    // Ensure spinners are removed even on error
+    ['users-wrap', 'purchases-wrap', 'proxy-listings-wrap', 'email-listings-wrap'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.querySelector('.loading')) el.innerHTML = '<div class="error">Failed to load data.</div>';
+    });
+  }
 }
 
 // ── RENDER USERS ──────────────────────────────────────────────
