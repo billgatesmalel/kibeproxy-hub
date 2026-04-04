@@ -116,7 +116,8 @@ async function loadAll() {
     renderPurchases(allProxies, allEmails);
     renderProxyListings(proxyListings);
     renderEmailListings(emailListings);
-    renderRevenueChart(txns);
+    window.allTransactions = txns;
+    updateChartTimeframe('7d'); 
     populateDropdowns();
   } catch (err) {
     console.error("loadAll Error:", err);
@@ -325,40 +326,92 @@ function renderProxyListings(listings) {
 }
 
 // ── RENDER REVENUE CHART ──────────────────────────────────────
-function renderRevenueChart(txns) {
-  const ctx = document.getElementById('revenueChart');
-  if (!ctx) return;
+function updateChartTimeframe(tf) {
+  // Update UI
+  document.querySelectorAll('.tf-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === tf.toLowerCase());
+  });
 
-  // 1. Get last 7 days labels
-  const labels = [];
-  const dailyData = {};
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    labels.push(dateStr);
-    dailyData[dateStr] = 0;
+  const now = new Date();
+  let labels = [];
+  let dataPoints = {};
+  let title = "";
+  let formatLabel = (d) => d.toLocaleDateString();
+
+  if (tf === '1h') {
+    title = "Earnings over the last 60 minutes";
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 5 * 60000);
+      const key = d.getHours() + ":" + String(Math.floor(d.getMinutes() / 5) * 5).padStart(2, '0');
+      labels.push(key);
+      dataPoints[key] = 0;
+    }
+    formatLabel = (date) => date.getHours() + ":" + String(Math.floor(date.getMinutes() / 5) * 5).padStart(2, '0');
+  } 
+  else if (tf === '24h') {
+    title = "Earnings over the last 24 hours";
+    for (let i = 23; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 3600000);
+      const key = d.getHours() + ":00";
+      labels.push(key);
+      dataPoints[key] = 0;
+    }
+    formatLabel = (date) => date.getHours() + ":00";
+  }
+  else if (tf === '7d' || tf === '30d') {
+    const days = tf === '7d' ? 7 : 30;
+    title = `Earnings over the last ${days} days`;
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      labels.push(key);
+      dataPoints[key] = 0;
+    }
+    formatLabel = (date) => date.toISOString().split('T')[0];
+  }
+  else if (tf === '1y') {
+    title = "Earnings over the last 12 months";
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0');
+      labels.push(key);
+      dataPoints[key] = 0;
+    }
+    formatLabel = (date) => date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, '0');
   }
 
-  // 2. Aggregate amounts
-  txns.forEach(t => {
-    const dStr = new Date(t.created_at).toISOString().split('T')[0];
-    if (dailyData[dStr] !== undefined) {
-      dailyData[dStr] += t.amount;
+  document.getElementById('analytics-sub').textContent = title;
+
+  // Process data
+  (window.allTransactions || []).forEach(t => {
+    const tDate = new Date(t.created_at);
+    const key = formatLabel(tDate);
+    if (dataPoints[key] !== undefined) {
+      dataPoints[key] += t.amount;
     }
   });
 
-  const chartData = labels.map(l => dailyData[l]);
+  renderRevenueChart(labels, labels.map(l => dataPoints[l]), tf);
+}
+
+function renderRevenueChart(labels, chartData, tf) {
+  const ctx = document.getElementById('revenueChart');
+  if (!ctx) return;
 
   if (window.myChart) window.myChart.destroy();
+
+  let displayLabels = labels;
+  if (tf === '30d') {
+    // Sparse labels for 30d to prevent crowding
+    displayLabels = labels.map((l, i) => (i % 5 === 0 || i === labels.length - 1) ? l : '');
+  }
 
   window.myChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels.map(l => {
-        const d = new Date(l);
-        return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-      }),
+      labels: displayLabels,
       datasets: [{
         label: 'Revenue (KES)',
         data: chartData,
@@ -368,14 +421,20 @@ function renderRevenueChart(txns) {
         tension: 0.4,
         fill: true,
         pointBackgroundColor: '#22c55e',
-        pointRadius: 4
+        pointRadius: tf === '30d' ? 2 : 4,
+        pointHoverRadius: 6
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => labels[items[0].dataIndex] // Show original label in tooltip
+          }
+        }
       },
       scales: {
         y: {
@@ -385,7 +444,7 @@ function renderRevenueChart(txns) {
         },
         x: {
           grid: { display: false },
-          ticks: { color: '#94a3b8', font: { size: 10 } }
+          ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 }
         }
       }
     }

@@ -98,3 +98,19 @@
   .section-header { padding: 1rem; flex-direction: column; align-items: flex-start; }
   .data-table th, .data-table td { padding: 10px 12px; font-size: 0.78rem; }
 }
+
+/* ── TIMEFRAME SELECTOR ── */
+.timeframe-selector { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 8px; border: 1px solid var(--border-light); }
+.tf-btn { 
+  background: transparent; 
+  border: none; 
+  color: var(--text-muted); 
+  font-size: 0.7rem; 
+  font-weight: 700; 
+  padding: 4px 10px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+}
+.tf-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+.tf-btn.active { background: var(--green); color: #000; }
