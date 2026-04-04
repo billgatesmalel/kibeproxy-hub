@@ -326,6 +326,35 @@
   </div><!-- /layout -->
 </div><!-- /app -->
 
+<!-- BALANCE MODAL -->
+<div class="modal-overlay" id="modal-balance">
+  <div class="modal">
+    <div class="modal-title">Edit User Balance</div>
+    <p class="modal-sub">Manually adjust the wallet balance for this user.</p>
+    
+    <div class="form-group">
+      <label class="form-label">User Email</label>
+      <input class="form-input" id="eb-email" readonly style="opacity:0.6;cursor:not-allowed;background:rgba(0,0,0,0.1);" />
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Current Balance (KES)</label>
+      <input class="form-input" id="eb-current" readonly style="opacity:0.6;cursor:not-allowed;background:rgba(0,0,0,0.1);" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">New Balance (KES)</label>
+      <input class="form-input" id="eb-amount" type="number" step="0.01" placeholder="Enter amount..." />
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">This will overwrite the user's current balance.</div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:2rem;">
+      <button class="btn-cancel" onclick="closeModal('balance')">Cancel</button>
+      <button class="btn-submit" id="eb-save-btn" onclick="saveUserBalance()">Save Balance</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 

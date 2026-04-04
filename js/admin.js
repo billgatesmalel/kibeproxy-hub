@@ -46,7 +46,8 @@ async function loadAll() {
       db.from('user_bans').select('*'),
       db.from('transactions').select('amount').eq('status', 'success'),
       db.from('feedbacks').select('id'),
-      db.from('usernames').select('*')
+      db.from('usernames').select('*'),
+      db.from('wallets').select('*')
     ];
 
     const results = await Promise.all(tables.map(p => Promise.resolve(p).catch(e => {
@@ -62,6 +63,7 @@ async function loadAll() {
     const txns          = results[5].data || [];
     const feedbacks     = results[6].data || [];
     const userProfiles  = results[7].data || [];
+    const wallets       = results[8].data || [];
 
     // Build bans map
     window.bannedUsers = {};
@@ -77,18 +79,24 @@ async function loadAll() {
     
     // 1. Start with known profiles (usernames table)
     userProfiles.forEach(u => {
-      userMap[u.user_id] = { id: u.user_id, email: u.email, username: u.username, proxies: [], emails: [] };
+      userMap[u.user_id] = { id: u.user_id, email: u.email, username: u.username, balance: 0, proxies: [], emails: [] };
+    });
+
+    // 1b. Add wallet balances
+    wallets.forEach(w => {
+      if (userMap[w.user_id]) userMap[w.user_id].balance = w.balance;
+      else userMap[w.user_id] = { id: w.user_id, email: '—', username: '—', balance: w.balance, proxies: [], emails: [] };
     });
 
     // 2. Add proxies and emails, filling in missing user entries
     allProxies.forEach(p => {
       if (!p.user_id) return;
-      if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, email: p.buyer_email || '—', username: '—', proxies: [], emails: [] };
+      if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, email: p.buyer_email || '—', username: '—', balance: 0, proxies: [], emails: [] };
       userMap[p.user_id].proxies.push(p);
     });
     allEmails.forEach(e => {
       if (!e.user_id) return;
-      if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, email: e.buyer_email || '—', username: '—', proxies: [], emails: [] };
+      if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, email: e.buyer_email || '—', username: '—', balance: 0, proxies: [], emails: [] };
       userMap[e.user_id].emails.push(e);
     });
     
@@ -130,7 +138,7 @@ function renderUsers(users) {
   wrap.innerHTML = `
     <table class="data-table">
       <thead>
-        <tr><th>User ID</th><th>Email</th><th>Username</th><th>Proxies</th><th>Emails</th><th>Status</th><th>Actions</th></tr>
+        <tr><th>User ID</th><th>Email</th><th>Username</th><th>Balance</th><th>Proxies</th><th>Emails</th><th>Status</th><th>Actions</th></tr>
       </thead>
       <tbody>
         ${users.map(u => `
@@ -138,6 +146,10 @@ function renderUsers(users) {
             <td class="mono" onclick="toggleExpand('${u.id}')">${u.id.slice(0,8)}…</td>
             <td onclick="toggleExpand('${u.id}')" style="color:var(--green);font-size:0.85rem;">${u.email || '—'}</td>
             <td onclick="toggleExpand('${u.id}')" style="color:var(--yellow);font-weight:600;">@${u.username || '—'}</td>
+            <td class="mono" onclick="toggleExpand('${u.id}')" style="color:var(--green);font-weight:700;">
+              KES ${u.balance || 0}
+              <button class="btn btn-sm" style="background:var(--border-light);color:var(--text-muted);margin-left:5px;padding:2px 6px;" onclick="event.stopPropagation(); editBalance('${u.id}', '${u.email || '—'}', ${u.balance || 0})" title="Edit Balance">✎</button>
+            </td>
             <td class="mono" onclick="toggleExpand('${u.id}')">${u.proxies.length}</td>
             <td class="mono" onclick="toggleExpand('${u.id}')">${u.emails.length}</td>
             <td onclick="toggleExpand('${u.id}')">
@@ -145,9 +157,11 @@ function renderUsers(users) {
               ${window.bannedUsers && window.bannedUsers[u.id] ? '<span class="badge expired" style="margin-left:6px;">🚫 Banned</span>' : ''}
             </td>
             <td>
-              ${window.bannedUsers && window.bannedUsers[u.id]
-                ? `<button class="btn btn-green btn-sm" onclick="banUser('${u.id}', false)">✓ Unban</button>`
-                : `<button class="btn btn-red btn-sm" onclick="banUser('${u.id}', true)">🚫 Ban</button>`}
+              <div style="display:flex;gap:5px;">
+                ${window.bannedUsers && window.bannedUsers[u.id]
+                  ? `<button class="btn btn-green btn-sm" onclick="banUser('${u.id}', false)">✓ Unban</button>`
+                  : `<button class="btn btn-red btn-sm" onclick="banUser('${u.id}', true)">🚫 Ban</button>`}
+              </div>
             </td>
           </tr>
           <tr id="expand-${u.id}" style="display:none;" class="expand-row">
@@ -442,7 +456,7 @@ function updateFlagFromCountry() {
   document.getElementById('pl-flag').value = flag;
 }
 
-// ── ADD PROXY LISTING ─────────���───────────────────────────────
+// ── ADD PROXY LISTING ─────────────────────────────────────────
 async function addProxyListing() {
   const country       = document.getElementById('pl-country').value.trim();
   let flag            = document.getElementById('pl-flag').value.trim();
@@ -607,6 +621,62 @@ async function submitReply(id) {
     showToast('Reply saved successfully!');
     loadFeedbackMgmt();
   }
+}
+
+// ── MODALS ────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById('modal-' + id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById('modal-' + id).classList.remove('open');
+}
+
+// ── BALANCE EDITING ───────────────────────────────────────────
+let currentEditingUserId = null;
+
+function editBalance(userId, email, balance) {
+  currentEditingUserId = userId;
+  document.getElementById('eb-email').value = email;
+  document.getElementById('eb-current').value = balance;
+  document.getElementById('eb-amount').value = balance;
+  openModal('balance');
+}
+
+async function saveUserBalance() {
+  const amount = parseFloat(document.getElementById('eb-amount').value);
+  if (isNaN(amount)) { showToast('Invalid amount', 'error'); return; }
+
+  const btn = document.getElementById('eb-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const { error } = await db.from('wallets').upsert([{
+      user_id: currentEditingUserId,
+      balance: amount,
+      updated_at: new Date().toISOString()
+    }], { onConflict: 'user_id' });
+
+    if (error) throw error;
+
+    showToast('Balance updated successfully!');
+    closeModal('balance');
+    await loadAll();
+  } catch (err) {
+    showToast('Failed to update balance: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Balance';
+  }
+}
+
+// ── SHOW TOAST ────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
 }
 
 initAdmin();
