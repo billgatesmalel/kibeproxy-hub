@@ -19,7 +19,7 @@ const supabase = createClient(
 
 // Enable CORS for all origins with credentials
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5500', 'https://kibeproxy-mpesa.vercel.app'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5500', 'https://kibeproxy-mpesa.vercel.app', 'https://kibeproxy-hub.vercel.app'],
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
