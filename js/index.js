@@ -386,6 +386,12 @@ async function loadAll() {
   document.getElementById('stat-balance').textContent = 'KES ' + currentBalance;
   document.getElementById('nav-balance').textContent  = 'KES ' + currentBalance;
 
+  // Referral Stats
+  const refEarned = (txList || []).filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
+  document.getElementById('ref-earned').textContent = 'KES ' + refEarned;
+  const refLink = window.location.origin + '/auth.html?ref=' + currentUserId;
+  document.getElementById('ref-link-input').value = refLink;
+
   document.getElementById('stat-active').textContent   = active.length;
   document.getElementById('stat-expired').textContent  = expired.length;
   document.getElementById('stat-emails').textContent   = emailList.length;
@@ -490,7 +496,22 @@ function showAmError(msg) {
 }
 
 function closeModal(id) {
-  document.getElementById('modal-' + id).classList.remove('open');
+  document.getElementById('modal-' + id).classList.remove('active');
+}
+
+function copyReferralLink() {
+  const input = document.getElementById('ref-link-input');
+  input.select();
+  document.execCommand('copy');
+  showToast('Referral link copied! 🚀');
+}
+
+function copyToClipboard(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓';
+    setTimeout(() => btn.innerHTML = original, 1500);
+  });
 }
 
 // ── FEEDBACK LOGIC ────────────────────────────────────────────

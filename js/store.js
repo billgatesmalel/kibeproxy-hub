@@ -228,16 +228,22 @@ function openProxyOrder(id) {
   if (!listing) return;
 
   const days    = listing.duration_days || 1;
-  const total   = listing.price_per_day;
+  const unitPrice = listing.price_per_day;
   const expires = new Date(Date.now() + days * 86400000).toLocaleDateString();
 
   document.getElementById('o-icon').textContent    = listing.flag || '🌍';
   document.getElementById('o-title').textContent   = `${listing.country} ${days}-Day Proxy`;
-  document.getElementById('o-host').textContent    = listing.host;
-  document.getElementById('o-dur').textContent     = `${days} Days`;
-  document.getElementById('o-price').textContent   = `KES ${total}`;
+  document.getElementById('o-price').textContent   = `KES ${unitPrice}`;
   document.getElementById('o-expires').textContent = expires;
-  document.getElementById('o-total').textContent   = `KES ${total}`;
+  
+  // Reset quantity selector
+  const qtyInput = document.getElementById('o-qty');
+  if (qtyInput) {
+    qtyInput.value = 1;
+    qtyInput.max = listing.max_buyers - (listing.buyer_count || 0);
+  }
+  
+  updateOrderQuantity(1);
 
   const btn = document.getElementById('confirm-btn');
   btn.dataset.type    = 'proxy';
@@ -245,10 +251,59 @@ function openProxyOrder(id) {
   btn.dataset.days    = days;
   btn.dataset.expires = new Date(Date.now() + days * 86400000).toISOString();
 
-  pendingOrderData = { type: 'proxy', id: listing.id, days, expires: btn.dataset.expires, total };
-
   showOrderView();
   openModal('order');
+}
+
+function updateOrderQuantity(q) {
+  const qty = parseInt(q) || 1;
+  const listingId = pendingOrderData?.id || document.getElementById('confirm-btn').dataset.id;
+  const listing = proxyListings.find(p => p.id === listingId);
+  if (!listing) return;
+
+  const unitPrice = listing.price_per_day;
+  let subtotal = unitPrice * qty;
+  let discount = 0;
+  let discountRate = 0;
+
+  if (qty >= 10)      discountRate = 0.10;
+  else if (qty >= 5)  discountRate = 0.05;
+
+  discount = Math.floor(subtotal * discountRate);
+  const total = subtotal - discount;
+
+  // Update UI
+  document.getElementById('o-qty-display').textContent = qty;
+  const discountRow = document.getElementById('o-discount-row');
+  const discountTag = document.getElementById('o-discount-tag');
+  
+  if (discount > 0) {
+    discountRow.style.display = 'flex';
+    discountTag.style.display = 'block';
+    discountTag.textContent = `🔥 ${discountRate * 100}% Bulk Discount!`;
+    document.getElementById('o-discount-amt').textContent = `- KES ${discount}`;
+  } else {
+    discountRow.style.display = 'none';
+    discountTag.style.display = 'none';
+  }
+
+  document.getElementById('o-total').textContent = `KES ${total}`;
+  
+  // Update pending data
+  if (pendingOrderData) {
+    pendingOrderData.qty = qty;
+    pendingOrderData.total = total;
+  } else {
+    // Initial load from openProxyOrder
+    pendingOrderData = { 
+      type: 'proxy', 
+      id: listing.id, 
+      days: listing.duration_days || 1, 
+      expires: new Date(Date.now() + (listing.duration_days || 1) * 86400000).toISOString(),
+      qty, 
+      total 
+    };
+  }
 }
 
 // ── OPEN EMAIL ORDER ──────────────────────────────────────────
@@ -486,9 +541,51 @@ function showMpesaError(msg) {
 
 function hideMpesaError() { document.getElementById('mpesa-error').style.display = 'none'; }
 
+async function handleReferralReward() {
+  try {
+    const { data: { user } } = await db.auth.getUser();
+    const referredBy = user?.user_metadata?.referred_by;
+    if (!referredBy) return;
+
+    // Check if this is the user's first purchase
+    const { count } = await db.from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', currentUserId)
+      .eq('status', 'success');
+
+    if (count > 1) return; // Not the first successful one (current one + previous)
+    // Actually, count will be 1 if this is the first success we just inserted.
+
+    // Add KES 20 to referrer wallet
+    const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', referredBy).single();
+    const currentRefBalance = wallet?.balance || 0;
+    const newRefBalance = currentRefBalance + 20;
+
+    await db.from('wallets').upsert([{
+      user_id: referredBy,
+      balance: newRefBalance,
+      updated_at: new Date().toISOString()
+    }], { onConflict: 'user_id' });
+
+    // Record referral transaction for referrer
+    await db.from('transactions').insert([{
+      user_id: referredBy,
+      type: 'bonus',
+      amount: 20,
+      description: `Referral Bonus (from ${currentUserEmail})`,
+      status: 'success',
+      created_at: new Date().toISOString()
+    }]);
+
+    console.log('Referral bonus paid to:', referredBy);
+  } catch (err) {
+    console.error('Referral reward error:', err);
+  }
+}
+
 async function completePaidOrder(mpesaCode, phone) {
   if (!pendingOrderData) return;
-  const { type, id, days, expires, total } = pendingOrderData;
+  const { type, id, days, expires, total, qty } = pendingOrderData;
   const now = new Date().toISOString();
 
   try {
@@ -497,35 +594,44 @@ async function completePaidOrder(mpesaCode, phone) {
       user_id:      currentUserId,
       type:         'purchase',
       amount:       total,
-      description:  `Store purchase (${type === 'proxy' ? 'Proxy' : 'Email'})`,
+      description:  `Store purchase (${type === 'proxy' ? 'Proxy x'+(qty||1) : 'Email'})`,
       mpesa_phone:  phone === 'N/A' ? null : phone,
       status:       'success',
       created_at:   now,
     }]);
 
+    // Reward referrer if eligible
+    await handleReferralReward();
+
     if (type === 'proxy') {
       const listing = proxyListings.find(p => p.id === id);
-      const { error: insertErr } = await db.from('proxies').insert([{
-        user_id:        currentUserId,
-        host:           listing.host,
-        port:           listing.port,
-        username:       listing.username || '',
-        password:       listing.password || '',
-        country:        listing.country,
-        status:         'active',
-        expires_at:     expires,
-        buyer_email:    currentUserEmail,
-        mpesa_phone:    phone,
-        mpesa_code:     mpesaCode || '',
-        payment_status: 'success',
-        purchased_at:   now,
-        listing_id:     id,
-      }]);
+      const count = qty || 1;
+      
+      const insertRows = [];
+      for (let i = 0; i < count; i++) {
+        insertRows.push({
+          user_id:        currentUserId,
+          host:           listing.host,
+          port:           listing.port,
+          username:       listing.username || '',
+          password:       listing.password || '',
+          country:        listing.country,
+          status:         'active',
+          expires_at:     expires,
+          buyer_email:    currentUserEmail,
+          mpesa_phone:    phone,
+          mpesa_code:     mpesaCode || '',
+          payment_status: 'success',
+          purchased_at:   now,
+          listing_id:     id,
+        });
+      }
 
+      const { error: insertErr } = await db.from('proxies').insert(insertRows);
       if (insertErr) throw new Error(insertErr.message);
 
       // Increment buyer_count, remove from store if limit reached
-      const newCount  = (listing.buyer_count || 0) + 1;
+      const newCount  = (listing.buyer_count || 0) + count;
       const maxBuyers = listing.max_buyers  || 1;
       await db.from('proxy_listings').update({
         buyer_count: newCount,

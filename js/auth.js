@@ -19,7 +19,12 @@ function togglePasswordVisibility(inputId, iconId) {
        <circle cx="12" cy="12" r="3"/>`;
 }
 
-// Check if already logged in - show sign out option instead of redirecting
+// ── REFERRAL CAPTURE ──────────────────────────────────────────
+let referralCode = new URLSearchParams(window.location.search).get('ref');
+if (referralCode) localStorage.setItem('kibeproxy_ref', referralCode);
+else referralCode = localStorage.getItem('kibeproxy_ref');
+
+// Check if already logged in...
 db.auth.getSession().then(({ data }) => {
   if (data.session) {
     // User is logged in - show logged-in UI
@@ -150,10 +155,17 @@ async function handleSignup() {
   if (confirm && password !== confirm) { showAlert('Passwords do not match'); return; }
 
   setLoading('signup-btn', true);
-  const { error } = await db.auth.signUp({
+  
+  const signupOptions = {
     email, password,
     options: { data: { full_name: name } }
-  });
+  };
+
+  if (referralCode) {
+    signupOptions.options.data.referred_by = referralCode;
+  }
+
+  const { error } = await db.auth.signUp(signupOptions);
   setLoading('signup-btn', false, 'Create Account');
 
   if (error) {
