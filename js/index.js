@@ -2,6 +2,28 @@
 let currentUserId = null;
 let currentBalance = 0;
 
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function copyToClipboard(text, btn) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+    }, 1500);
+    showToast('Copied to clipboard!');
+  }).catch(err => {
+    console.error('Copy failed:', err);
+    showToast('Failed to copy', 'error');
+  });
+}
+
 async function initAuth() {
   document.body.style.visibility = 'hidden';
 
@@ -90,12 +112,30 @@ function renderProxies(data, panelId, status) {
         ${data.map(p => `
           <tr>
             <td>${p.country || '—'}</td>
-            <td class="mono">${p.host || '—'}</td>
-            <td class="mono">${p.port || '—'}</td>
-            <td class="mono">${p.username || '—'}</td>
+            <td class="mono">
+              ${p.host || '—'}
+              ${p.host ? `<button class="copy-btn" onclick="copyToClipboard('${p.host}', this)" title="Copy Host">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>` : ''}
+            </td>
+            <td class="mono">
+              ${p.port || '—'}
+              ${p.port ? `<button class="copy-btn" onclick="copyToClipboard('${p.port}', this)" title="Copy Port">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>` : ''}
+            </td>
+            <td class="mono">
+              ${p.username || '—'}
+              ${p.username ? `<button class="copy-btn" onclick="copyToClipboard('${p.username}', this)" title="Copy Username">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>` : ''}
+            </td>
             <td class="mono">
               <span class="pass-hidden" id="pass-${p.id}" data-pass="${(p.password||'').replace(/"/g,'&quot;')}">••••••••</span>
               <button class="show-btn" onclick="togglePass('pass-${p.id}')">Show</button>
+              <button class="copy-btn" onclick="copyToClipboard(document.getElementById('pass-${p.id}').getAttribute('data-pass'), this)" title="Copy Password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
             </td>
             <td><span class="badge ${p.status}">${p.status}</span></td>
             <td>${paymentBadge(p.payment_status)}</td>
@@ -138,10 +178,18 @@ function renderEmails(data) {
       <tbody>
         ${data.map(e => `
           <tr>
-            <td class="mono">${e.email}</td>
+            <td class="mono">
+              ${e.email}
+              <button class="copy-btn" onclick="copyToClipboard('${e.email}', this)" title="Copy Email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </td>
             <td class="mono">
               <span class="pass-hidden" id="epass-${e.id}" data-pass="${(e.password||'').replace(/"/g,'&quot;')}">••••••••</span>
               <button class="show-btn" onclick="togglePass('epass-${e.id}')">Show</button>
+              <button class="copy-btn" onclick="copyToClipboard(document.getElementById('epass-${e.id}').getAttribute('data-pass'), this)" title="Copy Password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
             </td>
             <td>${paymentBadge(e.payment_status)}</td>
             <td class="mono" style="font-size:0.78rem;color:var(--text-muted);display:none;">

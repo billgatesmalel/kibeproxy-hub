@@ -64,3 +64,27 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 .am-success-icon { width: 64px; height: 64px; background: var(--green-glow); border: 2px solid var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--green); }
 
 @media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr);}.am-row{grid-template-columns:1fr;}}
+
+/* ── COPY BUTTON ── */
+.copy-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-left: 5px;
+  border-radius: 4px;
+}
+.copy-btn:hover {
+  color: var(--green);
+  background: var(--green-glow);
+}
+.copy-btn svg {
+  width: 14px;
+  height: 14px;
+}
