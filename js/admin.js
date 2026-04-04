@@ -339,10 +339,19 @@ function populateDropdowns() {}
 function showSection(name, btn) {
   const sections = ['users', 'purchases', 'proxy-listings', 'email-listings', 'feedback-mgmt'];
   sections.forEach(s => {
-    document.getElementById(`section-${s}`).style.display = s === name ? 'block' : 'none';
+    const el = document.getElementById(`section-${s}`);
+    if (el) el.style.display = s === name ? 'block' : 'none';
   });
+
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // If no button passed (e.g. from stat card), find by onclick
+    const targetBtn = Array.from(document.querySelectorAll('.sidebar-btn')).find(b => b.getAttribute('onclick').includes(`'${name}'`));
+    if (targetBtn) targetBtn.classList.add('active');
+  }
 }
 
 // ── EXPAND ROW ────────────────────────────────────────────────
