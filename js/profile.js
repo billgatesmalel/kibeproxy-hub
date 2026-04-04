@@ -80,14 +80,33 @@ async function loadStats() {
   const [{ data: proxies }, { data: emails }] = await Promise.all([
     db.from('proxies').select('id,status').eq('user_id', currentUser.id),
     db.from('emails').select('id').eq('user_id', currentUser.id),
+    db.from('transactions').select('amount,type,status').eq('user_id', currentUser.id)
   ]);
 
-  const active = (proxies || []).filter(p => p.status === 'active').length;
-  const total  = (proxies || []).length + (emails || []).length;
+  const active = (proxies || []).filter(p => p.status === 'active');
+  const expired = (proxies || []).filter(p => p.status === 'expired');
+  const emailList = (emails || []);
+  const txList = (txns || []);
 
-  document.getElementById('stat-proxies').textContent = active;
-  document.getElementById('stat-emails').textContent  = (emails || []).length;
-  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-proxies').textContent = active.length;
+  document.getElementById('stat-active').textContent   = active.length;
+  document.getElementById('stat-expired').textContent  = expired.length;
+  document.getElementById('stat-emails').textContent   = emailList.length;
+  document.getElementById('stat-txns').textContent     = txList.length;
+
+  // Referral Stats
+  const refEarned = txList.filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
+  document.getElementById('ref-earned').textContent = 'KES ' + refEarned;
+  
+  const refLink = window.location.origin + '/auth.html?ref=' + currentUser.id;
+  document.getElementById('ref-link-input').value = refLink;
+}
+
+function copyReferralLink() {
+  const input = document.getElementById('ref-link-input');
+  input.select();
+  document.execCommand('copy');
+  showToast('Referral link copied! 🚀');
 }
 
 // ── CHECK USERNAME AVAILABILITY ───────────────────────────────

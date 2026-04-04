@@ -129,6 +129,28 @@
     <div class="mini-stat"><div class="mini-stat-val" id="stat-total">—</div><div class="mini-stat-lbl">Total Purchases</div></div>
   </div>
 
+  <!-- REFER & EARN -->
+  <div class="section-card" style="background:var(--green-glow);border:1px solid var(--green-dim);">
+    <div class="card-header" style="border-bottom-color:var(--green-dim);">
+      <div class="card-title" style="color:var(--green);">🚀 Refer & Earn KES 10!</div>
+      <div class="card-sub" style="color:rgba(255,255,255,0.7);">Get KES 10 credited to your wallet for every friend who joins and makes their first purchase!</div>
+    </div>
+    <div class="card-body" style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:280px;">
+        <label class="form-label" style="margin-bottom:8px;display:block;">Your Referral Link</label>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="text" id="ref-link-input" readonly class="form-input" style="flex:1;background:rgba(0,0,0,0.2);font-family:DM Mono,monospace;font-size:0.75rem;padding:10px;" value="Generating link..." />
+          <button class="save-btn" style="padding:10px 20px;white-space:nowrap;" onclick="copyReferralLink()">Copy Link</button>
+        </div>
+      </div>
+      <div style="text-align:right;min-width:140px;padding-left:1.5rem;border-left:1px solid var(--green-dim);">
+        <div class="form-label">Earnings</div>
+        <div class="mini-stat-val" id="ref-earned" style="font-size:1.6rem;color:var(--green);">KES 0</div>
+        <div class="card-sub">From Referrals</div>
+      </div>
+    </div>
+  </div>
+
   <!-- USERNAME -->
   <div class="section-card">
     <div class="card-header">
