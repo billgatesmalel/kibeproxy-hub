@@ -146,7 +146,7 @@ function renderUsers(users) {
                               <td>${payBadge(p.payment_status)}</td>
                               <td>${p.country || '—'}</td>
                               <td><span class="badge ${p.status}">${p.status}</span></td>
-                              <td style="color:var(--text-muted);font-size:0.72rem">${new Date(p.purchased_at || p.created_at).toLocaleString()}</td>
+                               <td style="color:var(--text-muted);font-size:0.72rem;display:none;">${new Date(p.purchased_at || p.created_at).toLocaleString()}</td>
                               <td><button class="btn btn-red btn-sm" onclick="deleteUserProxy('${p.id}')">Remove</button></td>
                             </tr>`).join('')}
                         </tbody>
@@ -164,7 +164,7 @@ function renderUsers(users) {
                             <th>M-Pesa Code</th>
                             <th>Payment</th>
                             <th>Email Account</th>
-                            <th>Purchased At</th>
+                            <th style="display:none;">Purchased At</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -176,7 +176,7 @@ function renderUsers(users) {
                               <td style="color:var(--yellow);font-weight:700">${e.mpesa_code || '—'}</td>
                               <td>${payBadge(e.payment_status)}</td>
                               <td>${e.email}</td>
-                              <td style="color:var(--text-muted);font-size:0.72rem">${new Date(e.purchased_at || e.created_at).toLocaleString()}</td>
+                               <td style="color:var(--text-muted);font-size:0.72rem;display:none;">${new Date(e.purchased_at || e.created_at).toLocaleString()}</td>
                               <td><button class="btn btn-red btn-sm" onclick="deleteUserEmail('${e.id}')">Remove</button></td>
                             </tr>`).join('')}
                         </tbody>
@@ -249,7 +249,11 @@ function renderProxyListings(listings) {
       <thead><tr><th>Country</th><th>Host</th><th>Duration</th><th>Price</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
       <tbody>
         ${listings.map(p => {
-          const isExpired = (new Date() - new Date(p.created_at)) > 24 * 60 * 60 * 1000;
+          const createdAt = new Date(p.created_at);
+          const durationDays = p.duration_days || 1;
+          const expiresAt = new Date(createdAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+          const isExpired = new Date() > expiresAt;
+          
           const statusText = isExpired ? 'Expired' : (p.available ? 'Available' : 'Sold Out');
           const statusClass = (isExpired || !p.available) ? 'expired' : 'active';
           
@@ -261,9 +265,9 @@ function renderProxyListings(listings) {
             <td class="mono" style="color:var(--green)">KES ${p.price_per_day}</td>
             <td><span class="badge ${statusClass}">${statusText}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.created_at).toLocaleDateString()}</td>
-            <td>${p.available && !isExpired ? `<button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Inactive</span>'}</td>
+            <td><button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button></td>
           </tr>`;
-        }).join('')}
+        }).sort((a,b) => b.isExpired - a.isExpired).join('')}
       </tbody>
     </table>`;
 }
@@ -285,7 +289,7 @@ function renderEmailListings(listings) {
             <td class="mono" style="color:var(--green)">KES ${e.price}</td>
             <td><span class="badge ${e.available ? 'active' : 'expired'}">${e.available ? 'Available' : 'Sold'}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(e.created_at).toLocaleDateString()}</td>
-            <td>${e.available ? `<button class="btn btn-red btn-sm" onclick="removeEmailListing('${e.id}')">Remove</button>` : '<span style="color:var(--text-muted);font-size:0.78rem;">Sold</span>'}</td>
+            <td><button class="btn btn-red btn-sm" onclick="removeEmailListing('${e.id}')">Remove</button></td>
           </tr>`).join('')}
       </tbody>
     </table>`;

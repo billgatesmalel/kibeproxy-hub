@@ -51,25 +51,32 @@ async function initStore() {
 
 // ── LOAD LISTINGS ─────────────────────────────────────────────
 async function loadListings() {
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const [{ data: proxies }, { data: emails }, { data: userProxies }] = await Promise.all([
     db.from('proxy_listings')
       .select('*')
       .eq('available', true)
-      .gt('created_at', twentyFourHoursAgo)
       .order('created_at', { ascending: false }),
     db.from('email_listings')
       .select('*')
       .eq('available', true)
-      .gt('created_at', twentyFourHoursAgo)
       .order('created_at', { ascending: false }),
     db.from('proxies').select('listing_id').eq('user_id', currentUserId).eq('status', 'active')
   ]);
 
   // Filter out proxies the user already owns
   const ownedListingIds = new Set((userProxies || []).map(p => p.listing_id));
-  proxyListings = (proxies || []).filter(p => !ownedListingIds.has(p.id));
-  emailListings = emails  || [];
+  
+  // Proxies expire after their duration_days since created_at
+  const now = new Date();
+  proxyListings = (proxies || []).filter(p => {
+    if (ownedListingIds.has(p.id)) return false;
+    const createdAt = new Date(p.created_at);
+    const durationDays = p.duration_days || 1;
+    const expiresAt = new Date(createdAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+    return now < expiresAt;
+  });
+
+  emailListings = emails || [];
 
   renderTab(activeTab);
 }

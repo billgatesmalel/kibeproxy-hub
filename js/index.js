@@ -127,7 +127,7 @@ function renderEmails(data) {
   }
   panel.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Email</th><th>Password</th><th>Payment</th><th>Purchased</th></tr></thead>
+      <thead><tr><th>Email</th><th>Password</th><th>Payment</th><th style="display:none;">Purchased</th></tr></thead>
       <tbody>
         ${data.map(e => `
           <tr>
@@ -137,7 +137,7 @@ function renderEmails(data) {
               <button class="show-btn" onclick="togglePass('epass-${e.id}')">Show</button>
             </td>
             <td>${paymentBadge(e.payment_status)}</td>
-            <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
+            <td class="mono" style="font-size:0.78rem;color:var(--text-muted);display:none;">
               ${new Date(e.purchased_at || e.created_at).toLocaleDateString()}
             </td>
           </tr>`).join('')}
@@ -169,7 +169,7 @@ function renderTransactions(data) {
           <th>M-Pesa Number</th>
           <th>Amount</th>
           <th>Status</th>
-          <th>Date & Time</th>
+          <th style="display:none;">Date & Time</th>
         </tr>
       </thead>
       <tbody>
@@ -189,7 +189,7 @@ function renderTransactions(data) {
               ${t.type === 'deposit' ? '+' : '-'}KES ${t.amount}
             </td>
             <td>${paymentBadge(t.status)}</td>
-            <td class="mono" style="font-size:0.75rem;color:var(--text-muted);">
+            <td class="mono" style="font-size:0.75rem;color:var(--text-muted);display:none;">
               ${new Date(t.created_at).toLocaleString()}
             </td>
           </tr>`).join('')}

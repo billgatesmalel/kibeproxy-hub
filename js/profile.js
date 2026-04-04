@@ -29,9 +29,7 @@ async function initProfile() {
   document.getElementById('avatar-initials').textContent = initials;
   document.getElementById('hero-name').textContent        = name;
   document.getElementById('hero-email').textContent       = currentUser.email;
-  document.getElementById('hero-joined').textContent      =
-    'Member since ' + new Date(currentUser.created_at).toLocaleDateString('en-US',
-      { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('hero-joined').style.display    = 'none';
 
   // Pre-fill form — name is read-only
   document.getElementById('display-name').value  = name;
