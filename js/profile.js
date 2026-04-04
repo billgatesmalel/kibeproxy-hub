@@ -83,16 +83,13 @@ async function loadStats() {
     db.from('transactions').select('amount,type,status').eq('user_id', currentUser.id)
   ]);
 
-  const active = (proxies || []).filter(p => p.status === 'active');
-  const expired = (proxies || []).filter(p => p.status === 'expired');
-  const emailList = (emails || []);
-  const txList = (txns || []);
+  const active = (proxies || []).filter(p => p.status === 'active').length;
+  const emailsCount = (emails || []).length;
+  const totalPurchases = (proxies || []).length + emailsCount;
 
-  document.getElementById('stat-proxies').textContent = active.length;
-  document.getElementById('stat-active').textContent   = active.length;
-  document.getElementById('stat-expired').textContent  = expired.length;
-  document.getElementById('stat-emails').textContent   = emailList.length;
-  document.getElementById('stat-txns').textContent     = txList.length;
+  document.getElementById('stat-proxies').textContent = active;
+  document.getElementById('stat-emails').textContent  = emailsCount;
+  document.getElementById('stat-total').textContent   = totalPurchases;
 
   // Referral Stats
   const refEarned = txList.filter(t => t.type === 'bonus' && t.status === 'success').reduce((acc, t) => acc + t.amount, 0);
@@ -100,6 +97,14 @@ async function loadStats() {
   
   const refLink = window.location.origin + '/auth.html?ref=' + currentUser.id;
   document.getElementById('ref-link-input').value = refLink;
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 function copyReferralLink() {
