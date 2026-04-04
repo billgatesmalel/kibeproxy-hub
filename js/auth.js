@@ -171,11 +171,27 @@ async function handleSignup() {
   if (error) {
     showAlert(error.message);
   } else {
-    if (data.session) {
+    // Check if session exists in data or in the current client
+    let session = data.session;
+    if (!session) {
+      const { data: { session: s2 } } = await db.auth.getSession();
+      session = s2;
+    }
+
+    if (session) {
       showAlert('Account created! Welcome to KibeProxy.', 'success');
-      setTimeout(() => window.location.href = 'index.html', 1500);
+      setTimeout(() => window.location.href = 'index.html', 1000);
     } else {
-      showAlert('Account created! Please check your email to verify.', 'success');
+      // If still no session, it likely needs email confirmation
+      // But let's show a link or message about refreshing if it fails to redirect
+      showAlert('Account created! Redirecting...', 'success');
+      // If we don't have a session, we can try logging them in if it's auto-confirm
+      const { error: loginErr } = await db.auth.signInWithPassword({ email, password });
+      if (!loginErr) {
+        setTimeout(() => window.location.href = 'index.html', 800);
+      } else {
+        showAlert('Account created! Please check your email to verify.', 'success');
+      }
     }
   }
 }
