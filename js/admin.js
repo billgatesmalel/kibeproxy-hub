@@ -45,7 +45,8 @@ async function loadAll() {
       db.from('email_listings').select('*').order('created_at', { ascending: false }),
       db.from('user_bans').select('*'),
       db.from('transactions').select('amount').eq('status', 'success'),
-      db.from('feedbacks').select('id')
+      db.from('feedbacks').select('id'),
+      db.from('usernames').select('*')
     ];
 
     const results = await Promise.all(tables.map(p => Promise.resolve(p).catch(e => {
@@ -60,6 +61,7 @@ async function loadAll() {
     const bans          = results[4].data || [];
     const txns          = results[5].data || [];
     const feedbacks     = results[6].data || [];
+    const userProfiles  = results[7].data || [];
 
     // Build bans map
     window.bannedUsers = {};
@@ -70,18 +72,26 @@ async function loadAll() {
     proxyListings = pListings;
     emailListings = eListings;
 
-    // Build users map from purchases
+    // Build users map
     const userMap = {};
+    
+    // 1. Start with known profiles (usernames table)
+    userProfiles.forEach(u => {
+      userMap[u.user_id] = { id: u.user_id, email: u.email, username: u.username, proxies: [], emails: [] };
+    });
+
+    // 2. Add proxies and emails, filling in missing user entries
     allProxies.forEach(p => {
       if (!p.user_id) return;
-      if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, proxies: [], emails: [] };
+      if (!userMap[p.user_id]) userMap[p.user_id] = { id: p.user_id, email: p.buyer_email || '—', username: '—', proxies: [], emails: [] };
       userMap[p.user_id].proxies.push(p);
     });
     allEmails.forEach(e => {
       if (!e.user_id) return;
-      if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, proxies: [], emails: [] };
+      if (!userMap[e.user_id]) userMap[e.user_id] = { id: e.user_id, email: e.buyer_email || '—', username: '—', proxies: [], emails: [] };
       userMap[e.user_id].emails.push(e);
     });
+    
     allUsers = Object.values(userMap);
 
     // Stats
@@ -114,18 +124,20 @@ async function loadAll() {
 function renderUsers(users) {
   const wrap = document.getElementById('users-wrap');
   if (!users.length) {
-    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="4">No users have purchased anything yet.</td></tr></tbody></table>`;
+    wrap.innerHTML = `<table class="data-table"><tbody><tr><td class="empty-cell" colspan="6">No users found.</td></tr></tbody></table>`;
     return;
   }
   wrap.innerHTML = `
     <table class="data-table">
       <thead>
-        <tr><th>User ID</th><th>Proxies</th><th>Emails</th><th>Details</th></tr>
+        <tr><th>User ID</th><th>Email</th><th>Username</th><th>Proxies</th><th>Emails</th><th>Status</th><th>Actions</th></tr>
       </thead>
       <tbody>
         ${users.map(u => `
           <tr style="cursor:pointer;">
-            <td class="mono" onclick="toggleExpand('${u.id}')">${u.id.slice(0,8)}…<span style="color:var(--text-muted);font-size:0.72rem;margin-left:4px;">${u.id.slice(-4)}</span></td>
+            <td class="mono" onclick="toggleExpand('${u.id}')">${u.id.slice(0,8)}…</td>
+            <td onclick="toggleExpand('${u.id}')" style="color:var(--green);font-size:0.85rem;">${u.email || '—'}</td>
+            <td onclick="toggleExpand('${u.id}')" style="color:var(--yellow);font-weight:600;">@${u.username || '—'}</td>
             <td class="mono" onclick="toggleExpand('${u.id}')">${u.proxies.length}</td>
             <td class="mono" onclick="toggleExpand('${u.id}')">${u.emails.length}</td>
             <td onclick="toggleExpand('${u.id}')">
@@ -139,7 +151,7 @@ function renderUsers(users) {
             </td>
           </tr>
           <tr id="expand-${u.id}" style="display:none;" class="expand-row">
-            <td colspan="4">
+            <td colspan="7">
               <div class="expand-inner">
                 <div class="expand-tabs">
                   <button class="expand-tab active" onclick="switchExpandTab('${u.id}','proxies',this)">Proxies (${u.proxies.length})</button>
