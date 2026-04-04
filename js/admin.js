@@ -48,7 +48,7 @@ async function loadAll() {
       db.from('feedbacks').select('id')
     ];
 
-    const results = await Promise.all(tables.map(p => p.catch(e => {
+    const results = await Promise.all(tables.map(p => Promise.resolve(p).catch(e => {
         console.error("Table load error:", e);
         return { data: [], error: e };
     })));
