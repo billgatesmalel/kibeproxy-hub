@@ -407,15 +407,15 @@ async function confirmAddMoney() {
       throw new Error(data.error || 'STK Push failed at server');
     }
 
-    // Optionally, add a pending transaction
+    // Log a pending transaction (only use columns that exist in the table)
+    const pendingDesc = `Wallet top-up via M-Pesa (KES ${amount})`;
     const { error: txErr } = await db.from('transactions').insert([{
       user_id:     currentUserId,
       type:        'deposit',
       amount:      amount,
-      description: 'Wallet top-up via M-Pesa (pending)',
-      mpesa_phone: phone,
+      description: pendingDesc,
       status:      'pending',
-      checkout_request_id: data.checkoutRequestId
+      created_at:  new Date().toISOString()
     }]);
 
     if (txErr) console.error('Transaction log error:', txErr);
@@ -424,7 +424,7 @@ async function confirmAddMoney() {
     btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Waiting for PIN...';
 
     // Begin dynamic polling
-    pollAddMoneyStatus(data.checkoutRequestId, amount);
+    pollAddMoneyStatus(data.checkoutRequestId, amount, pendingDesc);
 
   } catch (err) {
     showAmError(err.message);
@@ -433,7 +433,7 @@ async function confirmAddMoney() {
   }
 }
 
-async function pollAddMoneyStatus(checkoutId, amount) {
+async function pollAddMoneyStatus(checkoutId, amount, pendingDesc) {
   const btn = document.getElementById('am-btn');
   let attempts = 0;
   
@@ -458,6 +458,15 @@ async function pollAddMoneyStatus(checkoutId, amount) {
         document.getElementById('am-success').style.display = 'block';
         document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
         document.getElementById('am-success-balance').textContent = 'Wait for Wallet Balance to reflect...';
+        
+        // Mark the pending transaction as success
+        await db.from('transactions').update({ 
+          status: 'success', 
+          description: `Wallet top-up via M-Pesa (KES ${amount}) - Confirmed`
+        }).eq('user_id', currentUserId)
+         .eq('description', pendingDesc)
+         .eq('status', 'pending');
+        
         loadStats(); 
         maybeShowRatingPrompt();
       } else if (!data.success && data.status === 'failed') {
@@ -465,11 +474,13 @@ async function pollAddMoneyStatus(checkoutId, amount) {
         showAmError(data.error || 'Payment failed or was cancelled.');
         btn.disabled = false; btn.innerHTML = '✓ Add Money';
         
-        // Sync the explicit failure back to the database in case the webhook is delayed
+        // Mark the pending transaction as failed
         await db.from('transactions').update({ 
           status: 'failed', 
-          description: `Wallet top-up failed: ${data.error}`
-        }).eq('checkout_request_id', checkoutId);
+          description: `Wallet top-up failed: ${data.error || 'Cancelled'}`
+        }).eq('user_id', currentUserId)
+         .eq('description', pendingDesc)
+         .eq('status', 'pending');
         
         loadStats();
       }
