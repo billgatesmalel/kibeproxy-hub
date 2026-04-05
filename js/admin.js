@@ -483,7 +483,7 @@ function populateDropdowns() {}
 
 // ── SECTION SWITCH ────────────────────────────────────────────
 function showSection(name, btn) {
-  const sections = ['users', 'purchases', 'proxy-listings', 'email-listings', 'feedback-mgmt'];
+  const sections = ['users', 'purchases', 'proxy-listings', 'email-listings', 'feedback-mgmt', 'analytics'];
   sections.forEach(s => {
     const el = document.getElementById(`section-${s}`);
     if (el) el.style.display = s === name ? 'block' : 'none';
