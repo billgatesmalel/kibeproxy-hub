@@ -755,14 +755,6 @@ async function submitReply(id) {
   }
 }
 
-// ── MODALS ────────────────────────────────────────────────────
-function openModal(id) {
-  document.getElementById('modal-' + id).classList.add('open');
-}
-
-function closeModal(id) {
-  document.getElementById('modal-' + id).classList.remove('open');
-}
 
 // ── BALANCE EDITING ───────────────────────────────────────────
 let currentEditingUserId = null;
