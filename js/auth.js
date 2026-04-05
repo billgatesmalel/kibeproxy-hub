@@ -225,3 +225,36 @@ document.addEventListener('keydown', e => {
   if (loginVisible) handleLogin();
   else handleSignup();
 });
+
+// ── INIT ──────────────────────────────────────────────────────
+async function initAuth() {
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      // User is logged in - show logged-in UI
+      const loggedInEl = document.getElementById('logged-in');
+      const emailEl = document.getElementById('current-user-email');
+      const tabsEl = document.querySelector('.auth-tabs');
+      const loginEl = document.getElementById('form-login');
+      const signupEl = document.getElementById('form-signup');
+
+      if (loggedInEl) loggedInEl.style.display = 'block';
+      if (emailEl) emailEl.textContent = session.user.email;
+      if (tabsEl) tabsEl.style.display = 'none';
+      if (loginEl) loginEl.style.display = 'none';
+      if (signupEl) signupEl.style.display = 'none';
+
+      // Auto-redirect to dashboard if coming from non-store page
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get('next')) {
+        setTimeout(() => window.location.href = 'index.html', 1500);
+      }
+    }
+  } catch (err) {
+    console.error('Auth init error:', err);
+  } finally {
+    showPage();
+  }
+}
+
+initAuth();
