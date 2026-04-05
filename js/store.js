@@ -359,36 +359,24 @@ function renderPaymentOptions() {
   const total = pendingOrderData?.total || 0;
   const methodEl = document.getElementById('o-payment-method');
   const optionsEl = document.getElementById('o-payment-options');
-  selectedPaymentMethod = 'mpesa'; // Default to mpesa
 
   if (methodEl) {
-    methodEl.textContent = currentBalance >= total
-      ? 'Choose payment method'
-      : 'Wallet insufficient, pay with M-Pesa';
+    methodEl.textContent = 'Choose payment method';
   }
 
   if (optionsEl) {
-    if (currentBalance >= total && total > 0) {
-      optionsEl.innerHTML = `
-        <label style="display:flex;align-items:center;gap:8px;">
-          <input type="radio" name="payment_method" value="wallet" checked onchange="onPaymentMethodChange('wallet')" />
-          Use wallet balance (KES ${currentBalance})
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:6px;">
-          <input type="radio" name="payment_method" value="mpesa" onchange="onPaymentMethodChange('mpesa')" />
-          Pay with M-Pesa
-        </label>
-      `;
-      selectedPaymentMethod = 'wallet';
-    } else {
-      optionsEl.innerHTML = `
-        <label style="display:flex;align-items:center;gap:8px;">
-          <input type="radio" name="payment_method" value="mpesa" checked onchange="onPaymentMethodChange('mpesa')" />
-          Pay with M-Pesa
-        </label>
-      `;
-      selectedPaymentMethod = 'mpesa';
-    }
+    const isInsufficient = currentBalance < total;
+    optionsEl.innerHTML = `
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;">
+        <input type="radio" name="payment_method" value="wallet" ${!isInsufficient ? 'checked' : ''} onchange="onPaymentMethodChange('wallet')" />
+        <span>Use wallet balance (KES ${currentBalance}) ${isInsufficient ? '<span style="color:#ef4444;font-size:0.7rem;font-weight:700;margin-left:4px;">(Insufficient)</span>' : ''}</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="radio" name="payment_method" value="mpesa" ${isInsufficient ? 'checked' : ''} onchange="onPaymentMethodChange('mpesa')" />
+        <span>Pay with M-Pesa</span>
+      </label>
+    `;
+    selectedPaymentMethod = isInsufficient ? 'mpesa' : 'wallet';
     onPaymentMethodChange(selectedPaymentMethod);
   }
 }
@@ -412,7 +400,13 @@ async function payWithWallet() {
   const total = pendingOrderData.total;
 
   if (currentBalance < total) {
-    showOrderError('Insufficient wallet balance.');
+    showOrderError('Insufficient wallet balance. Please pay with M-Pesa instead.');
+    // Automatically switch to mpesa in the UI
+    const mpesaRadio = document.querySelector('input[name="payment_method"][value="mpesa"]');
+    if (mpesaRadio) {
+      mpesaRadio.checked = true;
+      onPaymentMethodChange('mpesa');
+    }
     return;
   }
 
