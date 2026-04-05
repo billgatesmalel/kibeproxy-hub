@@ -459,6 +459,7 @@ async function pollAddMoneyStatus(checkoutId, amount) {
         document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
         document.getElementById('am-success-balance').textContent = 'Wait for Wallet Balance to reflect...';
         loadStats(); 
+        maybeShowRatingPrompt();
       } else if (!data.success && data.status === 'failed') {
         clearInterval(poll);
         showAmError(data.error || 'Payment failed or was cancelled.');
@@ -599,6 +600,93 @@ async function submitFeedback() {
     feedbackEditingId = null;
   }
 }
+// ── POST-TRANSACTION RATING ───────────────────────────────────
+function initRateStars() {
+  const stars = document.querySelectorAll('#rate-star-wrap span');
+  const input = document.getElementById('rate-val');
+  if (!stars.length) return;
+
+  stars.forEach(s => {
+    s.addEventListener('click', () => {
+      const val = parseInt(s.getAttribute('data-val'));
+      input.value = val;
+      updateRateStars(val);
+    });
+    s.addEventListener('mouseover', () => updateRateStars(parseInt(s.getAttribute('data-val'))));
+    s.addEventListener('mouseout', () => updateRateStars(parseInt(input.value)));
+  });
+
+  function updateRateStars(val) {
+    stars.forEach(s => {
+      s.classList.toggle('selected', parseInt(s.getAttribute('data-val')) <= val);
+    });
+  }
+  updateRateStars(parseInt(input.value));
+}
+
+async function maybeShowRatingPrompt() {
+  if (!currentUserId) return;
+
+  try {
+    // Check if user already left a rating via the dashboard prompt
+    const { data: existing } = await db.from('feedbacks')
+      .select('id')
+      .eq('user_id', currentUserId)
+      .limit(1);
+
+    if (existing && existing.length > 0) return; // Already rated, don't bother
+
+    // Check how many successful transactions the user has
+    const { data: txns, error } = await db.from('transactions')
+      .select('id')
+      .eq('user_id', currentUserId)
+      .eq('status', 'success')
+      .limit(2);
+
+    if (error || !txns) return;
+
+    // Only prompt on the FIRST successful transaction (count === 1)
+    if (txns.length === 1) {
+      setTimeout(() => openModal('rate'), 1500);
+    }
+  } catch (e) {
+    console.error('Rating prompt check error:', e);
+  }
+}
+
+function skipRating() {
+  closeModal('rate');
+}
+
+async function submitRating() {
+  const rating = parseInt(document.getElementById('rate-val').value);
+  const content = document.getElementById('rate-content').value.trim();
+
+  const btn = document.getElementById('rate-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    const userName = document.getElementById('user-name')?.textContent || currentUserEmail.split('@')[0];
+
+    const { error } = await db.from('feedbacks').insert([{
+      user_id: currentUserId,
+      user_name: userName,
+      rating: rating,
+      content: content || `Rated ${rating} star${rating !== 1 ? 's' : ''}`
+    }]);
+
+    if (error) throw error;
+
+    showToast('Thank you for your rating! 🎉');
+    closeModal('rate');
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Rating';
+  }
+}
 
 async function init() {
   try {
@@ -628,6 +716,7 @@ async function init() {
       if (btn) switchTab(btn, hash);
     }
 
+    initRateStars();
     loadStats();
   } catch (err) {
     console.error('Init error:', err);

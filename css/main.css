@@ -495,3 +495,19 @@ footer {
   background: var(--border);
   color: var(--text-primary) !important;
 }
+
+/* ── STAR RATING ── */
+#star-input-wrap span,
+#rate-star-wrap span {
+  color: #333;
+  transition: color 0.15s, transform 0.15s;
+}
+#star-input-wrap span.selected,
+#rate-star-wrap span.selected {
+  color: #eab308;
+  text-shadow: 0 0 8px rgba(234,179,8,0.4);
+}
+#star-input-wrap span:hover,
+#rate-star-wrap span:hover {
+  transform: scale(1.2);
+}

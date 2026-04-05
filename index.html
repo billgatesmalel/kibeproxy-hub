@@ -266,7 +266,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Review Content</label>
+        <label class="form-label">Review Content <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
         <textarea id="feedback-content" class="form-input" style="height:120px;resize:none;" placeholder="What do you think of our service?"></textarea>
       </div>
 
@@ -312,6 +312,34 @@
     <div class="modal-actions" style="margin-top:2rem;">
       <button class="btn-cancel" onclick="closeModal('renew')">Cancel</button>
       <button class="btn-submit" id="rn-confirm-btn" onclick="confirmRenewal()">Confirm Renewal</button>
+    </div>
+  </div>
+</div>
+
+<!-- POST-TRANSACTION RATING MODAL -->
+<div class="modal-overlay" id="modal-rate">
+  <div class="modal" style="max-width:420px;">
+    <div style="text-align:center;margin-bottom:1.2rem;">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem;">🎉</div>
+      <div class="modal-title" style="margin-bottom:0.3rem;">Payment Successful!</div>
+      <p style="font-size:0.85rem;color:var(--text-muted);">How would you rate your experience?</p>
+    </div>
+
+    <div class="form-group" style="text-align:center;margin-bottom:1.2rem;">
+      <div id="rate-star-wrap" style="display:inline-flex;gap:10px;font-size:2.2rem;cursor:pointer;color:#333;">
+        <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
+      </div>
+      <input type="hidden" id="rate-val" value="5" />
+    </div>
+
+    <div class="form-group" style="margin-bottom:1.2rem;">
+      <label class="form-label" style="font-size:0.8rem;">Feedback <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+      <textarea id="rate-content" class="form-input" style="height:80px;resize:none;font-size:0.85rem;" placeholder="Tell us what you think... (optional)"></textarea>
+    </div>
+
+    <div class="modal-actions" style="gap:10px;">
+      <button class="btn-cancel" onclick="skipRating()">Skip</button>
+      <button class="btn btn-green" id="rate-submit-btn" onclick="submitRating()">Submit Rating</button>
     </div>
   </div>
 </div>
