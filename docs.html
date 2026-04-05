@@ -21,6 +21,7 @@
       --red: #ef4444;
     }
 
+    html { scroll-behavior: smooth; }
     html, body { background: var(--bg); color: var(--text-primary); font-family: 'Syne', sans-serif; min-height: 100vh; }
 
     /* ── HERO ── */
@@ -476,6 +477,12 @@
     <li><a href="docs.html" style="color:var(--green);">Docs</a></li>
   </ul>
   <div class="nav-right">
+    <div class="balance-pill">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      </svg>
+      <span id="nav-balance">KES 0</span>
+    </div>
     <a href="index.html" style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);text-decoration:none;">Dashboard</a>
     <a href="store.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#000;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:700;text-decoration:none;">Buy Now</a>
   </div>
@@ -585,9 +592,9 @@
         <div class="step-item">
           <div class="step-num">3</div>
           <div class="step-body">
-            <div class="step-title">Contact Support to Pay</div>
-            <div class="step-desc">Before confirming your order, contact us on <a href="https://wa.me/254724031319" class="doc-link" target="_blank">WhatsApp (+254724031319)</a> or <a href="https://t.me/kibeproxy" class="doc-link" target="_blank">Telegram (@kibeproxy)</a> to complete payment via M-Pesa or other methods.</div>
-            <span class="step-tag">💳 Payment first</span>
+            <div class="step-title">Pay via M-Pesa STK Push</div>
+            <div class="step-desc">Click <strong>Buy Now</strong>, enter your Phone Number, and check your phone for a payment prompt. Enter your M-Pesa PIN to complete the purchase instantly.</div>
+            <span class="step-tag">⚡ Automated STK Push</span>
           </div>
         </div>
         <div class="step-item">
@@ -978,6 +985,7 @@ console.<span class="fn">log</span>(<span class="str">'✓ Email sent!'</span>);
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
+<script src="js/common.js"></script>
 <script src="js/docs.js"></script>
 </body>
 </html>

@@ -5,6 +5,29 @@ function toggleFaq(el) {
   el.classList.toggle('open');
 }
 
+// ── AUTH & INIT ────────────────────────────────────────────────
+async function initDocs() {
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    
+    // Update balance if logged in
+    if (session) {
+      const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', session.user.id).single();
+      if (wallet) updateGlobalBalance(wallet.balance);
+
+      const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      AppCache.set('user_meta', { name, initials });
+    }
+  } catch (err) {
+    console.error('Docs init error:', err);
+  } finally {
+    showPage();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initDocs);
+
 // Support dropdown
 function toggleSupport(e) {
   e.preventDefault();
