@@ -610,7 +610,7 @@ async function submitFeedback() {
   const rating = parseInt(document.getElementById('rating-val').value);
   const name = document.getElementById('user-name').textContent;
 
-  if (!content) { showToast('Please write your feedback', 'error'); return; }
+
 
   const btn = document.getElementById('submit-feedback-btn');
   const originalText = btn.textContent;
@@ -629,7 +629,7 @@ async function submitFeedback() {
       user_id: currentUserId,
       user_name: name,
       rating: rating,
-      content: content
+      content: content || `Rated ${rating} star${rating !== 1 ? 's' : ''}`
     }]);
   }
 
