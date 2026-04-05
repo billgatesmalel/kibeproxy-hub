@@ -24,18 +24,7 @@ let referralCode = new URLSearchParams(window.location.search).get('ref');
 if (referralCode) localStorage.setItem('kibeproxy_ref', referralCode);
 else referralCode = localStorage.getItem('kibeproxy_ref');
 
-// Check if already logged in...
-db.auth.getSession().then(({ data }) => {
-  if (data.session) {
-    // User is logged in - show logged-in UI
-    document.getElementById('logged-in').style.display = 'block';
-    document.getElementById('current-user-email').textContent = data.session.user.email;
-    // Hide tabs and forms
-    document.querySelector('.auth-tabs').style.display = 'none';
-    document.getElementById('form-login').style.display = 'none';
-    document.getElementById('form-signup').style.display = 'none';
-  }
-});
+// Check if already logged in... done in init()
 
 // ── TAB SWITCH ────────────────────────────────────────────────
 function switchAuth(tab) {
