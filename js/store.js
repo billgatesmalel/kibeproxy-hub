@@ -8,8 +8,7 @@ let activeTab        = 'proxies';
 let pendingOrderData = null;
 let selectedPaymentMethod = 'mpesa';
 
-const IS_LOCAL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-const MPESA_API_URL = IS_LOCAL ? 'https://kibeproxy-hub-app.vercel.app/api' : '/api/ext';
+const MPESA_API_URL = '/api';
 
 const PROXY_PLANS = [
   { days: 1,  label: 'Daily' },

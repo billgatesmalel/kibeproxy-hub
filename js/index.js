@@ -386,11 +386,7 @@ async function confirmAddMoney() {
     // Generate unique order ID - MUST be short for AccountReference (max 20 chars)
     const orderId = 'WL' + Date.now().toString().slice(-10);
 
-    const IS_LOCAL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-    const apiUrl = IS_LOCAL 
-      ? 'https://kibeproxy-hub-app.vercel.app/api/stkpush'
-      : '/api/ext/stkpush';
-    
+    const apiUrl = '/api/stkpush';
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
