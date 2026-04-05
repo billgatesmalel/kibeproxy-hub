@@ -8,8 +8,8 @@ let activeTab        = 'proxies';
 let pendingOrderData = null;
 let selectedPaymentMethod = 'mpesa';
 
-// Use live backend for STK Pushes as it contains the credentials
-const MPESA_API_URL = 'https://kibeproxy-hub-app.vercel.app';
+const IS_LOCAL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+const MPESA_API_URL = IS_LOCAL ? 'https://kibeproxy-hub-app.vercel.app/api' : '/api/ext';
 
 const PROXY_PLANS = [
   { days: 1,  label: 'Daily' },
@@ -470,7 +470,7 @@ async function initiateMpesaPayment() {
   try {
     const amount = pendingOrderData.total;
     const orderId = 'ORD' + Date.now().toString().slice(-9);
-    const res = await fetch(MPESA_API_URL + '/api/stkpush', {
+    const res = await fetch(MPESA_API_URL + '/stkpush', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone, amount, orderId, description: 'Store Purchase' })
@@ -492,7 +492,7 @@ function showMpesaWaiting(checkoutId, phone) {
   const poll = setInterval(async () => {
     if (++attempts > 25) { clearInterval(poll); showMpesaPending(); return; }
     try {
-      const res = await fetch(MPESA_API_URL + '/api/query', {
+      const res = await fetch(MPESA_API_URL + '/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ checkoutRequestId: checkoutId })
