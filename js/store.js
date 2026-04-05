@@ -30,12 +30,11 @@ async function initStore() {
     currentUserId    = session.user.id;
     currentUserEmail = session.user.email;
 
-    const [walletRes] = await Promise.all([
-      db.from('wallets').select('balance').eq('user_id', currentUserId).maybeSingle()
-    ]);
-
-    currentBalance = walletRes?.data?.balance || 0;
-    updateGlobalBalance(currentBalance);
+    // Fetch wallet asynchronously
+    db.from('wallets').select('balance').eq('user_id', currentUserId).maybeSingle().then(walletRes => {
+      currentBalance = walletRes?.data?.balance || 0;
+      updateGlobalBalance(currentBalance);
+    });
 
     const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);

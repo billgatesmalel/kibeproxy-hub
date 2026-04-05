@@ -50,7 +50,7 @@ async function loadUsername() {
     .from('usernames')
     .select('username')
     .eq('user_id', currentUser.id)
-    .single();
+    .maybeSingle();
 
   if (data) {
     document.getElementById('username-input').value = data.username;

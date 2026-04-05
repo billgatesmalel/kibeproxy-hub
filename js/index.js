@@ -592,7 +592,7 @@ async function init() {
       if (btn) switchTab(btn, hash);
     }
 
-    await loadStats();
+    loadStats();
   } catch (err) {
     console.error('Init error:', err);
   } finally {
