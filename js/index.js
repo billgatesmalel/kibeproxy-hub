@@ -361,7 +361,7 @@ async function loadStats() {
 
 // ── ADD MONEY MODAL ───────────────────────────────────────────
 function openAddMoney() {
-  document.getElementById('modal-addmoney').classList.add('open');
+  document.getElementById('modal-addmoney').classList.add('active');
   document.getElementById('am-amount').value = '';
   document.getElementById('am-phone').value  = '';
   document.getElementById('am-error').style.display  = 'none';
