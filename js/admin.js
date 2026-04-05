@@ -20,6 +20,7 @@ async function initAdmin() {
 
   loadAll();
   loadFeedbackMgmt();
+  showPage();
 }
 
 // ── PAYMENT STATUS BADGE ──────────────────────────────────────
@@ -787,6 +788,16 @@ async function saveUserBalance() {
     }], { onConflict: 'user_id' });
 
     if (error) throw error;
+
+    // Record transaction
+    await db.from('transactions').insert([{
+      user_id: currentEditingUserId,
+      type: 'deposit',
+      amount: amount,
+      description: 'Admin balance adjustment',
+      status: 'success',
+      created_at: new Date().toISOString()
+    }]);
 
     showToast('Balance updated successfully!');
     closeModal('balance');

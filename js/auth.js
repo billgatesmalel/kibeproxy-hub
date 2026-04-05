@@ -138,27 +138,38 @@ async function handleLogin() {
 
 // ── SIGNUP ────────────────────────────────────────────────────
 async function handleSignup() {
-  const nameEl     = document.getElementById('signup-name');
+  const usernameEl = document.getElementById('signup-username');
   const emailEl    = document.getElementById('signup-email');
   const passwordEl = document.getElementById('signup-password');
   const confirmEl  = document.getElementById('signup-confirm');
 
-  const name     = nameEl     ? nameEl.value.trim()     : '';
-  const email    = emailEl    ? emailEl.value.trim()    : '';
-  const password = passwordEl ? passwordEl.value        : '';
-  const confirm  = confirmEl  ? confirmEl.value         : '';
+  const name     = nameEl     ? nameEl.value.trim()         : '';
+  const username = usernameEl ? usernameEl.value.trim().toLowerCase().replace(/^@/, '') : '';
+  const email    = emailEl    ? emailEl.value.trim()        : '';
+  const password = passwordEl ? passwordEl.value            : '';
+  const confirm  = confirmEl  ? confirmEl.value             : '';
 
   if (!name)     { showAlert('Please enter your full name'); return; }
+  if (!username) { showAlert('Please choose a username'); return; }
+  if (username.length < 3) { showAlert('Username must be at least 3 characters'); return; }
   if (!email)    { showAlert('Please enter your email address'); return; }
   if (!password) { showAlert('Please enter a password'); return; }
   if (password.length < 6) { showAlert('Password must be at least 6 characters'); return; }
   if (confirm && password !== confirm) { showAlert('Passwords do not match'); return; }
 
   setLoading('signup-btn', true);
+
+  // 1. Check if username exists
+  const { data: existingUser } = await db.from('usernames').select('username').eq('username', username).single();
+  if (existingUser) {
+    setLoading('signup-btn', false, 'Create Account');
+    showAlert('Username @' + username + ' is already taken. Please choose another.');
+    return;
+  }
   
   const signupOptions = {
     email, password,
-    options: { data: { full_name: name } }
+    options: { data: { full_name: name, username: username } }
   };
 
   if (referralCode) {
@@ -166,12 +177,26 @@ async function handleSignup() {
   }
 
   const { data, error } = await db.auth.signUp(signupOptions);
-  setLoading('signup-btn', false, 'Create Account');
 
   if (error) {
+    setLoading('signup-btn', false, 'Create Account');
     showAlert(error.message);
   } else {
-    // Check if session exists in data or in the current client
+    const user = data.user;
+    if (user) {
+      // 2. Save to usernames table
+      await db.from('usernames').insert([{
+        user_id: user.id,
+        username: username,
+        email: email
+      }]);
+
+      // 3. Create initial wallet if needed (Supabase trigger might do this, but being safe)
+      await db.from('wallets').insert([{ user_id: user.id, balance: 0 }], { onConflict: 'user_id' });
+    }
+
+    setLoading('signup-btn', false, 'Create Account');
+    
     let session = data.session;
     if (!session) {
       const { data: { session: s2 } } = await db.auth.getSession();
@@ -182,10 +207,7 @@ async function handleSignup() {
       showAlert('Account created! Welcome to KibeProxy.', 'success');
       setTimeout(() => window.location.href = 'index.html', 1000);
     } else {
-      // If still no session, it likely needs email confirmation
-      // But let's show a link or message about refreshing if it fails to redirect
-      showAlert('Account created! Redirecting...', 'success');
-      // If we don't have a session, we can try logging them in if it's auto-confirm
+      showAlert('Account created! Sign in with your new credentials.', 'success');
       const { error: loginErr } = await db.auth.signInWithPassword({ email, password });
       if (!loginErr) {
         setTimeout(() => window.location.href = 'index.html', 800);

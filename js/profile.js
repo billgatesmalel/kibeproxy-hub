@@ -36,39 +36,19 @@ async function initProfile() {
   // Parallel load non-critical data
   loadUsername();
   loadStats();
+  showPage();
 }
 
 // ── LOAD USERNAME ─────────────────────────────────────────────
 async function loadUsername() {
   const { data } = await db
     .from('usernames')
-    .select('username, created_at')
+    .select('username')
     .eq('user_id', currentUser.id)
     .single();
 
   if (data) {
     document.getElementById('username-input').value = data.username;
-
-    // Check if changed within last 30 days
-    const lastChanged = new Date(data.created_at);
-    const now         = new Date();
-    const daysSince   = Math.floor((now - lastChanged) / (1000 * 60 * 60 * 24));
-    const daysLeft    = 30 - daysSince;
-
-    if (daysLeft > 0) {
-      // Still locked
-      document.getElementById('username-input').disabled = true;
-      document.getElementById('btn-save-username').disabled = true;
-      document.getElementById('btn-save-username').innerHTML = '🔒 Locked';
-      document.getElementById('username-status').innerHTML =
-        '<span style="color:var(--yellow);">⏳ You can change your username in ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + '</span>';
-    } else {
-      document.getElementById('username-input').disabled = false;
-      document.getElementById('btn-save-username').disabled = false;
-      document.getElementById('btn-save-username').innerHTML = '✓ Save Username';
-      document.getElementById('username-status').innerHTML =
-        '<span style="color:var(--green);">✓ @' + data.username + ' — you can update it now</span>';
-    }
   }
 }
 
@@ -111,103 +91,6 @@ function copyReferralLink() {
   showToast('Referral link copied! 🚀');
 }
 
-// ── CHECK USERNAME AVAILABILITY ───────────────────────────────
-async function checkUsername() {
-  const raw      = document.getElementById('username-input').value.trim().toLowerCase();
-  const statusEl = document.getElementById('username-status');
-
-  if (!raw) { statusEl.innerHTML = ''; return; }
-
-  if (raw.length < 3) {
-    statusEl.innerHTML = '<span style="color:var(--red);">At least 3 characters</span>';
-    return;
-  }
-
-  if (!/^[a-z0-9_]+$/.test(raw)) {
-    statusEl.innerHTML = '<span style="color:var(--red);">Only letters, numbers and underscores</span>';
-    return;
-  }
-
-  statusEl.innerHTML = '<span style="color:var(--text-muted);">Checking...</span>';
-
-  const { data } = await db
-    .from('usernames')
-    .select('user_id')
-    .eq('username', raw)
-    .single();
-
-  if (data && data.user_id !== currentUser.id) {
-    statusEl.innerHTML = '<span style="color:var(--red);">✕ @' + raw + ' is taken</span>';
-  } else if (data && data.user_id === currentUser.id) {
-    statusEl.innerHTML = '<span style="color:var(--green);">✓ This is your current username</span>';
-  } else {
-    statusEl.innerHTML = '<span style="color:var(--green);">✓ @' + raw + ' is available!</span>';
-  }
-}
-
-// ── SAVE USERNAME ─────────────────────────────────────────────
-async function saveUsername() {
-  const raw = document.getElementById('username-input').value.trim().toLowerCase();
-
-  if (!raw)          { showPA('alert-username', 'Please enter a username', 'error'); return; }
-  if (raw.length < 3){ showPA('alert-username', 'Username must be at least 3 characters', 'error'); return; }
-  if (!/^[a-z0-9_]+$/.test(raw)) {
-    showPA('alert-username', 'Only letters, numbers and underscores allowed', 'error'); return;
-  }
-
-  // Check 30-day cooldown
-  const { data: current } = await db
-    .from('usernames')
-    .select('username, created_at')
-    .eq('user_id', currentUser.id)
-    .single();
-
-  if (current) {
-    // If username hasn't changed, no need to update
-    if (current.username === raw) {
-      showPA('alert-username', 'This is already your username!', 'error'); return;
-    }
-    // Check 30-day cooldown
-    const lastChanged = new Date(current.created_at);
-    const daysSince   = Math.floor((new Date() - lastChanged) / (1000 * 60 * 60 * 24));
-    if (daysSince < 30) {
-      const daysLeft = 30 - daysSince;
-      showPA('alert-username', '🔒 You can only change your username once per month. Try again in ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + '.', 'error');
-      return;
-    }
-  }
-
-  // Check if taken by someone else
-  const { data: existing } = await db
-    .from('usernames')
-    .select('user_id')
-    .eq('username', raw)
-    .single();
-
-  if (existing && existing.user_id !== currentUser.id) {
-    showPA('alert-username', '@' + raw + ' is already taken. Choose another.', 'error'); return;
-  }
-
-  const btn = document.getElementById('btn-save-username');
-  btn.disabled  = true;
-  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Saving...';
-
-  const { error } = await db
-    .from('usernames')
-    .upsert([{ user_id: currentUser.id, username: raw, email: currentUser.email, created_at: new Date().toISOString() }], { onConflict: 'user_id' });
-
-  btn.disabled  = false;
-  btn.innerHTML = '✓ Save Username';
-
-  if (error) {
-    showPA('alert-username', error.message, 'error');
-  } else {
-    showPA('alert-username', 'Username @' + raw + ' saved! You can change it again in 30 days.', 'success');
-    showToast('Username saved!');
-    // Reload to show the new lock countdown
-    await loadUsername();
-  }
-}
 
 // ── SAVE CONTACT DETAILS (email + phone) ──────────────────────
 async function saveContact() {

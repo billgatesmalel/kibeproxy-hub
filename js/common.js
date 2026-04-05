@@ -44,6 +44,11 @@ function showNavLoading() {
   }
 }
 
+// Reveal page
+function showPage() {
+  document.body.classList.add('ready');
+}
+
 // Global cached data handling
 const AppCache = {
   get(key) {
@@ -81,5 +86,10 @@ function updateGlobalBalance(balance) {
       if (nameEl) nameEl.textContent = cachedUser.name;
       if (initialsEl) initialsEl.textContent = cachedUser.initials;
     });
+  }
+
+  // Auto-reveal Auth Page as it has its own fast init
+  if (window.location.pathname.includes('auth.html')) {
+    document.addEventListener('DOMContentLoaded', showPage);
   }
 })();

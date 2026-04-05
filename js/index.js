@@ -592,6 +592,7 @@ async function init() {
   }
 
   await loadStats();
+  showPage();
 }
 
 init();

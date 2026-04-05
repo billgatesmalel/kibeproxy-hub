@@ -151,34 +151,6 @@
     </div>
   </div>
 
-  <!-- USERNAME -->
-  <div class="section-card">
-    <div class="card-header">
-      <div class="card-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Username
-      </div>
-      <div class="card-sub">Set a unique username to log in with instead of your email</div>
-    </div>
-    <div class="card-body">
-      <div class="palert" id="alert-username"></div>
-      <div class="info-note">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Once set, you can log in using <strong>@username</strong> or your email. Only letters, numbers and underscores allowed.
-      </div>
-      <div class="form-row single">
-        <div class="form-group">
-          <label class="form-label">Your Username</label>
-          <div class="username-wrap">
-            <span class="username-prefix">@</span>
-            <input class="form-input" id="username-input" type="text" placeholder="yourname" oninput="checkUsername()" autocomplete="username" />
-          </div>
-          <div class="username-status" id="username-status"></div>
-        </div>
-      </div>
-      <button class="save-btn" id="btn-save-username" onclick="saveUsername()">✓ Save Username</button>
-    </div>
-  </div>
 
   <!-- CONTACT DETAILS -->
   <div class="section-card">
@@ -193,21 +165,30 @@
       <div class="palert" id="alert-contact"></div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input class="form-input" id="user-email" type="email" placeholder="you@example.com" autocomplete="email" />
+          <label class="form-label">Username <span style="color:var(--text-muted);text-transform:none;font-size:0.68rem;letter-spacing:0">(permanent)</span></label>
+          <div class="username-wrap">
+            <span class="username-prefix">@</span>
+            <input class="form-input readonly-look" id="username-input" type="text" disabled />
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Phone Number</label>
-          <input class="form-input" id="phone-number" type="tel" placeholder="+254712345678" />
+          <label class="form-label">Email Address</label>
+          <input class="form-input" id="user-email" type="email" placeholder="you@example.com" autocomplete="email" />
         </div>
       </div>
       <div class="info-note" style="background:var(--yellow-glow);border-color:rgba(234,179,8,0.2);color:var(--yellow);">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Changing your email requires verification. A confirmation link will be sent to the new email.
       </div>
-      <div class="form-group" style="margin-bottom:1rem;">
-        <label class="form-label">Full Name <span style="color:var(--text-muted);text-transform:none;font-size:0.68rem;letter-spacing:0">(cannot be changed)</span></label>
-        <input class="form-input readonly-look" id="display-name" type="text" disabled />
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" id="phone-number" type="tel" placeholder="+254712345678" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name <span style="color:var(--text-muted);text-transform:none;font-size:0.68rem;letter-spacing:0">(permanent)</span></label>
+          <input class="form-input readonly-look" id="display-name" type="text" disabled />
+        </div>
       </div>
       <button class="save-btn" id="btn-save-contact" onclick="saveContact()">✓ Save Changes</button>
     </div>

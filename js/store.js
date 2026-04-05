@@ -50,6 +50,7 @@ async function initStore() {
   }
 
   loadListings();
+  showPage();
 }
 
 // ── LOAD LISTINGS ─────────────────────────────────────────────
