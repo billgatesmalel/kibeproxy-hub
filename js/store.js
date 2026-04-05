@@ -31,7 +31,7 @@ async function initStore() {
     currentUserEmail = session.user.email;
 
     const [walletRes] = await Promise.all([
-      db.from('wallets').select('balance').eq('user_id', currentUserId).single()
+      db.from('wallets').select('balance').eq('user_id', currentUserId).maybeSingle()
     ]);
 
     currentBalance = walletRes?.data?.balance || 0;
@@ -559,7 +559,7 @@ async function handleReferralReward() {
     // Actually, count will be 1 if this is the first success we just inserted.
 
     // Add KES 10 to referrer wallet
-    const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', referredBy).single();
+    const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', referredBy).maybeSingle();
     const currentRefBalance = wallet?.balance || 0;
     const newRefBalance = currentRefBalance + 10;
 

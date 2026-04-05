@@ -12,7 +12,7 @@ async function initDocs() {
     
     // Update balance if logged in
     if (session) {
-      const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', session.user.id).single();
+      const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', session.user.id).maybeSingle();
       if (wallet) updateGlobalBalance(wallet.balance);
 
       const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];

@@ -72,7 +72,7 @@ async function handleLogin() {
       .from('usernames')
       .select('user_id')
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
     if (!uRow) {
       setLoading('login-btn', false, 'Login to Dashboard');
@@ -87,7 +87,7 @@ async function handleLogin() {
       .from('usernames')
       .select('email')
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
     if (emailRow && emailRow.email) {
       email = emailRow.email;
@@ -110,7 +110,7 @@ async function handleLogin() {
       const { data: ban } = await db.from('user_bans')
         .select('banned')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
       if (ban && ban.banned) {
         await db.auth.signOut();
@@ -149,7 +149,7 @@ async function handleSignup() {
   setLoading('signup-btn', true);
 
   // 1. Check if username exists
-  const { data: existingUser } = await db.from('usernames').select('username').eq('username', username).single();
+  const { data: existingUser } = await db.from('usernames').select('username').eq('username', username).maybeSingle();
   if (existingUser) {
     setLoading('signup-btn', false, 'Create Account');
     showAlert('Username @' + username + ' is already taken. Please choose another.');
