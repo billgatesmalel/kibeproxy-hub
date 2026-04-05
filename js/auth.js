@@ -127,6 +127,7 @@ async function handleLogin() {
 
 // ── SIGNUP ────────────────────────────────────────────────────
 async function handleSignup() {
+  const nameEl     = document.getElementById('signup-name');
   const usernameEl = document.getElementById('signup-username');
   const emailEl    = document.getElementById('signup-email');
   const passwordEl = document.getElementById('signup-password');
