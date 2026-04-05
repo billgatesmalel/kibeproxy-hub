@@ -252,14 +252,13 @@ function openProxyOrder(id) {
     qtyInput.max = listing.max_buyers - (listing.buyer_count || 0);
   }
   
-  updateOrderQuantity(1);
-
   const btn = document.getElementById('confirm-btn');
   btn.dataset.type    = 'proxy';
   btn.dataset.id      = listing.id;
   btn.dataset.days    = days;
   btn.dataset.expires = new Date(Date.now() + days * 86400000).toISOString();
 
+  updateOrderQuantity(1);
   showOrderView();
   openModal('order');
 }
