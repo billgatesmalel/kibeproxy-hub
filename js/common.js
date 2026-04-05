@@ -46,7 +46,11 @@ function showNavLoading() {
 
 // Reveal page
 function showPage() {
-  document.body.classList.add('ready');
+  if (document.body) {
+    document.body.classList.add('ready');
+  } else {
+    document.addEventListener('DOMContentLoaded', () => document.body.classList.add('ready'));
+  }
 }
 
 // Global cached data handling
@@ -92,4 +96,7 @@ function updateGlobalBalance(balance) {
   if (window.location.pathname.includes('auth.html')) {
     document.addEventListener('DOMContentLoaded', showPage);
   }
+
+  // Safety reveal after 3.5s in case of initialization errors
+  setTimeout(showPage, 3500);
 })();

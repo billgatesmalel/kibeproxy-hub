@@ -23,34 +23,39 @@ const selectedPlans = {}; // Not used anymore in fixed mode
 
 // ── AUTH GUARD ────────────────────────────────────────────────
 async function initStore() {
-  const [{ data: { session } }, walletRes] = await Promise.all([
-    db.auth.getSession(),
-    db.from('wallets').select('balance').eq('user_id', currentUserId).single()
-  ]);
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
 
-  if (!session) { window.location.href = 'auth.html'; return; }
+    currentUserId    = session.user.id;
+    currentUserEmail = session.user.email;
 
-  currentUserId    = session.user.id;
-  currentUserEmail = session.user.email;
-  currentBalance   = walletRes?.data?.balance || 0;
-  
-  updateGlobalBalance(currentBalance);
+    const [walletRes] = await Promise.all([
+      db.from('wallets').select('balance').eq('user_id', currentUserId).single()
+    ]);
 
-  const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  
-  AppCache.set('user_meta', { name, initials });
+    currentBalance = walletRes?.data?.balance || 0;
+    updateGlobalBalance(currentBalance);
 
-  document.getElementById('user-name').textContent     = name;
-  document.getElementById('user-initials').textContent = initials;
+    const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    
+    AppCache.set('user_meta', { name, initials });
 
-  if (session.user.email === ADMIN_EMAIL) {
-    const adminLink = document.getElementById('admin-link');
-    if (adminLink) adminLink.style.display = 'inline-flex';
+    document.getElementById('user-name').textContent     = name;
+    document.getElementById('user-initials').textContent = initials;
+
+    if (session.user.email === ADMIN_EMAIL) {
+      const adminLink = document.getElementById('admin-link');
+      if (adminLink) adminLink.style.display = 'inline-flex';
+    }
+
+    loadListings();
+  } catch (err) {
+    console.error('Store init error:', err);
+  } finally {
+    showPage();
   }
-
-  loadListings();
-  showPage();
 }
 
 // ── LOAD LISTINGS ─────────────────────────────────────────────

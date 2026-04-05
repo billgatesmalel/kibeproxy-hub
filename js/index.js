@@ -565,34 +565,39 @@ async function submitFeedback() {
 }
 
 async function init() {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session || !session.user) { window.location.href = 'auth.html'; return; }
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session || !session.user) { window.location.href = 'auth.html'; return; }
 
-  currentUserId    = session.user.id;
-  currentUserEmail = session.user.email;
+    currentUserId    = session.user.id;
+    currentUserEmail = session.user.email;
 
-  const meta = session.user.user_metadata || {};
-  const name = meta.full_name || currentUserEmail.split('@')[0];
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const meta = session.user.user_metadata || {};
+    const name = meta.full_name || currentUserEmail.split('@')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-  AppCache.set('user_meta', { name, initials });
-  document.getElementById('user-name').textContent     = name;
-  document.getElementById('user-initials').textContent = initials;
+    AppCache.set('user_meta', { name, initials });
+    document.getElementById('user-name').textContent     = name;
+    document.getElementById('user-initials').textContent = initials;
 
-  if (currentUserEmail === ADMIN_EMAIL) {
-    const al = document.getElementById('admin-link');
-    if (al) al.style.display = 'inline-flex';
+    if (currentUserEmail === ADMIN_EMAIL) {
+      const al = document.getElementById('admin-link');
+      if (al) al.style.display = 'inline-flex';
+    }
+
+    // Handle tab switching via URL hash
+    const hash = window.location.hash.substring(1);
+    if (hash && ['active', 'expired', 'emails', 'transactions'].includes(hash)) {
+      const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick')?.includes(`'${hash}'`));
+      if (btn) switchTab(btn, hash);
+    }
+
+    await loadStats();
+  } catch (err) {
+    console.error('Init error:', err);
+  } finally {
+    showPage();
   }
-
-  // Handle tab switching via URL hash
-  const hash = window.location.hash.substring(1);
-  if (hash && ['active', 'expired', 'emails', 'transactions'].includes(hash)) {
-    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick')?.includes(`'${hash}'`));
-    if (btn) switchTab(btn, hash);
-  }
-
-  await loadStats();
-  showPage();
 }
 
 init();

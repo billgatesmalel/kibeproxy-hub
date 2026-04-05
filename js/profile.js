@@ -2,41 +2,46 @@
 let currentUser = null;
 
 async function initProfile() {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session) { window.location.href = 'auth.html'; return; }
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
 
-  currentUser = session.user;
-  const meta     = currentUser.user_metadata || {};
-  const name     = meta.full_name || currentUser.email.split('@')[0];
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  
-  AppCache.set('user_meta', { name, initials });
+    currentUser = session.user;
+    const meta     = currentUser.user_metadata || {};
+    const name     = meta.full_name || currentUser.email.split('@')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    
+    AppCache.set('user_meta', { name, initials });
 
-  // Update navbar/hero immediately via cache (common.js does this automatically on load, but we re-verify)
-  document.getElementById('user-name').textContent     = name;
-  document.getElementById('user-initials').textContent = initials;
+    // Update navbar/hero immediately via cache (common.js does this automatically on load, but we re-verify)
+    document.getElementById('user-name').textContent     = name;
+    document.getElementById('user-initials').textContent = initials;
 
-  if (currentUser.email === ADMIN_EMAIL) {
-    document.getElementById('admin-link').style.display  = 'inline-flex';
-    document.getElementById('badge-admin').style.display = 'inline-flex';
+    if (currentUser.email === ADMIN_EMAIL) {
+      document.getElementById('admin-link').style.display  = 'inline-flex';
+      document.getElementById('badge-admin').style.display = 'inline-flex';
+    }
+
+    if (currentUser.email_confirmed_at) {
+      document.getElementById('badge-verified').style.display = 'inline-flex';
+    }
+
+    document.getElementById('avatar-initials').textContent = initials;
+    document.getElementById('hero-name').textContent        = name;
+    document.getElementById('hero-email').textContent       = currentUser.email;
+
+    document.getElementById('display-name').value  = name;
+    document.getElementById('user-email').value    = currentUser.email;
+    document.getElementById('phone-number').value  = meta.phone || '';
+
+    // Parallel load non-critical data
+    loadUsername();
+    loadStats();
+  } catch (err) {
+    console.error('Profile init error:', err);
+  } finally {
+    showPage();
   }
-
-  if (currentUser.email_confirmed_at) {
-    document.getElementById('badge-verified').style.display = 'inline-flex';
-  }
-
-  document.getElementById('avatar-initials').textContent = initials;
-  document.getElementById('hero-name').textContent        = name;
-  document.getElementById('hero-email').textContent       = currentUser.email;
-
-  document.getElementById('display-name').value  = name;
-  document.getElementById('user-email').value    = currentUser.email;
-  document.getElementById('phone-number').value  = meta.phone || '';
-
-  // Parallel load non-critical data
-  loadUsername();
-  loadStats();
-  showPage();
 }
 
 // ── LOAD USERNAME ─────────────────────────────────────────────

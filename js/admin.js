@@ -7,20 +7,23 @@ let emailListings = [];
 
 // ── AUTH + ADMIN GUARD ────────────────────────────────────────
 async function initAdmin() {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session) { window.location.href = 'auth.html'; return; }
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
 
-  // All logged-in users can access admin
+    const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    document.getElementById('admin-name').textContent     = name;
+    document.getElementById('admin-initials').textContent = initials;
+    document.getElementById('app').style.display          = 'block';
 
-  const name     = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  document.getElementById('admin-name').textContent     = name;
-  document.getElementById('admin-initials').textContent = initials;
-  document.getElementById('app').style.display          = 'block';
-
-  loadAll();
-  loadFeedbackMgmt();
-  showPage();
+    loadAll();
+    loadFeedbackMgmt();
+  } catch (err) {
+    console.error('Admin init error:', err);
+  } finally {
+    showPage();
+  }
 }
 
 // ── PAYMENT STATUS BADGE ──────────────────────────────────────
