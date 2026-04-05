@@ -361,7 +361,7 @@ async function loadStats() {
 
 // ── ADD MONEY MODAL ───────────────────────────────────────────
 function openAddMoney() {
-  document.getElementById('modal-addmoney').classList.add('active');
+  document.getElementById('modal-addmoney').classList.add('open');
   document.getElementById('am-amount').value = '';
   document.getElementById('am-phone').value  = '';
   document.getElementById('am-error').style.display  = 'none';
@@ -443,9 +443,7 @@ function showAmError(msg) {
   el.style.display = 'block';
 }
 
-function closeModal(id) {
-  document.getElementById('modal-' + id).classList.remove('active');
-}
+
 
 function copyReferralLink() {
   const input = document.getElementById('ref-link-input');
