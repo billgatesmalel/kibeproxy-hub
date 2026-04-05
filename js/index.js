@@ -435,15 +435,29 @@ async function confirmAddMoney() {
 
 async function pollAddMoneyStatus(checkoutId, amount, pendingDesc) {
   const btn = document.getElementById('am-btn');
+  const errorEl = document.getElementById('am-error');
   let attempts = 0;
   
+  // Show a live "checking" status
+  errorEl.style.display = 'block';
+  errorEl.style.color = '#eab308';  // Yellow for pending
+  errorEl.textContent = '⏳ Waiting for you to enter your M-Pesa PIN...';
+  
   const poll = setInterval(async () => {
-    if (++attempts > 25) { 
+    if (++attempts > 30) { 
       clearInterval(poll); 
-      showAmError('Payment request timed out. Please try again.');
+      showAmError('⏰ Payment request timed out. If you entered your PIN, your balance will update automatically once M-Pesa confirms.');
       btn.disabled = false; btn.innerHTML = '✓ Add Money';
       return; 
     }
+    
+    // Update progress text
+    if (attempts <= 5) {
+      errorEl.textContent = '⏳ Waiting for you to enter your M-Pesa PIN...';
+    } else {
+      errorEl.textContent = `⏳ Checking payment status... (${attempts}/30)`;
+    }
+    
     try {
       const res = await fetch('/api/query', {
         method: 'POST',
@@ -454,38 +468,57 @@ async function pollAddMoneyStatus(checkoutId, amount, pendingDesc) {
       
       if (data.success && data.status === 'completed') {
         clearInterval(poll);
-        document.getElementById('am-view').style.display    = 'none';
-        document.getElementById('am-success').style.display = 'block';
-        document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
-        document.getElementById('am-success-balance').textContent = 'Wait for Wallet Balance to reflect...';
         
-        // Mark the pending transaction as success
+        // ✅ SUCCESS — Update the transaction record
         await db.from('transactions').update({ 
           status: 'success', 
-          description: `Wallet top-up via M-Pesa (KES ${amount}) - Confirmed`
+          description: `Wallet top-up via M-Pesa (KES ${amount}) ✓`
         }).eq('user_id', currentUserId)
          .eq('description', pendingDesc)
          .eq('status', 'pending');
         
+        // ✅ Instantly refresh wallet balance from the database
+        const { data: wallet } = await db.from('wallets')
+          .select('balance')
+          .eq('user_id', currentUserId)
+          .maybeSingle();
+        
+        if (wallet) {
+          currentBalance = wallet.balance;
+          updateBalanceDisplay();
+        }
+        
+        // Show success view
+        document.getElementById('am-view').style.display    = 'none';
+        document.getElementById('am-success').style.display = 'block';
+        document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
+        document.getElementById('am-success-balance').textContent = 'New Balance: KES ' + (currentBalance || '—');
+        
+        showToast(`KES ${amount} added to your wallet! 🎉`);
         loadStats(); 
         maybeShowRatingPrompt();
+        
       } else if (!data.success && data.status === 'failed') {
         clearInterval(poll);
-        showAmError(data.error || 'Payment failed or was cancelled.');
+        
+        // ❌ FAILED — Show the specific reason
+        showAmError('❌ ' + (data.error || 'Payment failed. Please try again.'));
         btn.disabled = false; btn.innerHTML = '✓ Add Money';
         
         // Mark the pending transaction as failed
         await db.from('transactions').update({ 
           status: 'failed', 
-          description: `Wallet top-up failed: ${data.error || 'Cancelled'}`
+          description: `Top-up failed: ${data.error || 'Cancelled'}`
         }).eq('user_id', currentUserId)
          .eq('description', pendingDesc)
          .eq('status', 'pending');
         
         loadStats();
       }
+      // If status is 'pending', the interval continues polling
+      
     } catch (e) { 
-      console.error(e); 
+      console.error('Poll error:', e); 
     }
   }, 3000);
 }
@@ -493,6 +526,7 @@ async function pollAddMoneyStatus(checkoutId, amount, pendingDesc) {
 function showAmError(msg) {
   const el = document.getElementById('am-error');
   el.textContent   = msg;
+  el.style.color   = '#ef4444';  // Red for errors
   el.style.display = 'block';
 }
 

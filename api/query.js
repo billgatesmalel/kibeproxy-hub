@@ -48,6 +48,24 @@ function generatePassword(shortcode, passkey, timestamp) {
   return Buffer.from(shortcode + passkey + timestamp).toString('base64');
 }
 
+// ── Human-readable M-Pesa error messages ──
+const MPESA_ERRORS = {
+  '1':    'Insufficient M-Pesa balance. Please top up your M-Pesa and try again.',
+  '1032': 'Payment was cancelled by you.',
+  '1037': 'Unable to reach your phone. Please check your network and try again.',
+  '2001': 'Wrong M-Pesa PIN entered. Please try again.',
+  '1001': 'Unable to lock subscriber. Please try again later.',
+  '1019': 'Transaction expired. You took too long to enter your PIN.',
+  '1025': 'An error occurred while sending the STK push.',
+  '9999': 'An error occurred while processing your payment.',
+  '17':   'Duplicate payment request detected. Check your M-Pesa messages.',
+};
+
+function getFriendlyError(resultCode, resultDesc) {
+  const code = String(resultCode);
+  return MPESA_ERRORS[code] || resultDesc || 'Payment failed. Please try again.';
+}
+
 const { setCorsHeaders } = require('./_cors');
 
 module.exports = async function handler(req, res) {
@@ -75,38 +93,76 @@ module.exports = async function handler(req, res) {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        // Don't throw on non-2xx — let us handle ALL responses manually
+        validateStatus: () => true
       }
     );
 
     const data = response.data;
-    if (data.ResponseCode === '0') {
-      // ResponseCode 0 means the query was successful. 
-      // ResultCode 0 means the actual payment was successful.
-      // Any other ResultCode means the payment failed (e.g., 1032 = Cancelled by user).
+    console.log('M-Pesa Query Response:', JSON.stringify(data));
+
+    // ── Safaricom returns errorCode when the transaction is still processing ──
+    // e.g. { errorCode: "500.001.1001", errorMessage: "The transaction is being processed" }
+    if (data.errorCode) {
+      const errCode = String(data.errorCode);
+      if (errCode.includes('1001') || errCode.includes('1002')) {
+        // Still processing — tell frontend to keep polling
+        return res.json({ success: false, status: 'pending', error: 'Payment is still being processed...' });
+      }
+      // Any other Safaricom-level error
+      return res.json({ success: false, status: 'failed', error: data.errorMessage || 'M-Pesa query failed.' });
+    }
+
+    // ── ResponseCode 0 means the query completed (we got a definitive answer) ──
+    if (String(data.ResponseCode) === '0') {
+      const resultCode = String(data.ResultCode);
       
-      // Sometimes Safaricom returns numbers as strings, so we check strictly.
-      if (String(data.ResultCode) === '0') {
+      if (resultCode === '0') {
+        // ✅ Payment was successful
+        const receipt = data.CallbackMetadata?.Item?.find(p => p.Name === 'MpesaReceiptNumber')?.Value
+                     || data.ResultParameter?.find(p => p.Key === 'MpesaReceiptNumber')?.Value
+                     || 'CONFIRMED';
         return res.json({
           success: true,
           status: 'completed',
           resultCode: data.ResultCode,
-          mpesaCode: data.ResultParameter?.find(p => p.Key === 'MpesaReceiptNumber')?.Value || 'CONFIRMED'
+          mpesaCode: receipt
         });
       } else {
+        // ❌ Payment failed — return a human-readable message
+        const friendlyError = getFriendlyError(data.ResultCode, data.ResultDesc);
         return res.json({ 
           success: false, 
           status: 'failed', 
-          error: data.ResultDesc || 'Payment failed or was cancelled.' 
+          resultCode: data.ResultCode,
+          error: friendlyError
         });
       }
-    } else if (data.ResponseCode === '1' || String(data.ResponseCode).includes('500.001.1001')) {
-      return res.json({ success: false, status: 'pending', error: 'Payment processing' });
-    } else {
-      return res.json({ success: false, status: 'failed', error: data.ResponseDescription || data.errorMessage });
     }
+
+    // ── Fallback for unexpected response shapes ──
+    if (String(data.ResponseCode) === '1') {
+      return res.json({ success: false, status: 'pending', error: 'Payment is still being processed...' });
+    }
+
+    return res.json({ success: false, status: 'failed', error: data.ResponseDescription || data.errorMessage || 'Unknown error from M-Pesa.' });
+
   } catch (error) {
-    console.error('Query Error:', error.response?.data || error.message);
-    return res.status(500).json({ success: false, error: 'Query failed' });
+    // ── Axios network/timeout errors ──
+    const errData = error.response?.data;
+    console.error('Query Error:', errData || error.message);
+
+    // If Safaricom returned an error body, try to parse it
+    if (errData) {
+      const errCode = String(errData.errorCode || '');
+      if (errCode.includes('1001') || errCode.includes('1002')) {
+        return res.json({ success: false, status: 'pending', error: 'Payment is still being processed...' });
+      }
+      return res.json({ success: false, status: 'failed', error: errData.errorMessage || 'M-Pesa query error.' });
+    }
+
+    // True network failure — tell frontend to keep trying
+    return res.json({ success: false, status: 'pending', error: 'Checking payment status...' });
   }
 };
