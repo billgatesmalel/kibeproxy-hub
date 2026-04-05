@@ -81,16 +81,29 @@ module.exports = async function handler(req, res) {
 
     const data = response.data;
     if (data.ResponseCode === '0') {
-      return res.json({
-        success: true,
-        status: 'completed',
-        resultCode: data.ResultCode,
-        mpesaCode: data.ResultParameter?.find(p => p.Key === 'MpesaReceiptNumber')?.Value
-      });
-    } else if (data.ResponseCode === '1' || data.ResponseCode === '500.001.1001') {
+      // ResponseCode 0 means the query was successful. 
+      // ResultCode 0 means the actual payment was successful.
+      // Any other ResultCode means the payment failed (e.g., 1032 = Cancelled by user).
+      
+      // Sometimes Safaricom returns numbers as strings, so we check strictly.
+      if (String(data.ResultCode) === '0') {
+        return res.json({
+          success: true,
+          status: 'completed',
+          resultCode: data.ResultCode,
+          mpesaCode: data.ResultParameter?.find(p => p.Key === 'MpesaReceiptNumber')?.Value || 'CONFIRMED'
+        });
+      } else {
+        return res.json({ 
+          success: false, 
+          status: 'failed', 
+          error: data.ResultDesc || 'Payment failed or was cancelled.' 
+        });
+      }
+    } else if (data.ResponseCode === '1' || String(data.ResponseCode).includes('500.001.1001')) {
       return res.json({ success: false, status: 'pending', error: 'Payment processing' });
     } else {
-      return res.json({ success: false, status: 'failed', error: data.ResponseDescription });
+      return res.json({ success: false, status: 'failed', error: data.ResponseDescription || data.errorMessage });
     }
   } catch (error) {
     console.error('Query Error:', error.response?.data || error.message);

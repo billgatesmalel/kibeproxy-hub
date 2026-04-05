@@ -407,13 +407,6 @@ async function confirmAddMoney() {
       throw new Error(data.error || 'STK Push failed at server');
     }
 
-    // For now, show success message - in production, wait for callback
-    // The callback will update the balance when payment is confirmed
-    document.getElementById('am-view').style.display    = 'none';
-    document.getElementById('am-success').style.display = 'block';
-    document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
-    document.getElementById('am-success-balance').textContent = 'Balance will update after payment confirmation';
-
     // Optionally, add a pending transaction
     const { error: txErr } = await db.from('transactions').insert([{
       user_id:     currentUserId,
@@ -427,14 +420,62 @@ async function confirmAddMoney() {
 
     if (txErr) console.error('Transaction log error:', txErr);
 
-    // Reload after a delay to check for updates
-    setTimeout(() => loadStats(), 10000);
+    // Provide visual feedback that we are waiting for the user's PIN
+    btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,0.2);border-top-color:#000"></div> Waiting for PIN...';
+
+    // Begin dynamic polling
+    pollAddMoneyStatus(data.checkoutRequestId, amount);
 
   } catch (err) {
     showAmError(err.message);
     btn.disabled  = false;
     btn.innerHTML = '✓ Add Money';
   }
+}
+
+async function pollAddMoneyStatus(checkoutId, amount) {
+  const btn = document.getElementById('am-btn');
+  let attempts = 0;
+  
+  const poll = setInterval(async () => {
+    if (++attempts > 25) { 
+      clearInterval(poll); 
+      showAmError('Payment request timed out. Please try again.');
+      btn.disabled = false; btn.innerHTML = '✓ Add Money';
+      return; 
+    }
+    try {
+      const res = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkoutRequestId: checkoutId })
+      });
+      const data = await res.json();
+      
+      if (data.success && data.status === 'completed') {
+        clearInterval(poll);
+        document.getElementById('am-view').style.display    = 'none';
+        document.getElementById('am-success').style.display = 'block';
+        document.getElementById('am-success-amount').textContent  = 'KES ' + amount;
+        document.getElementById('am-success-balance').textContent = 'Wait for Wallet Balance to reflect...';
+        loadStats(); 
+      } else if (!data.success && data.status === 'failed') {
+        clearInterval(poll);
+        showAmError(data.error || 'Payment failed or was cancelled.');
+        btn.disabled = false; btn.innerHTML = '✓ Add Money';
+        
+        // Sync the explicit failure back to the database in case the webhook is delayed
+        await db.from('transactions').update({ 
+          status: 'failed', 
+          description: `Wallet top-up failed: ${data.error}`
+        }).eq('checkout_request_id', checkoutId);
+        
+        loadStats();
+      }
+    } catch (e) { 
+      console.error(e); 
+    }
+  }, 3000);
 }
 
 function showAmError(msg) {
