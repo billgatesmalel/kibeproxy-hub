@@ -5,6 +5,14 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 /* ── STATS ROW ── */
 .stats-wrap { display: flex; gap: 1.5rem; align-items: flex-start; margin-bottom: 2rem; }
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin: 0; }
+/* ── ACTION CARDS (nav items inside stat-like boxes) ── */
+.action-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.action-card { background: var(--surface); border: 1px solid var(--border); padding: 1.25rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; color: var(--text-primary); transition: transform 0.18s, border-color 0.18s; }
+.action-card:hover { transform: translateY(-3px); border-color: var(--border-light); }
+.action-info { display: flex; flex-direction: column; gap: 6px; }
+.action-title { font-weight: 800; font-size: 1rem; }
+.action-sub { font-size: 0.78rem; color: var(--text-muted); }
+.action-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(255,255,255,0.02); color: var(--text-secondary); }
 .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s; }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-light); }
 .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
@@ -43,6 +51,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
   .tabs-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex-direction: row; padding: 5px; }
   .tabs-bar::-webkit-scrollbar { display: none; }
   .tab-btn { flex-shrink: 0; padding: 10px 16px; }
+  .action-cards { grid-template-columns: 1fr; }
 }
 
 /* ── WALLET CARD ── */
