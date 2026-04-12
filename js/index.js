@@ -365,10 +365,10 @@ async function loadStats() {
 
   // (Referral Stats moved to profile.html)
 
-  document.getElementById('stat-active').textContent   = active.length;
-  document.getElementById('stat-expired').textContent  = expired.length;
-  document.getElementById('stat-emails').textContent   = emailList.length;
-  document.getElementById('stat-txns').textContent     = txList.length;
+  if (document.getElementById('stat-active'))  document.getElementById('stat-active').textContent   = active.length;
+  if (document.getElementById('stat-expired')) document.getElementById('stat-expired').textContent  = expired.length;
+  if (document.getElementById('stat-emails'))  document.getElementById('stat-emails').textContent   = emailList.length;
+  if (document.getElementById('stat-txns'))    document.getElementById('stat-txns').textContent     = txList.length;
 
   // Render on index only if elements exist (other pages will handle their own)
   if (document.getElementById('panel-active')) renderProxies(active,  'panel-active',  'active');
@@ -824,8 +824,8 @@ async function init() {
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
     AppCache.set('user_meta', { name, initials });
-    document.getElementById('user-name').textContent     = name;
-    document.getElementById('user-initials').textContent = initials;
+    if (document.getElementById('user-name')) document.getElementById('user-name').textContent = name;
+    if (document.getElementById('user-initials')) document.getElementById('user-initials').textContent = initials;
 
     if (currentUserEmail === ADMIN_EMAIL) {
       const al = document.getElementById('admin-link');
