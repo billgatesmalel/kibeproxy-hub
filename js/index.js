@@ -1,6 +1,34 @@
 // ── DASHBOARD LOGIC ───────────────────────────────────────────
 let currentUserId = null;
 let currentBalance = 0;
+let pollingInterval = null;
+
+function toggleSupport(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const menu = document.getElementById('support-menu');
+  const btn = e.currentTarget;
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  
+  menu.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+  menu.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
+  
+  const isOpen = menu.classList.toggle('open');
+  
+  const closeMenu = (event) => {
+    if (!menu.contains(event.target) && !btn.contains(event.target)) {
+      menu.classList.remove('open');
+      document.removeEventListener('click', closeMenu);
+    }
+  };
+  
+  if (isOpen) {
+    setTimeout(() => document.addEventListener('click', closeMenu), 10);
+  }
+}
 
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
@@ -117,20 +145,7 @@ function updateBalanceDisplay() {
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────────
-function switchTab(btn, tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  ['active', 'expired', 'emails', 'transactions'].forEach(t => {
-    document.getElementById('panel-' + t).style.display = t === tab ? 'block' : 'none';
-  });
-}
-
-function jumpToTab(tabName) {
-  const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => 
-    b.getAttribute('onclick')?.includes(`'${tabName}'`)
-  );
-  if (btn) switchTab(btn, tabName);
-}
+// (tab logic removed from dashboard as request)
 
 // ── PAYMENT STATUS BADGE ──────────────────────────────────────
 function paymentBadge(status) {
@@ -218,8 +233,8 @@ function togglePass(id) {
 }
 
 // ── RENDER EMAILS ─────────────────────────────────────────────
-function renderEmails(data) {
-  const panel = document.getElementById('panel-emails');
+function renderEmails(data, panelId = 'panel-emails') {
+  const panel = document.getElementById(panelId);
   if (!data || data.length === 0) {
     panel.innerHTML = `
       <div class="empty-state">
@@ -262,8 +277,8 @@ function renderEmails(data) {
 }
 
 // ── RENDER TRANSACTIONS ───────────────────────────────────────
-function renderTransactions(data) {
-  const panel = document.getElementById('panel-transactions');
+function renderTransactions(data, panelId = 'panel-transactions') {
+  const panel = document.getElementById(panelId);
   if (!data || data.length === 0) {
     panel.innerHTML = `
       <div class="empty-state">
@@ -355,15 +370,14 @@ async function loadStats() {
   document.getElementById('stat-emails').textContent   = emailList.length;
   document.getElementById('stat-txns').textContent     = txList.length;
 
-  document.getElementById('badge-active').textContent       = active.length;
-  document.getElementById('badge-expired').textContent      = expired.length;
-  document.getElementById('badge-emails').textContent       = emailList.length;
-  document.getElementById('badge-transactions').textContent = txList.length;
-
-  renderProxies(active,  'panel-active',  'active');
-  renderProxies(expired, 'panel-expired', 'expired');
-  renderEmails(emailList);
-  renderTransactions(txList);
+  // Render on index only if elements exist (other pages will handle their own)
+  if (document.getElementById('panel-active')) renderProxies(active,  'panel-active',  'active');
+  if (document.getElementById('panel-expired')) renderProxies(expired, 'panel-expired', 'expired');
+  if (document.getElementById('emails-list')) renderEmails(emailList, 'emails-list');
+  if (document.getElementById('transactions-list')) renderTransactions(txList, 'transactions-list');
+  // Legacy support for index.html if it still uses panel- names
+  if (document.getElementById('emails-panel')) renderEmails(emailList, 'emails-panel');
+  if (document.getElementById('transactions-panel')) renderTransactions(txList, 'transactions-panel');
 }
 
 // ── ADD MONEY MODAL ───────────────────────────────────────────

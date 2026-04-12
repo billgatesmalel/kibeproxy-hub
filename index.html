@@ -135,96 +135,71 @@
       </a>
     </div>
 
-    <!-- STATS + TABS WRAP -->
-    <div class="stats-wrap">
-      <!-- TOOLBAR -->
-      <div class="toolbar">
-        <div class="tabs-bar">
-          <button class="tab-btn active" onclick="switchTab(this,'active')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            Active <span class="tab-badge" id="badge-active">0</span>
-          </button>
-          <button class="tab-btn" onclick="switchTab(this,'expired')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-            </svg>
-            Expired <span class="tab-badge" id="badge-expired">0</span>
-          </button>
-          <button class="tab-btn" onclick="switchTab(this,'emails')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-            Emails <span class="tab-badge" id="badge-emails">0</span>
-          </button>
-          <button class="tab-btn" onclick="switchTab(this,'transactions')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-            Transactions <span class="tab-badge" id="badge-transactions">0</span>
-          </button>
+      <!-- DYNAMIC STAT CARDS (CONTINUE BELOW FEEDBACK) -->
+      <a class="action-card" href="active.html">
+        <div class="action-info">
+          <div class="action-title">Active Proxies</div>
+          <div class="action-sub"><span id="stat-active" class="green">0</span> active now</div>
         </div>
-      </div>
-
-      <div class="stats-row">
-      <div class="stat-card" onclick="jumpToTab('active')" role="button" tabindex="0">
-        <div class="stat-label">Active Proxies</div>
-        <div class="stat-value green" id="stat-active">&#8212;</div>
-      </div>
-      <div class="stat-card" onclick="jumpToTab('expired')" role="button" tabindex="0">
-        <div class="stat-label">Expired Proxies</div>
-        <div class="stat-value" id="stat-expired">&#8212;</div>
-      </div>
-      <div class="stat-card" onclick="jumpToTab('emails')" role="button" tabindex="0">
-        <div class="stat-label">Emails</div>
-        <div class="stat-value" id="stat-emails">&#8212;</div>
-      </div>
-      <div class="stat-card" onclick="jumpToTab('transactions')" role="button" tabindex="0">
-        <div class="stat-label">Transactions</div>
-        <div class="stat-value" id="stat-txns">&#8212;</div>
-      </div>
-    </div>
-
-    <!-- TOOLBAR (secondary) - keep only Buy More button (Add Money moved into wallet card) -->
-    <div class="toolbar">
-      <a href="store.html" class="buy-store-btn">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="9" cy="21" r="1" />
-          <circle cx="20" cy="21" r="1" />
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-        </svg>
-        Buy More
+        <div class="action-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
+        </div>
+      </a>
+      <a class="action-card" href="expired.html">
+        <div class="action-info">
+          <div class="action-title">Expired Proxies</div>
+          <div class="action-sub"><span id="stat-expired">0</span> expired</div>
+        </div>
+        <div class="action-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+          </svg>
+        </div>
+      </a>
+      <a class="action-card" href="emails.html">
+        <div class="action-info">
+          <div class="action-title">Purchased Emails</div>
+          <div class="action-sub"><span id="stat-emails">0</span> emails</div>
+        </div>
+        <div class="action-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+        </div>
+      </a>
+      <a class="action-card" href="transactions.html">
+        <div class="action-info">
+          <div class="action-title">Transactions</div>
+          <div class="action-sub"><span id="stat-txns">0</span> records</div>
+        </div>
+        <div class="action-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </div>
       </a>
     </div>
 
-    <!-- PANELS -->
-    <div class="panel" id="panel-active">
-      <div class="loading">
-        <div class="spinner"></div> Loading active proxies...
-      </div>
-    </div>
-
-    <div class="panel" id="panel-expired" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading expired proxies...
-      </div>
-    </div>
-
-    <div class="panel" id="panel-emails" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading emails...
-      </div>
-    </div>
-
-    <div class="panel" id="panel-transactions" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading transactions...
-      </div>
+    <!-- SUPPORT MENU (RESTORED) -->
+    <div id="support-menu" class="support-menu">
+      <a href="https://wa.me/254724031319" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        WhatsApp Support
+      </a>
+      <a href="https://t.me/kibeproxy" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zm2 0h-4v2h4V2z"/></svg>
+        Telegram Channel
+      </a>
+      <a href="mailto:kibetcreations2025@outlook.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email Help
+      </a>
     </div>
   </main>
 

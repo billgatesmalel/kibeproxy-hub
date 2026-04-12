@@ -215,3 +215,20 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
   background: var(--green);
   color: #000;
 }
+
+/* ── SUB-PAGE BACK NAV ── */
+.back-nav { 
+  margin-bottom: 2rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  color: var(--text-muted); 
+  text-decoration: none; 
+  font-weight: 600; 
+  font-size: 0.9rem; 
+  transition: all 0.2s; 
+  width: fit-content;
+}
+.back-nav:hover { color: var(--green); transform: translateX(-4px); }
+.back-nav svg { transition: transform 0.2s; }
+.back-nav:hover svg { transform: translateX(-2px); }
