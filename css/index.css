@@ -253,8 +253,8 @@ footer::before {
 }
 
 .footer-inner { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 2.0rem; position: relative; z-index: 1; }
-.footer-top { display: flex; justify-content: space-between; gap: 4rem; margin-bottom: 3rem; }
-.footer-links { display: flex; gap: 4rem; }
+.footer-top { display: grid; grid-template-columns: 2fr 3fr; gap: 4rem; margin-bottom: 3rem; }
+.footer-links { display: flex; justify-content: space-between; gap: 1.5rem; width: 100%; }
 
 
 .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
@@ -351,7 +351,7 @@ footer::before {
 
 @media (max-width: 992px) {
   .footer-inner { padding: 2rem 1rem 1.5rem; }
-  .footer-top { flex-direction: column; gap: 2rem; align-items: center; text-align: center; }
+  .footer-top { display: flex; flex-direction: column; gap: 2rem; align-items: center; text-align: center; }
   .footer-brand { display: flex; flex-direction: column; align-items: center; }
   .footer-links { 
     display: grid;
