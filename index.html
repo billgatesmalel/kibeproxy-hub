@@ -422,20 +422,6 @@
   <script src="js/supabase.js"></script>
   <script src="js/common.js"></script>
   <script src="js/index.js"></script>
-  <script>
-    // Ensure Add Money buttons always open the modal (fallback binding)
-    (function(){
-      try {
-        document.querySelectorAll('.add-money-btn').forEach(function(btn){
-          btn.removeEventListener('click', openAddMoney);
-          btn.addEventListener('click', function(e){
-            e.preventDefault();
-            if (typeof openAddMoney === 'function') openAddMoney();
-          });
-        });
-      } catch (err) { console.warn('Add-money binding failed', err); }
-    })();
-  </script>
 </body>
 
 </html>

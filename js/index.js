@@ -360,24 +360,34 @@ async function loadStats() {
 }
 
 // ── ADD MONEY MODAL ───────────────────────────────────────────
-function openAddMoney() {
+let lastOpenTime = 0;
+async function openAddMoney() {
+  const now = Date.now();
+  if (now - lastOpenTime < 500) return; // Debounce multiple clicks
+  lastOpenTime = now;
+
   try {
     const modal = document.getElementById('modal-addmoney');
     if (!modal) throw new Error('Add money modal not found');
-    modal.classList.add('open');
+    
+    // Reset views inside modal
     const amt = document.getElementById('am-amount');
     const phone = document.getElementById('am-phone');
     const err = document.getElementById('am-error');
     const view = document.getElementById('am-view');
     const success = document.getElementById('am-success');
+    
     if (amt) amt.value = '';
     if (phone) phone.value = '';
     if (err) err.style.display = 'none';
     if (view) view.style.display = 'block';
     if (success) success.style.display = 'none';
-    // focus the amount input after the modal is visible
-    setTimeout(() => { try { if (amt) amt.focus(); } catch(e){} }, 120);
-    console.log('openAddMoney: modal opened');
+    
+    modal.classList.add('open');
+    
+    // Focus the amount input
+    setTimeout(() => { if (amt) amt.focus(); }, 150);
+    console.log('Add money modal opened');
   } catch (err) {
     console.error('openAddMoney error:', err);
     // Fallback: if modal isn't present (likely an older cached page), offer a quick top-up prompt

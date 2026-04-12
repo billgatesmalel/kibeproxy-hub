@@ -96,8 +96,15 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 .wallet-card::before {
   content: '';
   position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.04) 0%, transparent 60%);
-  animation: rotate-slow 30s linear infinite;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 60%);
+  animation: rotate-slow 20s linear infinite;
+  pointer-events: none;
+}
+.wallet-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at center, rgba(34, 197, 94, 0.1) 0%, transparent 100%);
+  opacity: 0.5;
   pointer-events: none;
 }
 @keyframes rotate-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
@@ -110,9 +117,16 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
   color: #000; border: none; border-radius: 16px; 
   padding: 16px 32px; font-size: 1rem; font-weight: 800; 
   cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+  position: relative; overflow: hidden;
 }
-.add-money-btn:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 30px rgba(34, 197, 94, 0.4); }
+.add-money-btn::after {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: 0.5s;
+}
+.add-money-btn:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 30px rgba(34, 197, 94, 0.5); }
+.add-money-btn:hover::after { left: 100%; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
