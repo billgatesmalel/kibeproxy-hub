@@ -7,12 +7,28 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin: 0; }
 /* ── ACTION CARDS (nav items inside stat-like boxes) ── */
 .action-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin: 1.5rem 0; }
-.action-card { background: var(--surface); border: 1px solid var(--border); padding: 1.25rem; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; color: var(--text-primary); transition: transform 0.18s, border-color 0.18s; }
-.action-card:hover { transform: translateY(-3px); border-color: var(--border-light); }
+.action-card, .stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.18s, border-color 0.18s;
+  min-height: 112px;
+}
+.action-card:hover, .stat-card:hover { transform: translateY(-3px); border-color: var(--border-light); }
 .action-info { display: flex; flex-direction: column; gap: 6px; }
-.action-title { font-weight: 800; font-size: 1rem; }
+.action-title, .stat-label { font-weight: 800; font-size: 1rem; }
 .action-sub { font-size: 0.78rem; color: var(--text-muted); }
 .action-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(255,255,255,0.02); color: var(--text-secondary); }
+
+/* Hide chevrons — cards now look identical and don't need arrows */
+.action-chevron, .stat-chevron { display: none !important; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s; }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-light); }
 .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
@@ -71,9 +87,10 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
   border-radius: 24px; 
   padding: 2rem 2.5rem; 
   display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  gap: 1.5rem; 
+  flex-direction: column;
+  align-items: flex-start; 
+  justify-content: flex-start; 
+  gap: 1rem; 
   margin-bottom: 2.5rem; 
   position: relative; 
   overflow: hidden;
@@ -93,6 +110,9 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
   .wallet-amount { font-size: 2rem; }
   .add-money-btn { width: 100%; justify-content: center; }
 }
+
+/* Make the Add Money button expand to full width inside wallet card */
+.wallet-card .add-money-btn { width: 100%; padding: 16px 28px; border-radius: 14px; font-size: 1.02rem; }
 
 .wallet-amount { font-size: 2.4rem; font-weight: 800; color: var(--text-primary); font-family: 'Syne', sans-serif; letter-spacing: -0.02em; margin: 4px 0; }
 .wallet-label { font-size: 0.75rem; color: var(--green); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; display: flex; align-items: center; gap: 8px; }
