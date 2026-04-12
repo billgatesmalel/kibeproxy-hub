@@ -129,7 +129,12 @@ function renderProxyListings() {
     return;
   }
 
-  grid.innerHTML = filtered.map(p => `
+  grid.innerHTML = filtered.map(p => {
+    const createdAt = new Date(p.created_at);
+    const durationDays = p.duration_days || 1;
+    const expiresAt = new Date(createdAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+    
+    return `
     <div class="listing-card">
       <div class="card-header">
         <div class="country-flag">${p.flag || '🌍'}</div>
@@ -143,6 +148,10 @@ function renderProxyListings() {
         <div class="spec-row">
           <span class="spec-label">Duration</span>
           <span class="spec-val">${currentDuration} Day${currentDuration > 1 ? 's' : ''}</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Expires</span>
+          <span class="spec-val mono" style="font-size:0.75rem;">${expiresAt.toLocaleString()}</span>
         </div>
         <div class="spec-row">
           <span class="spec-label">Host</span>
@@ -162,7 +171,8 @@ function renderProxyListings() {
           Buy Now
         </button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── RENDER EMAIL LISTINGS ─────────────────────────────────────

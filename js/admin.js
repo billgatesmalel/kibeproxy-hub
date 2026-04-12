@@ -303,7 +303,7 @@ function renderProxyListings(listings) {
   }
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Country</th><th>Host</th><th>Duration</th><th>Price</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
+      <thead><tr><th>Country</th><th>Host</th><th>Duration</th><th>Price</th><th>Slots</th><th>Expires At</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
       <tbody>
         ${listings.map(p => {
           const createdAt = new Date(p.created_at);
@@ -320,6 +320,8 @@ function renderProxyListings(listings) {
             <td class="mono">${p.host}</td>
             <td class="mono" style="color:var(--yellow)">${p.duration_days || 1} Days</td>
             <td class="mono" style="color:var(--green)">KES ${p.price_per_day}</td>
+            <td class="mono">${Math.max(0, (p.max_buyers || 1) - (p.buyer_count || 0))} / ${p.max_buyers || 1}</td>
+            <td class="mono" style="font-size:0.75rem;">${expiresAt.toLocaleString()}</td>
             <td><span class="badge ${statusClass}">${statusText}</span></td>
             <td class="mono" style="font-size:0.75rem;color:var(--text-muted)">${new Date(p.created_at).toLocaleDateString()}</td>
             <td><button class="btn btn-red btn-sm" onclick="removeProxyListing('${p.id}')">Remove</button></td>
