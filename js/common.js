@@ -72,6 +72,20 @@ function updateGlobalBalance(balance) {
   els.forEach(el => el.textContent = 'KES ' + balance);
 }
 
+// Global click delegation for common buttons (ensures handlers work even after DOM edits)
+document.addEventListener('click', function (e) {
+  const addBtn = e.target.closest && e.target.closest('.add-money-btn');
+  if (addBtn) {
+    if (typeof openAddMoney === 'function') {
+      e.preventDefault();
+      openAddMoney();
+    } else {
+      // if openAddMoney not defined yet, set a short retry
+      setTimeout(() => { if (typeof openAddMoney === 'function') openAddMoney(); }, 100);
+    }
+  }
+});
+
 // Show cached values immediately
 (function useCache() {
   const cachedBalance = AppCache.get('balance');
