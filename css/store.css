@@ -106,20 +106,31 @@ main { max-width: 1200px; margin: 0 auto; padding: 3rem 2.5rem; }
   .store-tabs {
     width: 100%;
     display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     padding: 6px;
+    box-shadow: none;
   }
   .store-tab {
-    flex: 1 1 48%; /* try two tabs per row when possible */
-    padding: 8px 10px;
-    font-size: 0.86rem;
+    flex: 1 1 0;
+    padding: 10px 8px;
+    font-size: 0.9rem;
     justify-content: center;
     text-align: center;
     white-space: nowrap;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-light);
   }
-  /* When there are many tabs, allow smaller text and full-width fallback */
-  @media (max-width: 420px) {
-    .store-tab { flex: 1 1 100%; font-size: 0.82rem; padding: 8px; }
+  .store-tab svg { width: 14px; height: 14px; }
+  .store-tab.active { background: var(--green); color: #000; border-color: var(--green); box-shadow: 0 6px 18px rgba(34,197,94,0.06); }
+  /* When viewport is narrow, allow tabs to wrap into multiple lines but keep pills */
+  @media (max-width: 460px) {
+    .store-tabs { flex-wrap: wrap; gap: 6px; }
+    .store-tab { flex: 1 1 48%; font-size: 0.86rem; }
+  }
+  @media (max-width: 360px) {
+    .store-tab { flex: 1 1 100%; font-size: 0.84rem; }
   }
 }
