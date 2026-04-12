@@ -100,3 +100,26 @@ main { max-width: 1200px; margin: 0 auto; padding: 3rem 2.5rem; }
   main { padding: 2rem 1.2rem; }
   .store-grid { grid-template-columns: 1fr; }
 }
+
+/* Mobile-friendly tabs: allow wrapping and equal distribution so all tabs show */
+@media (max-width: 700px) {
+  .store-tabs {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 6px;
+  }
+  .store-tab {
+    flex: 1 1 48%; /* try two tabs per row when possible */
+    padding: 8px 10px;
+    font-size: 0.86rem;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+  /* When there are many tabs, allow smaller text and full-width fallback */
+  @media (max-width: 420px) {
+    .store-tab { flex: 1 1 100%; font-size: 0.82rem; padding: 8px; }
+  }
+}
