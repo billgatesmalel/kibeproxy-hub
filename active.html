@@ -8,11 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/index.css" />
-  <style>
-    .back-nav { margin-bottom: 2rem; display: flex; align-items: center; gap: 8px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
-    .back-nav:hover { color: var(--green); }
-    .panel { display: block; animation: none; }
-  </style>
 </head>
 <body>
   <nav>
@@ -62,11 +57,11 @@
     </div>
 
     <!-- ACTIVE PROXIES PANEL -->
-    <div id="panel-active" class="panel">
+    <div id="panel-active" class="panel active">
       <div id="active-proxies-list">
         <div class="loading-state">
           <div class="spinner"></div>
-          <span>Retrieving proxy credentials...</span>
+          <span>Syncing active nodes...</span>
         </div>
       </div>
     </div>
