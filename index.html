@@ -97,9 +97,9 @@
         <div class="wallet-label">💰 WALLET BALANCE</div>
         <div class="wallet-amount" id="wallet-amount">KES 0</div>
         <div style="color:var(--text-muted);font-size:0.95rem;">Available to spend in the store</div>
-        <div style="width:100%;margin-top:1rem;">
-          <button class="add-money-btn" onclick="openAddMoney()">+ Add Money</button>
-        </div>
+      </div>
+      <div class="wallet-actions">
+        <button class="add-money-btn" onclick="openAddMoney()">+ Add Money</button>
       </div>
     </div>
     <div class="action-cards">
@@ -223,38 +223,7 @@
 
     <!-- PANELS -->
     <div class="panel" id="panel-active">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-    <div class="panel" id="panel-expired" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-    <div class="panel" id="panel-emails" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-    <div class="panel" id="panel-transactions" style="display:none;">
-      <div class="loading">
-        <div class="spinner"></div> Loading...
-      </div>
-    </div>
-  </main>
-
-  <!-- ADD MONEY MODAL -->
-  <div class="modal-overlay" id="modal-addmoney">
-    <div class="modal">
-      <div id="am-view">
-        <div class="modal-title">&#128176; Add Money to Wallet</div>
-        <div class="am-note">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            style="flex-shrink:0;margin-top:1px;">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
+      <!-- Top nav tabs removed per request -->
           </svg>
           Send money via M-Pesa first, then enter the details below to credit your wallet. Contact: +254724031319
         </div>

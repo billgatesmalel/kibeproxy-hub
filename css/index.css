@@ -87,10 +87,9 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
   border-radius: 24px; 
   padding: 2rem 2.5rem; 
   display: flex; 
-  flex-direction: column;
-  align-items: flex-start; 
-  justify-content: flex-start; 
-  gap: 1rem; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 1.5rem; 
   margin-bottom: 2.5rem; 
   position: relative; 
   overflow: hidden;
@@ -105,14 +104,17 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 }
 @keyframes rotate-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
+.wallet-card .wallet-actions { display:flex; align-items:center; justify-content:flex-end; }
+
 @media (max-width: 600px) {
   .wallet-card { flex-direction: column; align-items: flex-start; padding: 1.5rem; border-radius: 20px; }
   .wallet-amount { font-size: 2rem; }
-  .add-money-btn { width: 100%; justify-content: center; }
+  .wallet-card .wallet-actions { width:100%; margin-top:1rem; }
+  .wallet-card .add-money-btn { width:100%; justify-content:center; }
 }
 
-/* Make the Add Money button expand to full width inside wallet card */
-.wallet-card .add-money-btn { width: 100%; padding: 16px 28px; border-radius: 14px; font-size: 1.02rem; }
+/* Make the Add Money button slightly larger on desktop and allow min width */
+.wallet-card .add-money-btn { padding: 14px 28px; border-radius: 14px; font-size: 1.02rem; min-width: 160px; }
 
 .wallet-amount { font-size: 2.4rem; font-weight: 800; color: var(--text-primary); font-family: 'Syne', sans-serif; letter-spacing: -0.02em; margin: 4px 0; }
 .wallet-label { font-size: 0.75rem; color: var(--green); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; display: flex; align-items: center; gap: 8px; }
