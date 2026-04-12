@@ -192,46 +192,67 @@
 
     <!-- PANELS -->
     <div class="panel" id="panel-active">
-      <!-- Top nav tabs removed per request -->
+      <div class="loading">
+        <div class="spinner"></div> Loading active proxies...
+      </div>
+    </div>
+
+    <div class="panel" id="panel-expired" style="display:none;">
+      <div class="loading">
+        <div class="spinner"></div> Loading expired proxies...
+      </div>
+    </div>
+
+    <div class="panel" id="panel-emails" style="display:none;">
+      <div class="loading">
+        <div class="spinner"></div> Loading emails...
+      </div>
+    </div>
+
+    <div class="panel" id="panel-transactions" style="display:none;">
+      <div class="loading">
+        <div class="spinner"></div> Loading transactions...
+      </div>
+    </div>
+  </main>
+
+  <!-- ADD MONEY MODAL -->
+  <div class="modal-overlay" id="modal-addmoney">
+    <div class="modal">
+      <div id="am-view">
+        <div class="modal-title">Add Money to Wallet</div>
+        <div style="background:var(--green-glow);border:1px solid var(--green-dim);color:var(--green);padding:10px 14px;border-radius:10px;font-size:0.8rem;margin-bottom:1.5rem;display:flex;gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          Send money via M-Pesa first, then enter the details below to credit your wallet. Contact: +254724031319
+          Send money via M-Pesa then enter the details below. Contact: +254724031319
         </div>
-        <div id="am-error" class="am-error"></div>
-        <div class="am-row">
-          <div class="am-group">
-            <label class="am-label">Amount (KES)</label>
-            <input class="am-input" id="am-amount" type="number" placeholder="e.g. 500" min="1" />
-          </div>
-          <div class="am-group">
-            <label class="am-label">M-Pesa Phone Number</label>
-            <input class="am-input" id="am-phone" type="tel" placeholder="e.g. 254712345678" />
-          </div>
+        <div id="am-error" style="display:none;margin-bottom:1rem;font-size:0.82rem;font-family:DM Mono,monospace;"></div>
+        <div class="form-group">
+          <label class="form-label">Amount (KES)</label>
+          <input class="form-input" id="am-amount" type="number" placeholder="e.g. 500" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">M-Pesa Phone Number</label>
+          <input class="form-input" id="am-phone" type="tel" placeholder="e.g. 254712345678" />
         </div>
         <div class="modal-actions">
           <button class="btn-cancel" onclick="closeModal('addmoney')">Cancel</button>
-          <button class="am-submit" id="am-btn" onclick="confirmAddMoney()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-            Add Money
-          </button>
+          <button class="btn-submit" id="am-btn" onclick="confirmAddMoney()">Add Money</button>
         </div>
       </div>
       <div id="am-success" style="display:none;text-align:center;padding:1rem 0;">
-        <div class="am-success-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+        <div style="width:56px;height:56px;background:var(--green-glow);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--green);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.5rem;color:var(--green);">Money Added!</div>
-        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">
-          <span id="am-success-amount" style="color:var(--green);font-weight:700;font-family:DM Mono,monospace;"></span>
-          added to your wallet.
+        <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.4rem;color:var(--green);">Money Added!</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
+          <span id="am-success-amount"></span> added to your wallet.
         </div>
         <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">
           New balance: <strong id="am-success-balance" style="color:var(--text-primary);"></strong>
         </div>
-        <button class="am-submit" onclick="closeModal('addmoney')">Done &#10003;</button>
+        <button class="btn-submit" onclick="closeModal('addmoney')" style="width:100%">Done &#10003;</button>
       </div>
     </div>
   </div>
@@ -257,7 +278,7 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('feedback')">Cancel</button>
-        <button class="btn btn-green" id="submit-feedback-btn" onclick="submitFeedback()">Submit Review</button>
+        <button class="btn btn-submit" id="submit-feedback-btn" onclick="submitFeedback()">Submit Review</button>
       </div>
     </div>
   </div>
@@ -265,21 +286,21 @@
 <!-- RENEW MODAL -->
 <div class="modal-overlay" id="modal-renew">
   <div class="modal">
-    <div class="modal-title" style="display:flex;align-items:center;gap:1.25rem;">
+    <div class="modal-title" style="display:flex;align-items:center;gap:1rem;">
       <span style="font-size:1.5rem;">🔄</span>
       <span>Renew Proxy</span>
     </div>
-    <p class="modal-sub">Extend the duration of this proxy instantly using your wallet balance.</p>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;">Extend the duration of this proxy instantly using your wallet balance.</p>
     
-    <div class="order-summary" style="margin-bottom:1.5rem;background:rgba(255,255,255,0.02);">
+    <div class="order-summary" style="margin-bottom:1.5rem;background:rgba(255,255,255,0.02);padding:1rem;border-radius:10px;border:1px solid var(--border);">
       <div class="order-row"><span class="lbl">Proxy</span><span class="val" id="rn-host">—</span></div>
       <div class="order-row"><span class="lbl">Country</span><span class="val" id="rn-country">—</span></div>
-      <div class="order-row"><span class="lbl">Current Expiry</span><span class="val" id="rn-current-exp">—</span></div>
+      <div class="order-row"><span class="lbl">Expiry</span><span class="val" id="rn-current-exp">—</span></div>
     </div>
 
     <div class="form-group">
       <label class="form-label">Extension Duration</label>
-      <div class="duration-filter" style="margin-top:0.5rem;justify-content:flex-start;">
+      <div class="duration-filter" style="margin-top:0.5rem;display:flex;gap:8px;">
         <button class="dur-filter-btn renew-dur active" onclick="setRenewDuration(1, this)">+1 Day</button>
         <button class="dur-filter-btn renew-dur" onclick="setRenewDuration(7, this)">+7 Days</button>
         <button class="dur-filter-btn renew-dur" onclick="setRenewDuration(30, this)">+30 Days</button>
@@ -324,10 +345,11 @@
 
     <div class="modal-actions" style="gap:10px;">
       <button class="btn-cancel" onclick="skipRating()">Skip</button>
-      <button class="btn btn-green" id="rate-submit-btn" onclick="submitRating()">Submit Rating</button>
+      <button class="btn-submit" id="rate-submit-btn" onclick="submitRating()">Submit Rating</button>
     </div>
   </div>
 </div>
+
 
   <!-- FOOTER -->
   <footer>
