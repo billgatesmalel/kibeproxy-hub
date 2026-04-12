@@ -44,7 +44,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 .stat-card.green .stat-value { color: var(--green); text-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
 
 /* ── ACTION CARDS ── */
-.action-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 3rem; }
+.action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 3rem; }
 .action-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
