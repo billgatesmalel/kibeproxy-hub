@@ -90,45 +90,9 @@
       <p class="page-subtitle">Manage your wallet, proxies and emails</p>
     </div>
 
-    <!-- STATS -->
-    <div class="stats-row">
-      <a class="stat-card" href="#" onclick="switchTab(document.querySelector('.tab-btn[data-tab=\'active\']'),'active');return false;">
-        <div>
-          <div class="stat-label">Active Proxies</div>
-          <div class="stat-value green" id="stat-active">&#8212;</div>
-        </div>
-        <div class="stat-chevron">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </a>
-      <a class="stat-card" href="#" onclick="switchTab(document.querySelector('.tab-btn[data-tab=\'expired\']'),'expired');return false;">
-        <div>
-          <div class="stat-label">Expired Proxies</div>
-          <div class="stat-value" id="stat-expired">&#8212;</div>
-        </div>
-        <div class="stat-chevron">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </a>
-      <a class="stat-card" href="#" onclick="switchTab(document.querySelector('.tab-btn[data-tab=\'emails\']'),'emails');return false;">
-        <div>
-          <div class="stat-label">Emails</div>
-          <div class="stat-value" id="stat-emails">&#8212;</div>
-        </div>
-        <div class="stat-chevron">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </a>
-      <a class="stat-card" href="#" onclick="switchTab(document.querySelector('.tab-btn[data-tab=\'transactions\']'),'transactions');return false;">
-        <div>
-          <div class="stat-label">Transactions</div>
-          <div class="stat-value" id="stat-txns">&#8212;</div>
-        </div>
-        <div class="stat-chevron">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </a>
-    </div>
+    <!-- ACTION CARDS (visible under wallet) -->
+    <div class="action-cards">
+      <a class="action-card" href="store.html">
         <div class="action-info">
           <div class="action-title">Buy Proxies</div>
           <div class="action-sub">KES 100/day</div>
@@ -138,6 +102,9 @@
             <circle cx="12" cy="12" r="10" />
             <line x1="2" y1="12" x2="22" y2="12" />
           </svg>
+        </div>
+        <div class="action-chevron">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </a>
 
@@ -152,6 +119,9 @@
             <polyline points="22,6 12,13 2,6" />
           </svg>
         </div>
+        <div class="action-chevron">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
       </a>
 
       <a class="action-card" href="#" onclick="toggleSupport(event)">
@@ -164,6 +134,9 @@
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </div>
+        <div class="action-chevron">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
       </a>
 
       <a class="action-card" href="feedback.html">
@@ -175,6 +148,9 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
+        </div>
+        <div class="action-chevron">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </a>
     </div>
