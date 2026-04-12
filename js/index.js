@@ -380,7 +380,39 @@ function openAddMoney() {
     console.log('openAddMoney: modal opened');
   } catch (err) {
     console.error('openAddMoney error:', err);
-    alert('Unable to open Add Money modal. Please try again or contact support.');
+    // Fallback: if modal isn't present (likely an older cached page), offer a quick top-up prompt
+    try {
+      const quick = confirm('Add Money UI not available on this page. Would you like to try a quick top-up via M-Pesa prompt?');
+      if (!quick) {
+        alert('Unable to open Add Money modal. Please try again or contact support.');
+        return;
+      }
+      const amtRaw = prompt('Enter amount (KES)', '500');
+      if (!amtRaw) { alert('Top-up cancelled'); return; }
+      const amt = parseInt(amtRaw.replace(/[^0-9]/g,''), 10);
+      if (!amt || amt < 1) { alert('Invalid amount'); return; }
+      const phoneRaw = prompt('Enter M-Pesa phone (e.g. 254712345678)', '2547');
+      if (!phoneRaw) { alert('Top-up cancelled'); return; }
+      const phone = phoneRaw.replace(/\D/g,'');
+      if (phone.length < 9) { alert('Invalid phone number'); return; }
+
+      const orderId = 'WL' + Date.now().toString().slice(-10);
+      const apiUrl = '/api/stkpush';
+      const resp = await fetch(apiUrl, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone, amount: amt, orderId: orderId, description: 'Wallet Top-up (quick)' })
+      });
+      const data = await resp.json();
+      if (data && data.success) {
+        alert('M-Pesa prompt sent. Check your phone to complete the payment.');
+      } else {
+        console.error('STK push failed', data);
+        alert('Failed to initiate M-Pesa prompt: ' + (data?.error || 'Unknown error'));
+      }
+    } catch (err2) {
+      console.error('Fallback top-up failed', err2);
+      alert('Unable to open Add Money modal. Please try again or contact support.');
+    }
   }
 }
 
