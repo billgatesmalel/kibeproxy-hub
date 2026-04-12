@@ -1,8 +1,9 @@
 /* ── STORE PAGE STYLES ───────────────────────────────────────── */
 
-main { max-width: 1200px; margin: 0 auto; padding: 3rem 2.5rem; }
+.page-header  { margin-bottom: 1rem; }
+.page-header .page-title { margin-top: 0.2rem; }
 
-.page-header  { margin-bottom: 2rem; }
+main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
 .page-title   { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; }
 .page-subtitle { margin-top: 0.4rem; font-size: 0.9rem; color: var(--text-muted); }
 
