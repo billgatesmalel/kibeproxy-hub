@@ -1,0 +1,25 @@
+name: Capture store page screenshot
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install puppeteer
+        run: npm install puppeteer --no-audit --no-fund
+      - name: Run screenshot script
+        run: node tools/screenshot.js
+      - name: Upload screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-mobile-screenshot
+          path: screenshots/store_mobile.png
