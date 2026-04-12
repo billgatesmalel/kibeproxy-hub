@@ -125,6 +125,13 @@ function switchTab(btn, tab) {
   });
 }
 
+function jumpToTab(tabName) {
+  const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => 
+    b.getAttribute('onclick')?.includes(`'${tabName}'`)
+  );
+  if (btn) switchTab(btn, tabName);
+}
+
 // ── PAYMENT STATUS BADGE ──────────────────────────────────────
 function paymentBadge(status) {
   if (!status || status === 'success') {

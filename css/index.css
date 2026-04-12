@@ -11,18 +11,31 @@ main { max-width: 1200px; margin: 0 auto; padding: 2.5rem; }
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; flex: 1; }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  padding: 1.5rem;
-  border-radius: 20px;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
   position: relative;
   overflow: hidden;
 }
-.stat-card:hover { transform: translateY(-4px); border-color: var(--border-light); background: rgba(255, 255, 255, 0.04); box-shadow: var(--shadow-premium); }
+
+.stat-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--green-dim);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(34, 197, 94, 0.1);
+}
+
+.stat-card:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
 .stat-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.05), transparent 70%); opacity: 0; transition: opacity 0.3s; }
 .stat-card:hover::after { opacity: 1; }
 
