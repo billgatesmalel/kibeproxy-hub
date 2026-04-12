@@ -361,12 +361,27 @@ async function loadStats() {
 
 // ── ADD MONEY MODAL ───────────────────────────────────────────
 function openAddMoney() {
-  document.getElementById('modal-addmoney').classList.add('open');
-  document.getElementById('am-amount').value = '';
-  document.getElementById('am-phone').value  = '';
-  document.getElementById('am-error').style.display  = 'none';
-  document.getElementById('am-view').style.display   = 'block';
-  document.getElementById('am-success').style.display = 'none';
+  try {
+    const modal = document.getElementById('modal-addmoney');
+    if (!modal) throw new Error('Add money modal not found');
+    modal.classList.add('open');
+    const amt = document.getElementById('am-amount');
+    const phone = document.getElementById('am-phone');
+    const err = document.getElementById('am-error');
+    const view = document.getElementById('am-view');
+    const success = document.getElementById('am-success');
+    if (amt) amt.value = '';
+    if (phone) phone.value = '';
+    if (err) err.style.display = 'none';
+    if (view) view.style.display = 'block';
+    if (success) success.style.display = 'none';
+    // focus the amount input after the modal is visible
+    setTimeout(() => { try { if (amt) amt.focus(); } catch(e){} }, 120);
+    console.log('openAddMoney: modal opened');
+  } catch (err) {
+    console.error('openAddMoney error:', err);
+    alert('Unable to open Add Money modal. Please try again or contact support.');
+  }
 }
 
 async function confirmAddMoney() {
