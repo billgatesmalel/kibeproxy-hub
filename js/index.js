@@ -138,7 +138,7 @@ async function confirmRenewal() {
 }
 
 function updateBalanceDisplay() {
-  const pills = document.querySelectorAll('.balance-pill span, #stat-balance, #nav-balance');
+  const pills = document.querySelectorAll('.balance-pill span, #stat-balance, #nav-balance, #wallet-amount');
   pills.forEach(p => {
     p.textContent = 'KES ' + currentBalance;
   });
