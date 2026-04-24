@@ -153,10 +153,10 @@
         <div class="form-group">
           <label class="form-label">M-Pesa Phone Number</label>
           <div style="position:relative;">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:DM Mono,monospace;font-size:0.85rem;color:var(--text-muted);">+254</span>
-            <input class="form-input" id="mpesa-phone" type="tel" placeholder="7XXXXXXXX" style="padding-left:52px;" maxlength="9" />
+            <!-- prefix removed -->
+            <input class="form-input" id="mpesa-phone" type="tel" placeholder="e.g. 0712345678" style="width:100%;" />
           </div>
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:5px;">e.g. 0712345678 → enter 712345678</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:5px;">e.g. 0712345678 or 254712345678</div>
         </div>
         <div id="mpesa-error" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:1rem;"></div>
         <button class="btn-submit" id="mpesa-pay-btn" onclick="initiateMpesaPayment()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;">
