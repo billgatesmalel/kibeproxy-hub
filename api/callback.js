@@ -1,4 +1,3 @@
-const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
@@ -18,7 +17,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json({
       status: 'online',
-      message: 'M-Pesa Callback endpoint is active. Use POST for webhook notifications.',
+      message: 'GravityPay Callback endpoint is active. Use POST for webhook notifications.',
       timestamp: new Date().toISOString()
     });
   }
@@ -29,14 +28,16 @@ module.exports = async function handler(req, res) {
 
   try {
     const callbackData = req.body;
+    console.log('GravityPay Webhook Callback:', JSON.stringify(callbackData, null, 2));
 
-    console.log('M-Pesa Callback:', JSON.stringify(callbackData, null, 2));
+    // Handle GravityPay Webhook format
+    if (callbackData.type === 'PAYMENT_SUCCESS') {
+      const checkoutRequestId = callbackData.data?.checkoutRequestId;
+      const amount = callbackData.data?.amount;
 
-    // Check if payment was successful
-    if (callbackData.Body?.stkCallback?.ResultCode === 0) {
-      const callback = callbackData.Body.stkCallback;
-      const checkoutRequestId = callback.CheckoutRequestID;
-      const resultDesc = callback.ResultDesc;
+      if (!checkoutRequestId) {
+        return res.status(400).json({ error: 'No checkout request ID in payload' });
+      }
 
       // Find the transaction by checkoutRequestId
       const { data: transactions, error: txError } = await db
@@ -57,7 +58,8 @@ module.exports = async function handler(req, res) {
 
       const transaction = transactions[0];
       const userId = transaction.user_id;
-      const amount = transaction.amount;
+      // Use transaction amount just to be safe, or webhook amount
+      const txAmount = transaction.amount; 
 
       // Update transaction status to success
       const { error: updateTxError } = await db
@@ -77,13 +79,13 @@ module.exports = async function handler(req, res) {
         .eq('user_id', userId)
         .single();
 
-      if (walletError && walletError.code !== 'PGRST116') { // PGRST116 is "not found"
+      if (walletError && walletError.code !== 'PGRST116') {
         console.error('Wallet query error:', walletError);
         return res.status(500).json({ error: 'Database error' });
       }
 
       const currentBalance = wallet ? wallet.balance : 0;
-      const newBalance = currentBalance + amount;
+      const newBalance = currentBalance + txAmount;
 
       // Update wallet balance
       const { error: upsertError } = await db
@@ -99,28 +101,22 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Failed to update wallet' });
       }
 
-      console.log(`Wallet updated for user ${userId}: ${currentBalance} -> ${newBalance}`);
-    } else {
-      // Payment failed or cancelled
-      const checkoutRequestId = callbackData.Body?.stkCallback?.CheckoutRequestID;
+      console.log(`Wallet updated via Webhook for user ${userId}: ${currentBalance} -> ${newBalance}`);
+    } else if (callbackData.type === 'PAYMENT_FAILED' || callbackData.type === 'PAYMENT_CANCELLED') {
+      const checkoutRequestId = callbackData.data?.checkoutRequestId;
       if (checkoutRequestId) {
-        // Update transaction status to failed
-        const { error: updateTxError } = await db
+        await db
           .from('transactions')
           .update({ status: 'failed' })
           .eq('checkout_request_id', checkoutRequestId);
-
-        if (updateTxError) {
-          console.error('Failed transaction update error:', updateTxError);
-        }
       }
     }
 
-    // Always respond with success to M-Pesa
+    // Always respond with success to acknowledge webhook
     res.status(200).json({ success: true });
 
   } catch (error) {
-    console.error('Callback processing error:', error);
+    console.error('Webhook processing error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
