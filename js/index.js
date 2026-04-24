@@ -493,6 +493,7 @@ async function confirmAddMoney() {
       amount:      amount,
       description: pendingDesc,
       status:      'pending',
+      checkout_request_id: data.checkoutRequestId,
       created_at:  new Date().toISOString()
     }]);
 
