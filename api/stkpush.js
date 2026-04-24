@@ -7,10 +7,15 @@ const GRAVITYPAY_SECRET_KEY = process.env.GRAVITYPAY_SECRET_KEY;
 const STK_PUSH_URL = 'https://gravitypayserver.vercel.app/api/v1/stk/push';
 
 function formatPhoneNumber(phone) {
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('254')) return cleaned;
-  if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
-  return `254${cleaned}`;
+  let cleaned = String(phone).replace(/\D/g, '');
+  if (cleaned.startsWith('2540')) {
+    cleaned = '254' + cleaned.substring(4);
+  } else if (cleaned.startsWith('0')) {
+    cleaned = '254' + cleaned.substring(1);
+  } else if (!cleaned.startsWith('254')) {
+    cleaned = '254' + cleaned;
+  }
+  return cleaned;
 }
 
 const { setCorsHeaders } = require('./_cors');
