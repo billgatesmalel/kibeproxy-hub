@@ -548,24 +548,40 @@ async function pollAddMoneyStatus(checkoutId, amount, pendingDesc) {
       if (data.success && data.status === 'completed') {
         clearInterval(poll);
         
-        // ✅ SUCCESS — Update the transaction record
-        await db.from('transactions').update({ 
+        // ✅ SUCCESS — Update the transaction record atomically
+        const { data: updatedTxs } = await db.from('transactions').update({ 
           status: 'success', 
           description: `Wallet top-up via M-Pesa (KES ${amount}) ✓`
         }).eq('user_id', currentUserId)
          .eq('description', pendingDesc)
-         .eq('status', 'pending');
+         .eq('status', 'pending')
+         .select();
         
-        // ✅ Instantly refresh wallet balance from the database
-        const { data: wallet } = await db.from('wallets')
-          .select('balance')
-          .eq('user_id', currentUserId)
-          .maybeSingle();
-        
-        if (wallet) {
-          currentBalance = wallet.balance;
-          updateBalanceDisplay();
+        // Ensure atomic wallet funding if frontend beats the webhook
+        if (updatedTxs && updatedTxs.length > 0) {
+          const { data: curWallet } = await db.from('wallets')
+            .select('balance')
+            .eq('user_id', currentUserId)
+            .maybeSingle();
+            
+          const newBal = (curWallet?.balance || 0) + amount;
+          await db.from('wallets').upsert([{ 
+             user_id: currentUserId, 
+             balance: newBal, 
+             updated_at: new Date().toISOString() 
+          }], { onConflict: 'user_id' });
+          
+          currentBalance = newBal;
+        } else {
+          // Webhook processed it, fetch latest balance
+          const { data: curWallet } = await db.from('wallets')
+            .select('balance')
+            .eq('user_id', currentUserId)
+            .maybeSingle();
+          if (curWallet) currentBalance = curWallet.balance;
         }
+        
+        updateBalanceDisplay();
         
         // Show success view
         document.getElementById('am-view').style.display    = 'none';

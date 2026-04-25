@@ -17,6 +17,10 @@ async function initAdmin() {
     document.getElementById('admin-initials').textContent = initials;
     document.getElementById('app').style.display          = 'block';
 
+    // Clear search field on load to prevent browser autofill
+    const searchEl = document.getElementById('user-search');
+    if (searchEl) searchEl.value = '';
+
     loadAll();
     loadFeedbackMgmt();
   } catch (err) {
@@ -511,8 +515,14 @@ function toggleExpand(userId) {
 function switchExpandTab(userId, tab, btn) {
   document.querySelectorAll(`#expand-${userId} .expand-tab`).forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById(`exp-p-${userId}`).style.display = tab === 'proxies' ? 'block' : 'none';
-  document.getElementById(`exp-e-${userId}`).style.display = tab === 'emails'  ? 'block' : 'none';
+
+  // Defer rendering content switch
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.getElementById(`exp-p-${userId}`).style.display = tab === 'proxies' ? 'block' : 'none';
+      document.getElementById(`exp-e-${userId}`).style.display = tab === 'emails'  ? 'block' : 'none';
+    }, 10);
+  });
 }
 
 // ── SEARCH ────────────────────────────────────────────────────

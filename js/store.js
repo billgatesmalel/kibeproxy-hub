@@ -93,7 +93,16 @@ function switchStoreTab(tab, btn) {
   activeTab = tab;
   document.querySelectorAll('.store-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderTab(tab);
+  
+  // Show a loading text or spinner quickly if processing is long
+  const grid = document.getElementById('store-grid');
+  if (grid) grid.innerHTML = '<div class="store-empty"><div class="spinner" style="margin:0 auto 1rem;"></div> Loading...</div>';
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      renderTab(tab);
+    }, 10);
+  });
 }
 
 function renderTab(tab) {
@@ -101,13 +110,20 @@ function renderTab(tab) {
   else                   renderEmailListings();
 }
 
-// ── RENDER PROXY LISTINGS ─────────────────────────────────────
 // ── SET DURATION ──────────────────────────────────────────────
 function setStoreDuration(days, btn) {
   currentDuration = days;
   document.querySelectorAll('.dur-filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderProxyListings();
+  
+  const grid = document.getElementById('store-grid');
+  if (grid) grid.innerHTML = '<div class="store-empty"><div class="spinner" style="margin:0 auto 1rem;"></div> Loading...</div>';
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      renderProxyListings();
+    }, 10);
+  });
 }
 
 // ── RENDER PROXY LISTINGS ─────────────────────────────────────

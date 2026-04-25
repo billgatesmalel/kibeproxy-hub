@@ -39,38 +39,28 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'No checkout request ID in payload' });
       }
 
-      // Find the transaction by checkoutRequestId
-      const { data: transactions, error: txError } = await db
-        .from('transactions')
-        .select('*')
-        .eq('checkout_request_id', checkoutRequestId)
-        .eq('status', 'pending');
-
-      if (txError) {
-        console.error('Transaction query error:', txError);
-        return res.status(500).json({ error: 'Database error' });
-      }
-
-      if (!transactions || transactions.length === 0) {
-        console.error('No pending transaction found for checkoutRequestId:', checkoutRequestId);
-        return res.status(404).json({ error: 'Transaction not found' });
-      }
-
-      const transaction = transactions[0];
-      const userId = transaction.user_id;
-      // Use transaction amount just to be safe, or webhook amount
-      const txAmount = transaction.amount; 
-
-      // Update transaction status to success
-      const { error: updateTxError } = await db
+      // Update transaction status to success ONLY if it is currently pending
+      // This atomic update prevents race conditions with frontend polling
+      const { data: updatedTxs, error: updateTxError } = await db
         .from('transactions')
         .update({ status: 'success' })
-        .eq('checkout_request_id', checkoutRequestId);
+        .eq('checkout_request_id', checkoutRequestId)
+        .eq('status', 'pending')
+        .select();
 
       if (updateTxError) {
         console.error('Transaction update error:', updateTxError);
         return res.status(500).json({ error: 'Failed to update transaction' });
       }
+
+      if (!updatedTxs || updatedTxs.length === 0) {
+        console.log('Transaction already processed or not found for:', checkoutRequestId);
+        return res.status(200).json({ success: true, note: 'Already processed' });
+      }
+
+      const transaction = updatedTxs[0];
+      const userId = transaction.user_id;
+      const txAmount = transaction.amount;
 
       // Get current wallet balance
       const { data: wallet, error: walletError } = await db
