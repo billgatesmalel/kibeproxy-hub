@@ -46,12 +46,22 @@ async function handleLogout() {
 function toggleSupport(e) {
   e.preventDefault();
   const menu = document.getElementById('support-menu');
+  const other = document.getElementById('community-menu');
+  if (other) other.classList.remove('open');
+  if (menu) menu.classList.toggle('open');
+}
+
+function toggleCommunity(e) {
+  e.preventDefault();
+  const menu = document.getElementById('community-menu');
+  const other = document.getElementById('support-menu');
+  if (other) other.classList.remove('open');
   if (menu) menu.classList.toggle('open');
 }
 
 document.addEventListener('click', e => {
-  const menu = document.getElementById('support-menu');
-  if (menu && !e.target.closest('.support-dropdown')) {
-    menu.classList.remove('open');
-  }
+  const sm = document.getElementById('support-menu');
+  const cm = document.getElementById('community-menu');
+  if (sm && !e.target.closest('.support-dropdown') && !e.target.closest('.action-card')) sm.classList.remove('open');
+  if (cm && !e.target.closest('.support-dropdown') && !e.target.closest('.action-card')) cm.classList.remove('open');
 });

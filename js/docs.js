@@ -32,14 +32,24 @@ document.addEventListener('DOMContentLoaded', initDocs);
 function toggleSupport(e) {
   e.preventDefault();
   var menu = document.getElementById('support-menu');
+  var other = document.getElementById('community-menu');
+  if (other) other.classList.remove('open');
+  if (menu) menu.classList.toggle('open');
+}
+
+function toggleCommunity(e) {
+  e.preventDefault();
+  var menu = document.getElementById('community-menu');
+  var other = document.getElementById('support-menu');
+  if (other) other.classList.remove('open');
   if (menu) menu.classList.toggle('open');
 }
 
 document.addEventListener('click', function(e) {
-  var menu = document.getElementById('support-menu');
-  if (menu && !e.target.closest('.support-dropdown')) {
-    menu.classList.remove('open');
-  }
+  var sm = document.getElementById('support-menu');
+  var cm = document.getElementById('community-menu');
+  if (sm && !e.target.closest('.support-dropdown') && !e.target.closest('.action-card')) sm.classList.remove('open');
+  if (cm && !e.target.closest('.support-dropdown') && !e.target.closest('.action-card')) cm.classList.remove('open');
 });
 
 // Highlight active nav link on scroll

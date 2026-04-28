@@ -8,11 +8,11 @@ let allEmails = [];
 let allTransactions = [];
 
 function toggleSupport(e) {
-  if (e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
+  if (e) { e.preventDefault(); e.stopPropagation(); }
   const menu = document.getElementById('support-menu');
+  const other = document.getElementById('community-menu');
+  if (other) other.classList.remove('open');
+  
   const btn = e.currentTarget;
   if (!btn) return;
   const rect = btn.getBoundingClientRect();
@@ -21,16 +21,39 @@ function toggleSupport(e) {
   menu.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
   
   const isOpen = menu.classList.toggle('open');
-  
-  const closeMenu = (event) => {
-    if (!menu.contains(event.target) && !btn.contains(event.target)) {
-      menu.classList.remove('open');
-      document.removeEventListener('click', closeMenu);
-    }
-  };
-  
   if (isOpen) {
-    setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    const closeAny = (ev) => {
+      if (!menu.contains(ev.target) && !btn.contains(ev.target)) {
+        menu.classList.remove('open');
+        document.removeEventListener('click', closeAny);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeAny), 10);
+  }
+}
+
+function toggleCommunity(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const menu = document.getElementById('community-menu');
+  const other = document.getElementById('support-menu');
+  if (other) other.classList.remove('open');
+  
+  const btn = e.currentTarget;
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  
+  menu.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+  menu.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
+  
+  const isOpen = menu.classList.toggle('open');
+  if (isOpen) {
+    const closeAny = (ev) => {
+      if (!menu.contains(ev.target) && !btn.contains(ev.target)) {
+        menu.classList.remove('open');
+        document.removeEventListener('click', closeAny);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeAny), 10);
   }
 }
 
