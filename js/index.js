@@ -56,89 +56,9 @@ function copyToClipboard(text, btn) {
   });
 }
 
-// ── RENEWAL LOGIC ─────────────────────────────────────────────
-let currentRenewProxyId = null;
-let currentRenewDays = 1;
-let currentRenewPricePerDay = 100; // Default
-
-function openRenewModal(pId, host, country, currentExp) {
-  currentRenewProxyId = pId;
-  currentRenewDays = 1;
-  
-  document.getElementById('rn-host').textContent = host;
-  document.getElementById('rn-country').textContent = country;
-  document.getElementById('rn-current-exp').textContent = new Date(currentExp).toLocaleString();
-  document.getElementById('rn-total').textContent = `KES ${currentRenewPricePerDay}`;
-  
-  document.querySelectorAll('.renew-dur').forEach(b => b.classList.remove('active'));
-  document.querySelector('.renew-dur').classList.add('active'); // First one
-  
-  document.getElementById('rn-error').style.display = 'none';
-  openModal('renew');
-}
-
-function setRenewDuration(days, btn) {
-  currentRenewDays = days;
-  document.querySelectorAll('.renew-dur').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('rn-total').textContent = `KES ${days * currentRenewPricePerDay}`;
-}
-
-async function confirmRenewal() {
-  const total = currentRenewDays * currentRenewPricePerDay;
-  if (currentBalance < total) {
-    document.getElementById('rn-error').textContent = 'Insufficient wallet balance.';
-    document.getElementById('rn-error').style.display = 'block';
-    return;
-  }
-
-  const btn = document.getElementById('rn-confirm-btn');
-  btn.disabled = true;
-  btn.textContent = 'Renewing...';
-
-  try {
-    // 1. Get current proxy to find its expiry
-    const { data: proxy } = await db.from('proxies').select('expires_at').eq('id', currentRenewProxyId).single();
-    const currentExp = new Date(proxy.expires_at);
-    const newExp = new Date(currentExp.getTime() + currentRenewDays * 86400000);
-
-    // 2. Deduct from wallet
-    const newBalance = currentBalance - total;
-    await db.from('wallets').upsert([{
-      user_id: currentUserId,
-      balance: newBalance,
-      updated_at: new Date().toISOString()
-    }], { onConflict: 'user_id' });
-
-    // 3. Update proxy expiry
-    await db.from('proxies').update({
-      expires_at: newExp.toISOString(),
-      status: 'active'
-    }).eq('id', currentRenewProxyId);
-
-    // 4. Record transaction
-    await db.from('transactions').insert([{
-      user_id: currentUserId,
-      type: 'purchase',
-      amount: total,
-      description: `Proxy Renewal (${currentRenewDays} days)`,
-      status: 'success',
-      created_at: new Date().toISOString()
-    }]);
-
-    currentBalance = newBalance;
-    updateBalanceDisplay();
-    
-    showToast(`Proxy renewed for ${currentRenewDays} more days!`);
-    closeModal('renew');
-    loadStats();
-  } catch (err) {
-    document.getElementById('rn-error').textContent = err.message;
-    document.getElementById('rn-error').style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Confirm Renewal';
-  }
+// ── RENEWAL REDIRECT (User now buys new proxy instead of renewing) ───────
+function openRenewModal() {
+  window.location.href = 'store.html';
 }
 
 function updateBalanceDisplay() {
@@ -216,7 +136,7 @@ function renderProxies(data, panelId, status) {
               <span class="badge ${p.status} ${p.status === 'active' && (new Date(p.expires_at) - new Date()) < 86400000 ? 'pulse' : ''}">
                 ${p.status}
               </span>
-              ${p.status === 'active' ? `<button class="renew-btn" onclick="openRenewModal('${p.id}', '${p.host}', '${p.country}', '${p.expires_at}')">Renew</button>` : ''}
+              ${(p.status === 'active' || p.status === 'expired') ? `<button class="renew-btn" onclick="openRenewModal()" style="background:var(--blue-glow);color:var(--blue);border-color:rgba(59,130,246,0.3)">Buy More</button>` : ''}
             </td>
             <td>${paymentBadge(p.payment_status)}</td>
             <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
