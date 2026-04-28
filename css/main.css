@@ -724,22 +724,26 @@ footer::before {
 
 .support-menu {
   position: absolute;
-  background: var(--surface);
-  backdrop-filter: var(--glass);
-  -webkit-backdrop-filter: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 8px;
-  box-shadow: var(--shadow-premium), 0 20px 40px rgba(0,0,0,0.4);
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  padding: 10px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 220px;
+  gap: 6px;
+  min-width: 250px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px) translateX(-50%);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(12px) translateX(-50%);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 .support-menu.open {
@@ -751,22 +755,37 @@ footer::before {
 .support-menu a {
   display: flex;
   align-items: center;
-  font-weight: 500;
-  transition: all 0.15s;
+  gap: 14px;
+  padding: 12px 18px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 14px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
 }
-
-.support-menu a svg {
-  width: 16px !important;
-  height: 16px !important;
-  flex-shrink: 0;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
 .support-menu a:hover {
-  background: var(--border);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text-primary) !important;
+  transform: translateX(4px);
+}
+.support-menu a svg {
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+/* Brand Colors */
+.support-menu a[href*="wa.me"] svg, 
+.support-menu a[href*="whatsapp.com"] svg { color: #25D366; filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.3)); }
+.support-menu a[href*="t.me"] svg { color: #0088cc; filter: drop-shadow(0 0 8px rgba(0, 136, 204, 0.3)); }
+.support-menu a[href*="tel:"] svg { color: var(--green); filter: drop-shadow(0 0 8px var(--green-dim)); }
+.support-menu a[href*="mailto:"] svg { color: #facc15; filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.3)); }
+
+.support-menu a:hover svg {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 12px currentColor);
 }
 
 /* ── STAR RATING ── */
