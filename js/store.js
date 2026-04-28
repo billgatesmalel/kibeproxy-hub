@@ -128,6 +128,7 @@ function setStoreDuration(days, btn) {
 
 // ── RENDER PROXY LISTINGS ─────────────────────────────────────
 function renderProxyListings() {
+  const grid = document.getElementById('store-grid');
   const filterWrap = document.getElementById('duration-filter-wrap');
   if (filterWrap) filterWrap.style.display = 'block';
 
