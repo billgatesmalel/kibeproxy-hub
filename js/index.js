@@ -279,8 +279,9 @@ async function loadStats() {
     }
   }
 
-  const active    = (uniqueProxies || []).filter(p => p.status === 'active');
-  const expired   = (uniqueProxies || []).filter(p => p.status === 'expired');
+  const now = new Date();
+  const active    = (uniqueProxies || []).filter(p => p.status === 'active' && new Date(p.expires_at) > now);
+  const expired   = (uniqueProxies || []).filter(p => p.status === 'expired' || new Date(p.expires_at) <= now);
   const emailList = emails || [];
   const txList    = txns  || [];
 
@@ -733,8 +734,9 @@ function handleProxySearch(query) {
     (p.port || '').toString().includes(q)
   );
 
-  const active = filtered.filter(p => p.status === 'active');
-  const expired = filtered.filter(p => p.status === 'expired');
+  const now = new Date();
+  const active = filtered.filter(p => p.status === 'active' && new Date(p.expires_at) > now);
+  const expired = filtered.filter(p => p.status === 'expired' || new Date(p.expires_at) <= now);
 
   if (document.getElementById('panel-active')) renderProxies(active, 'panel-active', 'active');
   if (document.getElementById('panel-expired')) renderProxies(expired, 'panel-expired', 'expired');
