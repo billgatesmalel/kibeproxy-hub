@@ -48,6 +48,17 @@ async function initStore() {
       if (adminLink) adminLink.style.display = 'inline-flex';
     }
 
+    // Check URL hash for initial tab
+    const hash = window.location.hash.substring(1); // remove #
+    if (hash === 'proxies' || hash === 'emails') {
+      activeTab = hash;
+      // Update UI buttons to match hash
+      document.querySelectorAll('.store-tab').forEach(b => {
+        const isTarget = b.getAttribute('onclick').includes(`'${hash}'`);
+        b.classList.toggle('active', isTarget);
+      });
+    }
+
     loadListings();
   } catch (err) {
     console.error('Store init error:', err);
@@ -91,6 +102,7 @@ async function loadListings() {
 // ── SWITCH TAB ────────────────────────────────────────────────
 function switchStoreTab(tab, btn) {
   activeTab = tab;
+  window.location.hash = tab;
   document.querySelectorAll('.store-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   
