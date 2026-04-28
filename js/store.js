@@ -128,11 +128,8 @@ function setStoreDuration(days, btn) {
 
 // ── RENDER PROXY LISTINGS ─────────────────────────────────────
 function renderProxyListings() {
-  const grid = document.getElementById('store-grid');
   const filterWrap = document.getElementById('duration-filter-wrap');
-  
-  if (activeTab === 'proxies') filterWrap.style.display = 'block';
-  else                         filterWrap.style.display = 'none';
+  if (filterWrap) filterWrap.style.display = 'block';
 
   const filtered = proxyListings.filter(p => (p.duration_days || 1) === currentDuration);
 
@@ -194,6 +191,9 @@ function renderProxyListings() {
 // ── RENDER EMAIL LISTINGS ─────────────────────────────────────
 function renderEmailListings() {
   const grid = document.getElementById('store-grid');
+  const filterWrap = document.getElementById('duration-filter-wrap');
+  if (filterWrap) filterWrap.style.display = 'none';
+
   if (!emailListings.length) {
     grid.innerHTML = `
       <div class="store-empty">
