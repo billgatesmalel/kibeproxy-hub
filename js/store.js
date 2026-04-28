@@ -282,6 +282,11 @@ function openProxyOrder(id) {
   btn.dataset.days    = days;
   btn.dataset.expires = new Date(Date.now() + days * 86400000).toISOString();
 
+  // Ensure proxy-specific UI is shown
+  if (document.getElementById('o-qty-group')) document.getElementById('o-qty-group').style.display = 'block';
+  if (document.getElementById('o-qty-row')) document.getElementById('o-qty-row').style.display = 'flex';
+  if (document.getElementById('o-expires-row')) document.getElementById('o-expires-row').style.display = 'flex';
+
   updateOrderQuantity(1);
   showOrderView();
   openModal('order');
@@ -341,20 +346,24 @@ function updateOrderQuantity(q) {
 // ── OPEN EMAIL ORDER ──────────────────────────────────────────
 function openEmailOrder(id) {
   const listing = emailListings.find(e => e.id === id);
+  if (!listing) return;
 
   document.getElementById('o-icon').textContent    = '✉️';
   document.getElementById('o-title').textContent   = 'Email Account';
-  document.getElementById('o-host').textContent    = listing.email;
-  document.getElementById('o-dur').textContent     = 'Lifetime';
-  document.getElementById('o-price').textContent   = `KES ${listing.price}`;
-  document.getElementById('o-expires').textContent = 'Never';
-  document.getElementById('o-total').textContent   = `KES ${listing.price}`;
+  if (document.getElementById('o-price')) document.getElementById('o-price').textContent = `KES ${listing.price}`;
+  if (document.getElementById('o-total')) document.getElementById('o-total').textContent = `KES ${listing.price}`;
+
+  // Hide proxy-specific UI
+  if (document.getElementById('o-qty-group')) document.getElementById('o-qty-group').style.display = 'none';
+  if (document.getElementById('o-qty-row')) document.getElementById('o-qty-row').style.display = 'none';
+  if (document.getElementById('o-expires-row')) document.getElementById('o-expires-row').style.display = 'none';
+  if (document.getElementById('o-discount-row')) document.getElementById('o-discount-row').style.display = 'none';
 
   const btn = document.getElementById('confirm-btn');
   btn.dataset.type = 'email';
   btn.dataset.id   = id;
 
-  pendingOrderData = { type: 'email', id, total: listing.price };
+  pendingOrderData = { type: 'email', id, total: listing.price, qty: 1 };
 
   showOrderView();
   openModal('order');

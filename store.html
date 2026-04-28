@@ -95,35 +95,6 @@
   <div class="modal">
 
     <!-- ORDER SUMMARY -->
-    <div id="order-view">
-      <div class="modal-title" style="display:flex;align-items:center;gap:10px;">
-        <span id="o-icon">🌍</span>
-        <span id="o-title">Order Summary</span>
-      </div>
-
-      <div class="form-group" style="margin:1rem 0;padding:1rem;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid var(--border-light);">
-        <label class="form-label" style="font-size:0.75rem;margin-bottom:8px;display:block;">Select Quantity</label>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <input type="number" id="o-qty" min="1" max="50" value="1" oninput="updateOrderQuantity(this.value)" class="form-input" style="width:80px;text-align:center;font-weight:700;" />
-          <div id="o-discount-tag" style="font-size:0.72rem;font-weight:700;color:var(--green);display:none;background:var(--green-glow);padding:4px 8px;border-radius:4px;border:1px solid var(--green-dim);">
-            🔥 5% Bulk Discount!
-          </div>
-        </div>
-        <div style="font-size:0.68rem;color:var(--text-muted);margin-top:8px;">
-          Bulk Savings: <span style="color:var(--green)">5+ (5% Off)</span> | <span style="color:var(--green)">10+ (10% Off)</span>
-        </div>
-      </div>
-
-      <div class="order-summary">
-        <div class="order-row"><span class="lbl">Price Per Unit</span><span class="val" id="o-price">—</span></div>
-        <div class="order-row" id="o-discount-row" style="display:none;"><span class="lbl">Bulk Discount</span><span class="val" style="color:var(--green)" id="o-discount-amt">- KES 0</span></div>
-        <div class="order-row"><span class="lbl">Total Items</span><span class="val" id="o-qty-display">1</span></div>
-        <div class="order-row"><span class="lbl">Expires</span><span class="val" id="o-expires">—</span></div>
-        <div class="order-row"><span class="lbl">Total</span><span class="val total" id="o-total">—</span></div>
-        <div class="order-row"><span class="lbl">Payment</span><span class="val" id="o-payment-method">Choose option below</span></div>
-        <div id="o-payment-options" style="margin-top:0.5rem;"></div>
-        <div id="order-error" style="display:none;color:#ef4444;font-size:0.82rem;margin-top:0.6rem;"></div>
-      </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('order')">Cancel</button>
         <button class="btn-submit" id="confirm-btn" onclick="confirmOrderPayment()">Proceed</button>
