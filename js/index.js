@@ -106,40 +106,40 @@ function renderProxies(data, panelId, status) {
       <tbody>
         ${data.map(p => `
           <tr>
-            <td>${p.country || '—'}</td>
-            <td class="mono">
+            <td data-label="Country">${p.country || '—'}</td>
+            <td data-label="Host" class="mono">
               ${p.host || '—'}
               ${p.host ? `<button class="copy-btn" onclick="copyToClipboard('${p.host}', this)" title="Copy Host">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>` : ''}
             </td>
-            <td class="mono">
+            <td data-label="Port" class="mono">
               ${p.port || '—'}
               ${p.port ? `<button class="copy-btn" onclick="copyToClipboard('${p.port}', this)" title="Copy Port">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>` : ''}
             </td>
-            <td class="mono">
+            <td data-label="Username" class="mono">
               ${p.username || '—'}
               ${p.username ? `<button class="copy-btn" onclick="copyToClipboard('${p.username}', this)" title="Copy Username">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>` : ''}
             </td>
-            <td class="mono">
+            <td data-label="Password" class="mono">
               <span class="pass-hidden" id="pass-${p.id}" data-pass="${(p.password||'').replace(/"/g,'&quot;')}">••••••••</span>
               <button class="show-btn" onclick="togglePass('pass-${p.id}')">Show</button>
               <button class="copy-btn" onclick="copyToClipboard(document.getElementById('pass-${p.id}').getAttribute('data-pass'), this)" title="Copy Password">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>
             </td>
-            <td>
+            <td data-label="Status">
               <span class="badge ${p.status} ${p.status === 'active' && (new Date(p.expires_at) - new Date()) < 86400000 ? 'pulse' : ''}">
                 ${p.status}
               </span>
               ${(p.status === 'active' || p.status === 'expired') ? `<button class="renew-btn" onclick="openRenewModal()" style="background:var(--blue-glow);color:var(--blue);border-color:rgba(59,130,246,0.3)">Buy More</button>` : ''}
             </td>
-            <td>${paymentBadge(p.payment_status)}</td>
-            <td class="mono" style="font-size:0.78rem;color:var(--text-muted)">
+            <td data-label="Payment">${paymentBadge(p.payment_status)}</td>
+            <td data-label="Expires" class="mono" style="font-size:0.78rem;color:var(--text-muted)">
               ${p.expires_at ? new Date(p.expires_at).toLocaleString() : '—'}
             </td>
           </tr>`).join('')}
@@ -178,21 +178,21 @@ function renderEmails(data, panelId = 'panel-emails') {
       <tbody>
         ${data.map(e => `
           <tr>
-            <td class="mono">
+            <td data-label="Email" class="mono">
               ${e.email}
               <button class="copy-btn" onclick="copyToClipboard('${e.email}', this)" title="Copy Email">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>
             </td>
-            <td class="mono">
+            <td data-label="Password" class="mono">
               <span class="pass-hidden" id="epass-${e.id}" data-pass="${(e.password||'').replace(/"/g,'&quot;')}">••••••••</span>
               <button class="show-btn" onclick="togglePass('epass-${e.id}')">Show</button>
               <button class="copy-btn" onclick="copyToClipboard(document.getElementById('epass-${e.id}').getAttribute('data-pass'), this)" title="Copy Password">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>
             </td>
-            <td>${paymentBadge(e.payment_status)}</td>
-            <td class="mono" style="font-size:0.78rem;color:var(--text-muted);display:none;">
+            <td data-label="Payment">${paymentBadge(e.payment_status)}</td>
+            <td data-label="Purchased" class="mono" style="font-size:0.78rem;color:var(--text-muted);display:none;">
               ${new Date(e.purchased_at || e.created_at).toLocaleDateString()}
             </td>
           </tr>`).join('')}
@@ -230,7 +230,7 @@ function renderTransactions(data, panelId = 'panel-transactions') {
       <tbody>
         ${data.map(t => `
           <tr>
-            <td>
+            <td data-label="Type">
               <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;font-family:DM Mono,monospace;
                 ${t.type === 'deposit'
                   ? 'background:var(--green-glow);color:var(--green);border:1px solid var(--green-dim);'
@@ -238,13 +238,13 @@ function renderTransactions(data, panelId = 'panel-transactions') {
                 ${t.type === 'deposit' ? '↓ Deposit' : '↑ Purchase'}
               </span>
             </td>
-            <td style="font-size:0.82rem;color:var(--text-secondary);">${t.description || '—'}</td>
-            <td class="mono">${t.mpesa_phone || '—'}</td>
-            <td class="mono" style="color:${t.type === 'deposit' ? 'var(--green)' : 'var(--red)'};font-weight:600;">
+            <td data-label="Description" style="font-size:0.82rem;color:var(--text-secondary);">${t.description || '—'}</td>
+            <td data-label="M-Pesa Number" class="mono">${t.mpesa_phone || '—'}</td>
+            <td data-label="Amount" class="mono" style="color:${t.type === 'deposit' ? 'var(--green)' : 'var(--red)'};font-weight:600;">
               ${t.type === 'deposit' ? '+' : '-'}KES ${t.amount}
             </td>
-            <td>${paymentBadge(t.status)}</td>
-            <td class="mono" style="font-size:0.75rem;color:var(--text-muted);display:none;">
+            <td data-label="Status">${paymentBadge(t.status)}</td>
+            <td data-label="Date & Time" class="mono" style="font-size:0.75rem;color:var(--text-muted);display:none;">
               ${new Date(t.created_at).toLocaleString()}
             </td>
           </tr>`).join('')}

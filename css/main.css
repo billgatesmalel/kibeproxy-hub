@@ -415,12 +415,66 @@ nav {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-  nav { padding: 0 1.5rem; height: 64px; }
+  nav { padding: 0 1.25rem; height: 64px; }
   .logo-text { font-size: 1rem; }
   .nav-links { display: none; }
   .balance-pill { padding: 6px 12px; font-size: 0.75rem; }
   .user-btn span { display: none; }
   .modal { padding: 1.5rem; }
+
+  /* Table to Card Transformation */
+  .data-table, .data-table thead, .data-table tbody, .data-table th, .data-table td, .data-table tr {
+    display: block;
+  }
+  
+  .data-table { padding: 0.75rem; border-spacing: 0; }
+  .data-table thead tr { display: none; } /* Hide headers */
+  
+  .data-table tbody tr {
+    margin-bottom: 1.25rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+  }
+  
+  .data-table td {
+    padding: 10px 0 !important;
+    text-align: right;
+    font-size: 0.88rem;
+    position: relative;
+    border: none !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+  
+  .data-table td:last-child { border-bottom: none !important; }
+  .data-table td:first-child { border-radius: 0; }
+  .data-table td:last-child { border-radius: 0; }
+
+  .data-table td::before {
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .renew-btn { margin-top: 4px; padding: 4px 10px; font-size: 0.7rem; }
+  .search-wrap { max-width: 100%; }
+
+  .panel { border-radius: 20px; margin-top: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+  .wallet-card { padding: 2rem 1.5rem; }
+  .wallet-amount { font-size: 2.2rem; }
+  .page-title { font-size: 1.8rem; }
+  .add-money-btn { width: 100%; padding: 14px; font-size: 0.95rem; }
 }
 
 /* ── PREMIUM FOOTER (STANDARDIZED) ── */
