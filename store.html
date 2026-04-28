@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/store.css" />
-  
 </head>
 <body>
 
@@ -23,8 +22,6 @@
     </div>
     <span class="logo-text">KibeProxy Hub</span>
   </a>
-
-  <!-- Top nav tabs removed per request -->
 
   <div class="nav-right">
     <div class="balance-pill">
@@ -95,6 +92,35 @@
   <div class="modal">
 
     <!-- ORDER SUMMARY -->
+    <div id="order-view">
+      <div class="modal-title" style="display:flex;align-items:center;gap:10px;">
+        <span id="o-icon">🌍</span>
+        <span id="o-title">Order Summary</span>
+      </div>
+
+      <div class="form-group" id="o-qty-group" style="margin:1rem 0;padding:1rem;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid var(--border-light);">
+        <label class="form-label" style="font-size:0.75rem;margin-bottom:8px;display:block;">Select Quantity</label>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <input type="number" id="o-qty" min="1" max="50" value="1" oninput="updateOrderQuantity(this.value)" class="form-input" style="width:80px;text-align:center;font-weight:700;" />
+          <div id="o-discount-tag" style="font-size:0.72rem;font-weight:700;color:var(--green);display:none;background:var(--green-glow);padding:4px 8px;border-radius:4px;border:1px solid var(--green-dim);">
+            🔥 5% Bulk Discount!
+          </div>
+        </div>
+        <div style="font-size:0.68rem;color:var(--text-muted);margin-top:8px;">
+          Bulk Savings: <span style="color:var(--green)">5+ (5% Off)</span> | <span style="color:var(--green)">10+ (10% Off)</span>
+        </div>
+      </div>
+
+      <div class="order-summary">
+        <div class="order-row"><span class="lbl">Price Per Unit</span><span class="val" id="o-price">—</span></div>
+        <div class="order-row" id="o-discount-row" style="display:none;"><span class="lbl">Bulk Discount</span><span class="val" style="color:var(--green)" id="o-discount-amt">- KES 0</span></div>
+        <div class="order-row" id="o-qty-row"><span class="lbl">Total Items</span><span class="val" id="o-qty-display">1</span></div>
+        <div class="order-row" id="o-expires-row"><span class="lbl">Expires</span><span class="val" id="o-expires">—</span></div>
+        <div class="order-row"><span class="lbl">Total</span><span class="val total" id="o-total">—</span></div>
+        <div class="order-row"><span class="lbl">Payment</span><span class="val" id="o-payment-method">Choose option below</span></div>
+        <div id="o-payment-options" style="margin-top:0.5rem;"></div>
+        <div id="order-error" style="display:none;color:#ef4444;font-size:0.82rem;margin-top:0.6rem;"></div>
+      </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('order')">Cancel</button>
         <button class="btn-submit" id="confirm-btn" onclick="confirmOrderPayment()">Proceed</button>
@@ -103,7 +129,6 @@
 
     <!-- MPESA VIEW -->
     <div id="mpesa-view" style="display:none;">
-
       <!-- FORM -->
       <div id="mpesa-form-view">
         <div style="text-align:center;margin-bottom:1.5rem;">
@@ -124,7 +149,6 @@
         <div class="form-group">
           <label class="form-label">M-Pesa Phone Number</label>
           <div style="position:relative;">
-            <!-- prefix removed -->
             <input class="form-input" id="mpesa-phone" type="tel" placeholder="e.g. 0712345678" style="width:100%;" />
           </div>
           <div style="font-size:0.72rem;color:var(--text-muted);margin-top:5px;">e.g. 0712345678 or 254712345678</div>
@@ -140,7 +164,7 @@
 
       <!-- WAITING -->
       <div id="mpesa-wait-view" style="display:none;text-align:center;padding:1rem 0;">
-        <div style="font-size:3rem;margin-bottom:1rem;animation:pulse-icon 1.5s ease-in-out infinite;">📲</div>
+        <div style="font-size:3rem;margin-bottom:1rem;">📲</div>
         <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.5rem;">Check Your Phone!</div>
         <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6;">
           An M-Pesa prompt has been sent.<br>
@@ -177,11 +201,6 @@
         </div>
         <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;color:#ef4444;">❌ Payment Failed</div>
         <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;" id="mpesa-fail-reason">Payment was cancelled or failed.</div>
-        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.5rem;">
-          Need help? Contact us on
-          <a href="https://wa.me/254724031319" target="_blank" style="color:#25D366;font-weight:600;">WhatsApp</a> or
-          <a href="https://t.me/kibeproxy" target="_blank" style="color:#229ED9;font-weight:600;">Telegram</a>
-        </div>
         <button class="btn-submit" onclick="resetMpesaForm()" style="width:100%;justify-content:center;display:flex;background:var(--border-light);color:var(--text-primary);">
           Try Again
         </button>
@@ -192,23 +211,16 @@
         <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
         <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;color:var(--yellow);">⚠️ Payment Pending</div>
         <div style="font-size:0.84rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.7;">
-          We didn't receive confirmation yet.<br>
-          <strong style="color:var(--text-primary);">If you already entered your PIN</strong>, the payment may still be processing.
-        </div>
-        <div style="background:var(--yellow-glow);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:12px 16px;margin-bottom:1.5rem;font-size:0.8rem;color:var(--yellow);text-align:left;">
-          📞 Contact support with your M-Pesa message to confirm:<br>
-          <a href="https://wa.me/254724031319" target="_blank" style="color:#25D366;font-weight:700;">WhatsApp: +254724031319</a> |
-          <a href="https://t.me/kibeproxy" target="_blank" style="color:#229ED9;font-weight:700;">Telegram: @kibeproxy</a>
+          We didn't receive confirmation yet.
         </div>
         <div style="display:flex;gap:0.75rem;">
-          <button onclick="resetMpesaForm()" style="flex:1;background:var(--border-light);color:var(--text-primary);border:none;padding:10px;border-radius:8px;font-family:Syne,sans-serif;font-weight:600;cursor:pointer;">Try Again</button>
-          <button onclick="closeModal('order')" style="flex:1;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);padding:10px;border-radius:8px;font-family:Syne,sans-serif;font-weight:600;cursor:pointer;">Close</button>
+          <button onclick="resetMpesaForm()" style="flex:1;background:var(--border-light);color:var(--text-primary);border:none;padding:10px;border-radius:8px;cursor:pointer;">Try Again</button>
+          <button onclick="closeModal('order')" style="flex:1;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);padding:10px;border-radius:8px;cursor:pointer;">Close</button>
         </div>
       </div>
+    </div>
 
-    </div><!-- /mpesa-view -->
-
-    <!-- FINAL SUCCESS -->
+    <!-- SUCCESS VIEW -->
     <div id="success-view" style="display:none;">
       <div style="text-align:center;padding:1rem 0;">
         <div style="width:56px;height:56px;background:var(--green-glow);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--green);">
@@ -230,112 +242,89 @@
 
 <!-- ── FOOTER ── -->
 <footer>
-    <div class="footer-inner">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div class="footer-logo">
-            <div class="logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            </div>
-            <span class="footer-logo-text">Kibet Creations</span>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
           </div>
-          <p class="footer-tagline">Code with purpose, Build with passion. Delivering premium proxy solutions.</p>
-          <div class="status-indicator">
-            <div class="status-dot"></div>
-            System Status: Operational
-          </div>
+          <span class="footer-logo-text">Kibet Creations</span>
         </div>
-        <div class="footer-links">
-          <div class="footer-col">
-            <div class="footer-col-title">Product</div>
-            <a href="store.html">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              Buy Proxies
-            </a>
-            <a href="store.html">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              Buy Emails
-            </a>
-            <a href="docs.html">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Documentation
-            </a>
-          </div>
-          <div class="footer-col">
-            <div class="footer-col-title">Support</div>
-            <a href="https://wa.me/254724031319" target="_blank">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.23 8.1 8.1 0 0 1 2.9.55L21 3l-1.45 4.91a8.38 8.38 0 0 1 .45 3.59Z"/></svg>
-              WhatsApp
-            </a>
-            <a href="https://t.me/kibeproxy" target="_blank">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-              Telegram
-            </a>
-            <a href="mailto:kibetcreations2025@outlook.com">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              Email Support
-            </a>
-          </div>
-          <div class="footer-col">
-            <div class="footer-col-title">Countries</div>
-            <span>&#127477;&#127469; Philippines</span>
-            <span>&#127470;&#127475; India</span>
-            <span>&#127462;&#127482; Australia</span>
-            <span>&#127464;&#127462; Canada</span>
-            <span>&#127482;&#127480; USA</span>
-            <span>&#127475;&#127487; New Zealand</span>
-          </div>
+        <p class="footer-tagline">Code with purpose, Build with passion. Delivering premium proxy solutions.</p>
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          System Status: Operational
         </div>
       </div>
-      <div class="footer-divider"></div>
-      <div class="footer-bottom">
-        <span class="footer-copy">&copy; 2026 Kibet Creations. All Rights Reserved.</span>
-        <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
-          <a href="tel:+254799289214" class="footer-dev">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Live Web Dev Support
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title">Product</div>
+          <a href="store.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Buy Proxies
           </a>
-          <a href="mailto:kibetcreations2025@outlook.com" class="footer-dev">
+          <a href="store.html">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            Business Inquiry
+            Buy Emails
           </a>
+          <a href="docs.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Documentation
+          </a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Support</div>
+          <a href="https://wa.me/254724031319" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.23 8.1 8.1 0 0 1 2.9.55L21 3l-1.45 4.91a8.38 8.38 0 0 1 .45 3.59Z"/></svg>
+            WhatsApp
+          </a>
+          <a href="https://t.me/kibeproxy" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            Telegram
+          </a>
+          <a href="mailto:kibetcreations2025@outlook.com">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email Support
+          </a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Countries</div>
+          <span>&#127477;&#127469; Philippines</span>
+          <span>&#127470;&#127475; India</span>
+          <span>&#127462;&#127482; Australia</span>
+          <span>&#127464;&#127462; Canada</span>
+          <span>&#127482;&#127480; USA</span>
+          <span>&#127475;&#127487; New Zealand</span>
         </div>
       </div>
     </div>
-  </footer>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <span class="footer-copy">&copy; 2026 Kibet Creations. All Rights Reserved.</span>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <a href="tel:+254799289214" class="footer-dev">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Live Web Dev Support
+        </a>
+        <a href="mailto:kibetcreations2025@outlook.com" class="footer-dev">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Business Inquiry
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
 
-<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/common.js"></script>
 <script src="js/store.js"></script>
-<script>
-// Render email to prevent encoding issues
-(function(){
-  var e = 'kibetcreations2025' + '@' + 'outlook.com';
-  // Support dropdown and footer email links
-  document.querySelectorAll('.footer-email-placeholder').forEach(function(el) {
-    if (el.tagName === 'A') {
-      el.textContent = el.textContent.trim() || e;
-      el.href = 'mailto:' + e;
-    } else {
-      el.textContent = e;
-      el.onclick = function(){ window.location.href = 'mailto:' + e; };
-      el.style.cursor = 'pointer';
-    }
-  });
-  // Footer dev email span
-  var sp = document.getElementById('footer-email-link');
-  if (sp) {
-    sp.textContent = e;
-    sp.onclick = function(e2){ e2.stopPropagation(); window.location.href = 'mailto:' + e; };
-  }
-})();
-</script>
+
 </body>
 </html>
