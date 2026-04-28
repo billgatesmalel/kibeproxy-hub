@@ -590,19 +590,36 @@ footer::before {
 
 @media (max-width: 992px) {
   .footer-inner { padding: 2rem 1rem 1.5rem; }
-  .footer-top { display: flex; flex-direction: column; gap: 2rem; align-items: center; text-align: center; }
+  .footer-top { display: flex; flex-direction: column; gap: 1.5rem; align-items: center; text-align: center; }
   .footer-brand { display: flex; flex-direction: column; align-items: center; }
   .footer-links { 
     display: grid;
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 1.5rem; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 0.75rem; 
     width: 100%;
+    margin-top: 1rem;
   }
-  .footer-col-title { justify-content: center; font-size: 0.7rem; margin-bottom: 0.75rem; }
-  .footer-col { gap: 0.5rem; }
-  .footer-col a, .footer-col span { font-size: 0.75rem; gap: 4px; justify-content: center; transform: none !important; }
+  .footer-col-title { justify-content: center; font-size: 0.65rem; margin-bottom: 0.5rem; white-space: nowrap; }
+  .footer-col { gap: 0.4rem; min-width: 0; }
+  .footer-col a, .footer-col span { 
+    font-size: 0.65rem; 
+    gap: 0; 
+    justify-content: center; 
+    transform: none !important; 
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .footer-col a svg { display: none; }
-  .footer-bottom { flex-direction: column; text-align: center; gap: 1rem; }
+  .footer-bottom { flex-direction: column; text-align: center; gap: 0.75rem; margin-top: 1rem; }
+  .footer-divider { margin-bottom: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  .footer-links { gap: 0.4rem; }
+  .footer-col-title { font-size: 0.6rem; }
+  .footer-col a, .footer-col span { font-size: 0.6rem; }
 }
 
 /* ── ACTION CARDS (PREMIUM) ── */
