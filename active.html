@@ -56,6 +56,13 @@
       <p class="page-subtitle">Currently active and valid proxy nodes</p>
     </div>
 
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" class="search-icon">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="proxy-search" class="search-input" placeholder="Search by Country, Host or Port..." onkeyup="handleProxySearch(this.value)">
+    </div>
+
     <!-- ACTIVE PROXIES PANEL -->
     <div id="panel-active" class="panel active">
       <div id="active-proxies-list">

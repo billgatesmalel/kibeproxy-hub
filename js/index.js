@@ -1,7 +1,11 @@
-// ── DASHBOARD LOGIC ───────────────────────────────────────────
 let currentUserId = null;
 let currentBalance = 0;
 let pollingInterval = null;
+
+// Global data for filtering
+let allProxies = [];
+let allEmails = [];
+let allTransactions = [];
 
 function toggleSupport(e) {
   if (e) {
@@ -363,7 +367,9 @@ async function loadStats() {
   currentBalance = (walletRes?.data?.balance || 0);
   updateBalanceDisplay();
 
-  // (Referral Stats moved to profile.html)
+  allProxies = uniqueProxies || [];
+  allEmails = emailList;
+  allTransactions = txList;
 
   if (document.getElementById('stat-active'))  document.getElementById('stat-active').textContent   = active.length;
   if (document.getElementById('stat-expired')) document.getElementById('stat-expired').textContent  = expired.length;
@@ -798,6 +804,82 @@ function skipRating() {
   closeModal('rate');
 }
 
+// ── SEARCH HANDLERS ───────────────────────────────────────────
+function handleProxySearch(query) {
+  const q = query.toLowerCase().trim();
+  const filtered = allProxies.filter(p => 
+    (p.country || '').toLowerCase().includes(q) ||
+    (p.host || '').toLowerCase().includes(q) ||
+    (p.port || '').toString().includes(q)
+  );
+
+  const active = filtered.filter(p => p.status === 'active');
+  const expired = filtered.filter(p => p.status === 'expired');
+
+  if (document.getElementById('panel-active')) renderProxies(active, 'panel-active', 'active');
+  if (document.getElementById('panel-expired')) renderProxies(expired, 'panel-expired', 'expired');
+}
+
+function handleEmailSearch(query) {
+  const q = query.toLowerCase().trim();
+  const filtered = allEmails.filter(e => 
+    (e.email || '').toLowerCase().includes(q)
+  );
+  if (document.getElementById('emails-list')) renderEmails(filtered, 'emails-list');
+}
+
+function handleTxnSearch(query) {
+  const q = query.toLowerCase().trim();
+  const filtered = allTransactions.filter(t => 
+    (t.description || '').toLowerCase().includes(q) ||
+    (t.mpesa_phone || '').toLowerCase().includes(q) ||
+    (t.amount || '').toString().includes(q)
+  );
+  if (document.getElementById('transactions-list')) renderTransactions(filtered, 'transactions-list');
+}
+
+// ── BAN HANDLING ──────────────────────────────────────────────
+async function checkBanStatus() {
+  if (!currentUserId) return;
+  
+  try {
+    const { data: banData, error } = await db.from('user_bans')
+      .select('banned, reason')
+      .eq('user_id', currentUserId)
+      .maybeSingle();
+
+    if (banData && banData.banned) {
+      showBanOverlay(banData.reason || 'Term violation or suspicious activity.');
+    }
+  } catch (err) {
+    console.error('Ban check failed:', err);
+  }
+}
+
+function showBanOverlay(reason) {
+  // Create overlay element
+  const overlay = document.createElement('div');
+  overlay.className = 'ban-overlay';
+  overlay.innerHTML = `
+    <div class="ban-modal">
+      <div class="ban-icon">🚫</div>
+      <h2 class="ban-title">Account Suspended</h2>
+      <p class="ban-reason">Your access to KibeProxy Hub has been restricted.</p>
+      <div class="ban-detail"><strong>Reason:</strong> ${reason}</div>
+      <p class="ban-contact">If you believe this is a mistake, contact support at kibetcreations2025@outlook.com</p>
+      <button class="ban-btn" onclick="handleLogout()">Sign Out</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden'; // Prevent scrolling
+  
+  // Disable all buttons on the page
+  document.querySelectorAll('button:not(.ban-btn), a').forEach(el => {
+    el.style.pointerEvents = 'none';
+    el.style.filter = 'grayscale(1) opacity(0.5)';
+  });
+}
+
 async function submitRating() {
   const rating = parseInt(document.getElementById('rate-val').value);
   const content = document.getElementById('rate-content').value.trim();
@@ -858,6 +940,7 @@ async function init() {
 
     initRateStars();
     loadStats();
+    checkBanStatus();
   } catch (err) {
     console.error('Init error:', err);
   } finally {
