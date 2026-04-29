@@ -16,8 +16,8 @@ const fs = require('fs');
     console.log('Loading:', url);
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
 
-    // Ensure body is ready
-    await page.waitForTimeout(800);
+    // Ensure body is ready - use Promise-based delay instead of deprecated waitForTimeout
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     const outDir = path.resolve(__dirname, '..', 'screenshots');
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
